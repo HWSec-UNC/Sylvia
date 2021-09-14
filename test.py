@@ -71,14 +71,24 @@ class ExecutionEngine:
         if isinstance(items, Block):
             stmts = items.statements
             items.cname = "Block"
-        for item in stmts:
-            item.cname = parse_stmt(str(type(item)))
-            if item.cname in CONDITIONALS:
-                m.num_paths *= 2
-            if item.cname == "Block":
-                self.count_conditionals(m, item.items)
-            elif item.cname == "Always":
-                self.count_conditionals(m, item.statement)
+        if hasattr(stmts, '__iter__'):
+            for item in stmts:
+                item.cname = parse_stmt(str(type(item)))
+                if item.cname in CONDITIONALS:
+                    if item.cname == "IfStatement":
+                        print("hi")
+                        self.count_conditionals(m, item.true_statement)
+                        self.count_conditionals(m, item.false_statement)
+                    m.num_paths *= 2
+                if item.cname == "Block":
+                    self.count_conditionals(m, item.items)
+                elif item.cname == "Always":
+                    self.count_conditionals(m, item.statement)
+                elif item.cname == "IfStatement":
+                    print("hi")
+                    m.num_paths *= 2
+                    self.count_conditionals(m, item.true_statement)
+                    self.count_conditionals(m, item.false_statement)
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
         """Initalize run."""
@@ -86,7 +96,7 @@ class ExecutionEngine:
 
     def visit_expr(self, s: SymbolicState, expr: Value) -> None:
         if isinstance(expr, Reg):
-            s.store[expr.name] = "i"
+            s.store[expr.name] = "AAAAAAAA"
         return None
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node):
