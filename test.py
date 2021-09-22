@@ -1,9 +1,9 @@
 import pyverilog
 from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef
 from pyverilog.vparser.parser import parse
-from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement
-from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block
-from pyverilog.vparser.ast import Value, Reg
+from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement
+from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall
+from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql
 import sys
 import os
 from optparse import OptionParser
@@ -13,7 +13,7 @@ INFO = "Verilog code parser"
 VERSION = pyverilog.__version__
 USAGE = "Usage: python example_parser.py file ..."
 
-CONDITIONALS = ["IfStatement", "WhileStatement", "ForStatement", "CaseStatement"]
+CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
 EXPRESSIONS = ["Decl"]
 
 class SymbolicState:
@@ -26,7 +26,6 @@ class SymbolicState:
     # evaluating the expression knows to add the expr to the
     # PC, set to false after
     cond: bool = False
-    assertion_violation: bool = False
 
 class ExecutionManager:
     num_paths: int = 1
@@ -35,11 +34,12 @@ class ExecutionManager:
     ast_str: str = ""
     debugging: bool = False
     abandon: bool = False
+    assertion_violation: bool = False
 
 def to_binary(i: int, digits: int = 32) -> str:
     num: str = bin(i)[2:]
     padding_len: int = digits - len(num)
-    return ("0" * padding_len) + num
+    return  num + ("0" * padding_len)
 
 class ExecutionEngine:
     branch: bool = True
@@ -73,56 +73,103 @@ class ExecutionEngine:
             items.cname = "Block"
         if hasattr(stmts, '__iter__'):
             for item in stmts:
-                item.cname = parse_stmt(str(type(item)))
-                if item.cname in CONDITIONALS:
-                    if item.cname == "IfStatement":
-                        print("hi")
+                if isinstance(item, CONDITIONALS):
+                    if isinstance(item, IfStatement):
+                        m.num_paths *= 2
                         self.count_conditionals(m, item.true_statement)
                         self.count_conditionals(m, item.false_statement)
-                    m.num_paths *= 2
-                if item.cname == "Block":
+                if isinstance(item, Block):
                     self.count_conditionals(m, item.items)
-                elif item.cname == "Always":
+                elif isinstance(item, Always):
+                    self.count_conditionals(m, item.statement)             
+                elif isinstance(item, Initial):
                     self.count_conditionals(m, item.statement)
-                elif item.cname == "IfStatement":
-                    print("hi")
-                    m.num_paths *= 2
-                    self.count_conditionals(m, item.true_statement)
-                    self.count_conditionals(m, item.false_statement)
+        elif items != None:
+            if isinstance(items, IfStatement):
+                m.num_paths *= 2
+                self.count_conditionals(m, items.true_statement)
+                self.count_conditionals(m, items.false_statement)
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
         """Initalize run."""
         self.count_conditionals(m, module.items)
 
-    def visit_expr(self, s: SymbolicState, expr: Value) -> None:
+    def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         if isinstance(expr, Reg):
             s.store[expr.name] = "AAAAAAAA"
+        elif isinstance(expr, Eq):
+            # assume left is identifier
+            x = BitVec(expr.left.name, 32)
+            # assume right is a value
+            y = BitVec(int(expr.right.value), 32)
+            if self.branch:
+                s.pc.add(x == y)
+            else: 
+                s.pc.add(x != y)
+        elif isinstance(expr, Identifier):
+            x = BitVec(expr.name, 32)
+            y = BitVec(1, 32)
+            if self.branch:
+                s.pc.add(x == y)
+            else: 
+                s.pc.add(x != y)
+        elif isinstance(expr, NotEql):
+            x = BitVec(expr.left.name, 32)
+            y = BitVec(int(expr.right.value), 32)
+            if self.branch:
+                s.pc.add(x != y)
+            else: 
+                s.pc.add(x == y)
         return None
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node):
-        if stmt.cname == "Decl":
+        if isinstance(stmt, Decl):
             for item in stmt.list:
                 if isinstance(item, Value):
-                    self.visit_expr(s, item)
+                    self.visit_expr(m, s, item)
                 else:
                     self.visit_stmt(m, s, item)
                 # ref_name = item.name
                 # ref_width = int(item.width.msb.value) + 1
                 #  dont want to actually call z3 here, just when looking at PC
                 # x = BitVec(ref_name, ref_width)
-        elif stmt.cname == "Always":
+        elif isinstance(stmt, Always):
             sens_list = stmt.sens_list
             # print(sens_list.list[0].sig) # clock
             # print(sens_list.list[0].type) # posedge
             sub_stmt = stmt.statement
             self.visit_stmt(m, s, sub_stmt)
-        elif stmt.cname == "Assign":
+        elif isinstance(stmt, Assign):
             s.store[stmt.left.var.name] = "hi"
-        elif stmt.cname == "NonblockSub":
+        elif isinstance(stmt, NonblockingSubstitution):
             s.store[stmt.left.var.name] = "yo"
-        elif stmt.cname == "Block":
+        elif isinstance(stmt, Block):
             for item in stmt.statements: 
                 self.visit_stmt(m, s, item)
+        elif isinstance(stmt, Initial):
+            self.visit_stmt(m, s, stmt.statement)
+        elif isinstance(stmt, IfStatement):
+            m.curr_level += 1
+            self.cond = True
+            if (m.path_code[m.curr_level - 1] == '1'):
+                self.branch = True
+                self.visit_expr(m, s, stmt.cond)
+
+                if (m.abandon):
+                    m.abandon = False
+                    return
+                self.visit_stmt(m, s, stmt.true_statement)
+            else:
+                self.branch = False
+                self.visit_expr(m, s, stmt.cond)
+                if (m.abandon):
+                    m.abandon = False
+                    return
+                self.visit_stmt(m, s, stmt.false_statement)
+        elif isinstance(stmt, SystemCall):
+            m.assertion_violation = True
+        elif isinstance(stmt, SingleStatement):
+            self.visit_stmt(m, s, stmt.statement)
 
     def visit_module(self, m: ExecutionManager, s: SymbolicState, module: ModuleDef):
         """Visit module."""
@@ -142,8 +189,15 @@ class ExecutionEngine:
         self.init_run(manager, ast)
         print(f"Num paths: {manager.num_paths}")
         for i in range(manager.num_paths):
+            manager.path_code = to_binary(i)
             self.visit_module(manager, state, ast)
-        print(state.store)
+            if (manager.assertion_violation):
+                print("Assertion violation")
+                manager.assertion_violation = False
+                self.solve_pc(state.pc)
+            manager.curr_level = 0
+            state.pc.reset()
+        ## print(state.store)
 
 
 def showVersion():
@@ -151,34 +205,7 @@ def showVersion():
     print(VERSION)
     print(USAGE)
     sys.exit()
-
-def parse_stmt(class_name: str) -> str:
-    """Return the general statement type."""
-    if "Decl" in class_name:
-        return "Decl"
-    elif "Always" in class_name:
-        return "Always"
-    elif "Assign" in class_name:
-        return "Assign"
-    elif "IfStatement" in class_name:
-        return "IfStatement"
-    elif "WhileStatement" in class_name:
-        return "WhileStatement"
-    elif "ForStatement" in class_name:
-        return "ForStatement"
-    elif "CaseStatement" in class_name:
-        return "ClassStatement"
-    elif "Block" in class_name:
-        return "Block"
-    elif "NonblockingSubstitution" in class_name:
-        return "NonblockSub"
-    return ""
-
-def parse_expr(class_name: str) -> str:
-    """Return the Expression type."""
-    if "Reg" in class_name:
-        return "Reg"
-
+    
 def main():
     """Entrypoint of the program."""
     engine: ExecutionEngine = ExecutionEngine()

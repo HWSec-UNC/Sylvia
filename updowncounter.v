@@ -1,5 +1,11 @@
 `timescale 1ns / 1ps
 `default_nettype none
+`define assert(signal, value) \
+        if (signal !== value) begin \
+            $display("ASSERTION FAILED"); \
+            $finish; \
+        end       
+    
 //////////////////////////////////////////////////////////////////////////////////
 // Company: UNC Hardware Security Group
 // Engineer: Martin Meng
@@ -39,6 +45,10 @@ module updowncounter(
     end 
     
     assign value = internalvalue;
+
+    initial begin
+    `assert(value, 1)
+    end
     
     
 endmodule
