@@ -1,8 +1,9 @@
 import pyverilog
-from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef
+import z3
+from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef
 from pyverilog.vparser.parser import parse
-from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement
-from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall
+from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant
+from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql
 import sys
 import os
@@ -39,8 +40,44 @@ class ExecutionManager:
 def to_binary(i: int, digits: int = 32) -> str:
     num: str = bin(i)[2:]
     padding_len: int = digits - len(num)
-    return  num + ("0" * padding_len)
+    return  ("0" * padding_len) + num 
 
+def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
+    """Takes in a complex Verilog Expression and converts it to 
+    a Z3 query."""
+    if isinstance(e, And):
+        lhs = parse_expr_to_Z3(e.left, s, branch)
+        rhs = parse_expr_to_Z3(e.right, s, branch)
+        return s.add(lhs and rhs)
+    elif isinstance(e, Identifier):
+        return BitVec(e.name + "_0", 32)
+    elif isinstance(e, Constant):
+        return BitVec(int(e.value), 32)
+    elif isinstance(e, Eq):
+        lhs = parse_expr_to_Z3(e.left, s, branch)
+        rhs = parse_expr_to_Z3(e.right, s, branch)
+        if branch:
+            s.add(lhs == rhs)
+        else:
+            s.add(lhs != rhs)
+        return (lhs == rhs)
+    elif isinstance(e, NotEql):
+        lhs = parse_expr_to_Z3(e.left, s, branch)
+        rhs = parse_expr_to_Z3(e.right, s, branch)
+        # print(lhs)
+        # print(rhs)
+        # print(type(lhs))
+        # print(type(rhs))
+        if branch:
+            s.add(lhs != rhs)
+        else:
+            s.add(lhs == rhs)
+    elif isinstance(e, Land):
+        lhs = parse_expr_to_Z3(e.left, s, branch)
+        rhs = parse_expr_to_Z3(e.right, s, branch)
+        return s.add(lhs and rhs)
+    return s
+     
 class ExecutionEngine:
     branch: bool = True
 
@@ -113,13 +150,19 @@ class ExecutionEngine:
                 s.pc.add(x == y)
             else: 
                 s.pc.add(x != y)
+
+
+        # Handling Assertions
         elif isinstance(expr, NotEql):
-            x = BitVec(expr.left.name, 32)
-            y = BitVec(int(expr.right.value), 32)
-            if self.branch:
-                s.pc.add(x != y)
-            else: 
-                s.pc.add(x == y)
+            parse_expr_to_Z3(expr, s.pc, self.branch)
+            # x = BitVec(expr.left.name, 32)
+            # y = BitVec(int(expr.right.value), 32)
+            # if self.branch:
+            #     s.pc.add(x != y)
+            # else: 
+            #     s.pc.add(x == y)
+        elif isinstance(expr, Land):
+            parse_expr_to_Z3(expr, s.pc, self.branch)
         return None
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node):
@@ -149,12 +192,13 @@ class ExecutionEngine:
         elif isinstance(stmt, Initial):
             self.visit_stmt(m, s, stmt.statement)
         elif isinstance(stmt, IfStatement):
+            # print("forking")
+            # print(stmt.__dict__)
             m.curr_level += 1
             self.cond = True
-            if (m.path_code[m.curr_level - 1] == '1'):
+            if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
                 self.branch = True
                 self.visit_expr(m, s, stmt.cond)
-
                 if (m.abandon):
                     m.abandon = False
                     return
@@ -165,6 +209,7 @@ class ExecutionEngine:
                 if (m.abandon):
                     m.abandon = False
                     return
+
                 self.visit_stmt(m, s, stmt.false_statement)
         elif isinstance(stmt, SystemCall):
             m.assertion_violation = True
@@ -187,7 +232,7 @@ class ExecutionEngine:
         manager: ExecutionManager = ExecutionManager()
         manager.debugging = False
         self.init_run(manager, ast)
-        print(f"Num paths: {manager.num_paths}")
+        #print(f"Num paths: {manager.num_paths}")
         for i in range(manager.num_paths):
             manager.path_code = to_binary(i)
             self.visit_module(manager, state, ast)
