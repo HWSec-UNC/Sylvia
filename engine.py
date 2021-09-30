@@ -233,7 +233,7 @@ class ExecutionEngine:
         elif isinstance(stmt, InstanceList):
             if stmt.module in m.modules:
                 print(stmt.module)
-                self.execute(m.modules[stmt.module], m.modules, m)
+                self.execute_child(m.modules[stmt.module], s, m)
 
     def visit_module(self, m: ExecutionManager, s: SymbolicState, module: ModuleDef):
         """Visit module."""
@@ -267,9 +267,34 @@ class ExecutionEngine:
                 self.solve_pc(state.pc)
             manager.curr_level = 0
             state.pc.reset()
+        #manager.path_code = to_binary(0)
         print(f" finishing {ast.name}")
         self.module_depth -= 1
         ## print(state.store)
+
+
+    def execute_child(self, ast: ModuleDef, state: SymbolicState, manager: Optional[ExecutionManager]) -> None:
+        """Drives symbolic execution of child modules."""
+        # different manager
+        # same state
+        # dont call pc solve
+        manager = ExecutionManager()
+        self.init_run(manager, ast)
+        #print(f"Num paths: {manager.num_paths}")
+        for i in range(manager.num_paths):
+            manager.path_code = to_binary(i)
+            self.visit_module(manager, state, ast)
+            if (manager.assertion_violation):
+                print("Assertion violation")
+                manager.assertion_violation = False
+                self.solve_pc(state.pc)
+            manager.curr_level = 0
+            state.pc.reset()
+        #manager.path_code = to_binary(0)
+        print(f" finishing {ast.name}")
+        self.module_depth -= 1
+        ## print(state.store)
+    
 
 
 def showVersion():
@@ -311,12 +336,6 @@ def main():
     top_level_module: ModuleDef = description.children()[0]
     modules = description.definitions
     engine.execute(top_level_module, modules, None)
-    # for module in modules:
-    #     if isinstance(module, ModuleDef):
-    #         engine.execute(module)
-    #         print(f"module: {module.name}")
-    # for lineno, directive in directives:
-        # print('Line %d : %s' % (lineno, directive))
 
 if __name__ == '__main__':
     main()
