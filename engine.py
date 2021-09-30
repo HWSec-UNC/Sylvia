@@ -9,6 +9,7 @@ import sys
 import os
 from optparse import OptionParser
 from typing import Optional
+import time
 
 
 INFO = "Verilog code parser"
@@ -258,6 +259,7 @@ class ExecutionEngine:
             manager.modules = modules_dict
         self.init_run(manager, ast)
         #print(f"Num paths: {manager.num_paths}")
+        print(f"Num paths {manager.num_paths}")
         for i in range(manager.num_paths):
             manager.path_code = to_binary(i)
             self.visit_module(manager, state, ast)
@@ -281,6 +283,7 @@ class ExecutionEngine:
         manager = ExecutionManager()
         self.init_run(manager, ast)
         #print(f"Num paths: {manager.num_paths}")
+        print(f"Num paths {manager.num_paths}")
         for i in range(manager.num_paths):
             manager.path_code = to_binary(i)
             self.visit_module(manager, state, ast)
@@ -330,12 +333,15 @@ def main():
                             preprocess_include=options.include,
                             preprocess_define=options.define)
 
-    ast.show()
+    #ast.show()
 
     description: Description = ast.children()[0]
     top_level_module: ModuleDef = description.children()[0]
     modules = description.definitions
+    start = time.time()
     engine.execute(top_level_module, modules, None)
+    end = time.time()
+    print(f"Elapsed time {end - start}")
 
 if __name__ == '__main__':
     main()
