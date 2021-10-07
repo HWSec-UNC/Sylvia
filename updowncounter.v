@@ -39,7 +39,10 @@ module updowncounter(
     reg [31:0] internalvalue;
     
     always @(posedge clock) begin
-        if (inst) begin 
+        if (reset) begin
+            internalvalue <= 0;
+        end
+        else if (inst) begin 
             internalvalue <= internalvalue - 1;
         end
         else begin

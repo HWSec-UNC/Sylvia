@@ -2,8 +2,8 @@ import pyverilog
 import z3
 from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef, If, BitVecVal
 from pyverilog.vparser.parser import parse
-from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant
-from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList
+from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus
+from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql
 import sys
 import os
@@ -38,6 +38,7 @@ class ExecutionManager:
     debugging: bool = False
     abandon: bool = False
     assertion_violation: bool = False
+    in_always: bool = False
     modules = {}
 
 def to_binary(i: int, digits: int = 32) -> str:
@@ -67,10 +68,6 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
     elif isinstance(e, NotEql):
         lhs = parse_expr_to_Z3(e.left, s, branch)
         rhs = parse_expr_to_Z3(e.right, s, branch)
-        # print(lhs)
-        # print(rhs)
-        # print(type(lhs))
-        # print(type(rhs))
         if branch:          
             # only RHS is BitVec (Lhs is a more complex expr)
             if isinstance(rhs, z3.z3.BitVecRef) and not isinstance(lhs, BitVecRef):
@@ -90,6 +87,23 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
         rhs = parse_expr_to_Z3(e.right, s, branch)
         return s.add(lhs and rhs)
     return s
+
+
+def parse_rvalue(rvalue: Rvalue, store) -> (str, str, str): 
+    tokens = str(rvalue).replace('(','').replace(')','').split()
+    print(tokens)
+    op = ""
+    if 'Plus' in tokens[0]:
+        op = "+"
+    elif 'Minus' in tokens[0]:
+        op = '-'
+    lhs = tokens[1]
+    rhs = tokens[2]
+    if not lhs.isdigit():
+        lhs = store[lhs]
+    if not rhs.isdigit():
+        rhs = store[rhs]
+    return (lhs, op, rhs)
      
 class ExecutionEngine:
     branch: bool = True
@@ -147,7 +161,7 @@ class ExecutionEngine:
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         if isinstance(expr, Reg):
-            s.store[expr.name] = "AAAAAAAA"
+            s.store[expr.name] = expr.name + "_0"
         elif isinstance(expr, Eq):
             # assume left is identifier
             x = BitVec(expr.left.name, 32)
@@ -197,11 +211,26 @@ class ExecutionEngine:
             # print(sens_list.list[0].sig) # clock
             # print(sens_list.list[0].type) # posedge
             sub_stmt = stmt.statement
+            m.in_always = True
             self.visit_stmt(m, s, sub_stmt)
         elif isinstance(stmt, Assign):
-            s.store[stmt.left.var.name] = "hi"
+            if isinstance(stmt.right.var, IntConst):
+                s.store[stmt.left.var.name] = stmt.right.var.value
+            else:
+                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store)
+                if (lhs, op, rhs) != ("","",""):
+                    s.store[stmt.left.var.name] = lhs + op + rhs
+                else:
+                    s.store[stmt.left.var.name] = s.store[stmt.right.var.name]
         elif isinstance(stmt, NonblockingSubstitution):
-            s.store[stmt.left.var.name] = "yo"
+            if isinstance(stmt.right.var, IntConst):
+                s.store[stmt.left.var.name] = stmt.right.var.value
+            else:
+                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store)
+                if (lhs, op, rhs) != ("","",""):
+                    s.store[stmt.left.var.name] = lhs + op + rhs
+                else:
+                    s.store[stmt.left.var.name] = s.store[stmt.right.var.name]
         elif isinstance(stmt, Block):
             for item in stmt.statements: 
                 self.visit_stmt(m, s, item)
