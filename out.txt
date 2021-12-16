@@ -1,0 +1,142 @@
+Upper bound on num paths 32
+[]
+------------------------
+Path 0
+00000000000000000000000000000000
+Final state:
+{'CLK': 'x4oBg4nD0JBbmqwt', 'RST': 'FSMaV56aPH4olpLF', 'enable': 'Ol2zSTP4jyWGKzVP', 'value': 'yfIxFNvvgsU64hJD', 'led': 'f5ZPWjhQpKivvVRZ[23:16]', 'place_holder_out': 'jsN5kITmV8Oc0Wax', 'count': 'f5ZPWjhQpKivvVRZ', 'state': 'Yd39x9Zt66JO7Fgy'}
+Final path condition:
+[FSMaV56aPH4olpLF != k!1,
+ Yd39x9Zt66JO7Fgy != k!0,
+ Yd39x9Zt66JO7Fgy != k!1,
+ Yd39x9Zt66JO7Fgy != k!2]
+{'led': 0}
+[]
+[]
+------------------------
+Path 1
+00000000000000000000000000000001
+Nested ifs 0
+1
+['00000000000000000000000000000000']
+bit index: 31
+count: 0
+Final state:
+{'CLK': 'AxdXE5o5m3hanNET', 'RST': 'eAQZX6hNvgq83hE4', 'enable': 'gPTinn2Xp4etFF1V', 'value': 'padSJKt4nc2sxKAW', 'led': '0[23:16]', 'place_holder_out': 'JQDBd8GY2JdT2zXg', 'count': '0', 'state': '0'}
+Final path condition:
+[eAQZX6hNvgq83hE4 == k!1]
+{'led': 0, 'count': (1, 'IeEbwf9miEBybTo0'), 'state': (1, 'PHeCeZkgDX0sXAZi')}
+[31]
+[31]
+------------------------
+Path 2
+00000000000000000000000000000010
+Nested ifs 1
+2
+['00000000000000000000000000000000', '00000000000000000000000000000001']
+bit index: 30
+count: 0
+Final state:
+{'CLK': 'N6DpchadXfsw1tPU', 'RST': 'vr0Ur3pyvm4f0aIo', 'enable': 'HQfN6bTfeuBf7adh', 'value': 'UXdks618pRJWWsEB', 'led': 'aEOVNn4s3lv24pbF[23:16]', 'place_holder_out': 'XwkYcYZje2Cv6gfR', 'count': 'aEOVNn4s3lv24pbF', 'state': 'XfTIIDXzS750qbjN'}
+Final path condition:
+[vr0Ur3pyvm4f0aIo != k!1,
+ XfTIIDXzS750qbjN == k!0,
+ HQfN6bTfeuBf7adh != k!1]
+{'led': 0, 'count': (1, 'IeEbwf9miEBybTo0'), 'state': (1, 'PHeCeZkgDX0sXAZi')}
+[31]
+[31]
+[31]
+------------------------
+Path 4
+00000000000000000000000000000100
+Nested ifs 0
+3
+['00000000000000000000000000000000', '00000000000000000000000000000001', '00000000000000000000000000000010']
+bit index: 29
+Final state:
+{'CLK': 'KflivwBI71oipKIQ', 'RST': 'QwLCRybplkIokcSn', 'enable': 'iuXybGjowJd33aRT', 'value': '2dqCjlzjlxSfo0RP', 'led': 'U8bB2qcB2C65VMhe[23:16]', 'place_holder_out': '6OYg2LI1dbtEU1j9', 'count': 'U8bB2qcB2C65VMhe', 'state': '2'}
+Final path condition:
+[QwLCRybplkIokcSn != k!1,
+ VMuDQxzYp8cDgLK9 != k!0,
+ VMuDQxzYp8cDgLK9 == k!1]
+{'led': 0, 'count': (1, 'IeEbwf9miEBybTo0'), 'state': (1, 'VMuDQxzYp8cDgLK9')}
+[31]
+[31]
+[31]
+------------------------
+Path 6
+00000000000000000000000000000110
+Nested ifs 1
+2
+['00000000000000000000000000000000', '00000000000000000000000000000001', '00000000000000000000000000000010', '00000000000000000000000000000100']
+bit index: 30
+count: 1
+Nested ifs 0
+3
+['00000000000000000000000000000000', '00000000000000000000000000000001', '00000000000000000000000000000010', '00000000000000000000000000000100']
+bit index: 29
+count: 1
+Final state:
+{'CLK': 'iQR0EQcz946aOjRY', 'RST': 'G23uhL6lZWZvkOdj', 'enable': 'dcNepPbJF4jRSXU1', 'value': 'UYp16403xdr4hTpX', 'led': '7wGg9pJWGJkZXzyf[23:16]', 'place_holder_out': 'GLcGSqomL7rbdesN', 'count': '7wGg9pJWGJkZXzyf', 'state': '1'}
+Final path condition:
+[G23uhL6lZWZvkOdj != k!1,
+ 94al86QExphhlZjN == k!0,
+ dcNepPbJF4jRSXU1 == k!1]
+{'led': 0, 'count': (1, 'IeEbwf9miEBybTo0'), 'state': (1, '94al86QExphhlZjN')}
+[31, 30, 29]
+[31, 30, 29]
+[31, 30, 29]
+------------------------
+Path 8
+00000000000000000000000000001000
+Nested ifs 0
+4
+['00000000000000000000000000000000', '00000000000000000000000000000001', '00000000000000000000000000000010', '00000000000000000000000000000100', '00000000000000000000000000000110']
+bit index: 28
+count: 0
+Final state:
+{'CLK': 'bmpYmTbUupzc7m3v', 'RST': 'vEcaUId7LWFV4wGs', 'enable': 'qgTGDPJNCDSmSMS4', 'value': 'ICPRmXbILYyct1m8', 'led': '7xaRVRcN2zaiWU9Y+ICPRmXbILYyct1m8[23:16]', 'place_holder_out': 'dUVGyiZoUlN5Z5hj', 'count': '7xaRVRcN2zaiWU9Y+ICPRmXbILYyct1m8', 'state': '0'}
+Final path condition:
+[vEcaUId7LWFV4wGs != k!1,
+ FQ39fOysvZlW7nyC != k!0,
+ FQ39fOysvZlW7nyC != k!1,
+ FQ39fOysvZlW7nyC == k!2]
+{'led': 0, 'count': (1, '7xaRVRcN2zaiWU9Y'), 'state': (1, 'FQ39fOysvZlW7nyC')}
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+------------------------
+Path 16
+00000000000000000000000000010000
+Final state:
+{'CLK': 'Y4EjX9lDgauNr4w3', 'RST': 'exFp2nGmaLi665dR', 'enable': 'ytJ3DC2GJKmKfzec', 'value': 'l3aBX1tSYdRUa6XD', 'led': 'P6YlpRC5RDddkN2n[23:16]', 'place_holder_out': '8KHjmiL0csedp0Xs', 'count': 'P6YlpRC5RDddkN2n', 'state': 'cBbY9y2omVngcmFT'}
+Final path condition:
+[exFp2nGmaLi665dR != k!1,
+ cBbY9y2omVngcmFT != k!0,
+ cBbY9y2omVngcmFT != k!1,
+ cBbY9y2omVngcmFT != k!2]
+{'led': 0, 'count': (1, '7xaRVRcN2zaiWU9Y'), 'state': (1, 'FQ39fOysvZlW7nyC')}
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+[31, 30, 29, 28]
+ finishing sanity_test
+Elapsed time 0.07335257530212402
