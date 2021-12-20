@@ -25,6 +25,32 @@ module sanity_test
       end
     end
   end
+
+    place_holder test_1(
+    .CLK (CLK),
+    .RST (RST),
+    .out (test_1_out)
+  );
+
+  place_holder test_2(
+    .CLK (CLK),
+    .RST (RST),
+    .out (test_2_out)
+  );
+
+  place_holder test_3(
+    .CLK (CLK),
+    .RST (RST),
+    .out (test_3_out)
+  );
+
+  place_holder test_4(
+    .CLK (CLK),
+    .RST (RST),
+    .out (test_4_out)
+  );
   
 endmodule
+
+
 

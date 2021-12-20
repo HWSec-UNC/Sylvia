@@ -11,6 +11,7 @@ from optparse import OptionParser
 from typing import Optional
 import random, string
 import time
+from itertools import product
 
 
 INFO = "Verilog code parser"
@@ -46,6 +47,12 @@ class ExecutionManager:
     seen = []
     final = False
     completed = []
+    is_child: bool = False
+    # Map of module name to path nums for child module
+    child_num_paths = {}    
+    # Map of module name to path code for child module
+    child_path_codes = {}
+    paths = []
 
 def to_binary(i: int, digits: int = 32) -> str:
     num: str = bin(i)[2:]
@@ -120,7 +127,8 @@ def parse_rvalue(rvalue: Rvalue, store) -> (str, str, str):
 
 def init_symbol() -> str:
     """Initializes signal with random symbol."""
-    return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
+    #TODO:change symbol length back to 16 or whatever or make this hash to guarantee good randomness
+    return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(2))
     
      
 class ExecutionEngine:
@@ -141,7 +149,6 @@ class ExecutionEngine:
 
     def check_dup(self, m: ExecutionManager) -> bool:
         """Checks if the current path is a duplicate/worth exploring."""
-        print(m.completed)
         for i in range(len(m.path_code)):
             if m.path_code[i] == "1" and i in m.completed:
                 return True
@@ -213,8 +220,6 @@ class ExecutionEngine:
         We know there are no more nested conditionals within the block, just want to check 
         that we have seen the path where this bit was turned on but the thing to the left of it
         could vary."""
-        print(f"bit index: {bit_index}")
-
         # first check if things less than me have been added.
         # so index 29 shouldnt be completed before 30
         for i in range(bit_index + 1, 32):
@@ -223,9 +228,8 @@ class ExecutionEngine:
         count = 0
         seen = m.seen
         for path in seen:
-            if path[bit_index ] == '1':
+            if path[bit_index] == '1':
                 count += 1
-        print(f"count: {count}")
         if count >=  nested_ifs:
             return True
         return False
@@ -271,14 +275,13 @@ class ExecutionEngine:
             parse_expr_to_Z3(expr, s.pc, self.branch)
         return None
 
-    def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node):
-        #print(type(stmt))
+    def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
         if isinstance(stmt, Decl):
             for item in stmt.list:
                 if isinstance(item, Value):
                     self.visit_expr(m, s, item)
                 else:
-                    self.visit_stmt(m, s, item)
+                    self.visit_stmt(m, s, item, modules)
                 # ref_name = item.name
                 # ref_width = int(item.width.msb.value) + 1
                 #  dont want to actually call z3 here, just when looking at PC
@@ -289,7 +292,7 @@ class ExecutionEngine:
             # print(sens_list.list[0].type) # posedge
             sub_stmt = stmt.statement
             m.in_always = True
-            self.visit_stmt(m, s, sub_stmt)
+            self.visit_stmt(m, s, sub_stmt, modules)
             for signal in m.dependencies:
                 if m.dependencies[signal] in m.updates:
                     if m.updates[m.dependencies[signal]][0] == 1:
@@ -322,9 +325,9 @@ class ExecutionEngine:
             m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, Block):
             for item in stmt.statements: 
-                self.visit_stmt(m, s, item)
+                self.visit_stmt(m, s, item, modules)
         elif isinstance(stmt, Initial):
-            self.visit_stmt(m, s, stmt.statement)
+            self.visit_stmt(m, s, stmt.statement, modules)
         elif isinstance(stmt, IfStatement):
             # print("forking")
             # print(stmt.__dict__)
@@ -344,15 +347,12 @@ class ExecutionEngine:
                     print("Abandoning this path!")
                     return
                 nested_ifs = self.count_conditionals_2(m, stmt.true_statement)
-                print(f"Nested ifs {nested_ifs}")
                 diff = 32 - bit_index
-                print(diff)
-                print(m.seen)
                 # m.curr_level == (32 - bit_index) this is always true
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
                 if self.seen_all_cases(m, bit_index, nested_ifs):
                     m.completed.append(bit_index)
-                self.visit_stmt(m, s, stmt.true_statement)
+                self.visit_stmt(m, s, stmt.true_statement, modules)
             else:
                 self.branch = False
                 self.visit_expr(m, s, stmt.cond)
@@ -360,22 +360,23 @@ class ExecutionEngine:
                     print("Abandoning this path!")
                     m.abandon = False
                     return
-                self.visit_stmt(m, s, stmt.false_statement)
+                self.visit_stmt(m, s, stmt.false_statement, modules)
         elif isinstance(stmt, SystemCall):
             m.assertion_violation = True
         elif isinstance(stmt, SingleStatement):
-            self.visit_stmt(m, s, stmt.statement)
+            self.visit_stmt(m, s, stmt.statement, modules)
         elif isinstance(stmt, InstanceList):
-            if stmt.module in m.modules:
-                print(stmt.module)
-                self.execute_child(m.modules[stmt.module], s, m)
+            if stmt.module in modules:
+                self.execute_child(modules[stmt.module], s, m)
 
-    def visit_module(self, m: ExecutionManager, s: SymbolicState, module: ModuleDef):
+    def visit_module(self, m: ExecutionManager, s: SymbolicState, module: ModuleDef, modules: Optional):
         """Visit module."""
         m.currLevel = 0
-        print(m.path_code)
+        #print(m.path_code)
         params = module.paramlist.params
         ports = module.portlist.ports
+
+
         for port in ports:
             if isinstance(port, Ioport):
                 s.store[port.first.name] = init_symbol()
@@ -386,11 +387,18 @@ class ExecutionEngine:
             if isinstance(item, Value):
                 self.visit_expr(m, s, item)
             else:
-                self.visit_stmt(m, s, item)
+                self.visit_stmt(m, s, item, modules)
         print("Final state:")
         print(s.store)
         print("Final path condition:")
         print(s.pc)
+
+    def populate_child_paths(self, manager: ExecutionManager) -> None:
+        """Populates child path codes based on number of paths."""
+        for child in manager.child_num_paths:
+            manager.child_path_codes[child] = []
+            for i in range(manager.child_num_paths[child]):
+                manager.child_path_codes[child].append(to_binary(i))
         
             
     def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager]) -> None:
@@ -403,7 +411,15 @@ class ExecutionEngine:
             modules_dict = {}
             for module in modules:
                 modules_dict[module.name] = module
+                manager.child_path_codes[module.name] = to_binary(0)
+                sub_manager = ExecutionManager()
+                self.init_run(sub_manager, module)
+                manager.child_num_paths[module.name] = sub_manager.num_paths
+            self.populate_child_paths(manager)
             manager.modules = modules_dict
+            paths = list(product(*manager.child_path_codes.values()))
+            #print(paths)
+            print(len(paths))
         self.init_run(manager, ast)
         #print(f"Num paths: {manager.num_paths}")
         print(f"Upper bound on num paths {manager.num_paths}")
@@ -415,11 +431,9 @@ class ExecutionEngine:
                 continue
             else:
                 print("------------------------")
-                print(f"Path {i}")
-            self.visit_module(manager, state, ast)
+                print(f"{ast.name} Path {i}")
+            self.visit_module(manager, state, ast, modules_dict)
             manager.seen.append(manager.path_code)
-            print(manager.updates)
-            print(manager.completed)
             if (manager.assertion_violation):
                 print("Assertion violation")
                 manager.assertion_violation = False
@@ -438,13 +452,16 @@ class ExecutionEngine:
         # different manager
         # same state
         # dont call pc solve
-        manager = ExecutionManager()
-        self.init_run(manager, ast)
+        manager_sub = ExecutionManager()
+        manager_sub.is_child = True
+        self.init_run(manager_sub, ast)
         #print(f"Num paths: {manager.num_paths}")
-        print(f"Num paths {manager.num_paths}")
-        for i in range(manager.num_paths):
-            manager.path_code = to_binary(i)
-            self.visit_module(manager, state, ast)
+        print(f"Num paths {manager_sub.num_paths}")
+        for i in range(manager_sub.num_paths):
+            manager_sub.path_code = to_binary(i)
+            print("------------------------")
+            print(f"{ast.name} Path {i}")
+            self.visit_module(manager_sub, state, ast, manager.modules)
             if (manager.assertion_violation):
                 print("Assertion violation")
                 manager.assertion_violation = False
