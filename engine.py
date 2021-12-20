@@ -390,10 +390,12 @@ class ExecutionEngine:
                 self.visit_expr(m, s, item)
             else:
                 self.visit_stmt(m, s, item, modules)
-        print("Final state:")
-        print(s.store)
-        print("Final path condition:")
-        print(s.pc)
+        
+        if not m.is_child:
+            print("Final state:")
+            print(s.store)
+            print("Final path condition:")
+            print(s.pc)
 
     def populate_child_paths(self, manager: ExecutionManager) -> None:
         """Populates child path codes based on number of paths."""
@@ -467,17 +469,18 @@ class ExecutionEngine:
         #for i in range(manager_sub.num_paths):
             manager_sub.path_code = manager.config[ast.name]
             print("------------------------")
-            print(f"{ast.name} Path {manager_sub.path_code}")
+            print(f"{ast.name} Path {i}")
             self.visit_module(manager_sub, state, ast, manager.modules)
             if (manager.assertion_violation):
                 print("Assertion violation")
                 manager.assertion_violation = False
                 self.solve_pc(state.pc)
             manager.curr_level = 0
-            state.pc.reset()
+            #state.pc.reset()
         #manager.path_code = to_binary(0)
         print(f" finishing {ast.name}")
         self.module_depth -= 1
+        manager.is_child = False
         ## print(state.store)
     
 
