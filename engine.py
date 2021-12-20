@@ -53,6 +53,8 @@ class ExecutionManager:
     # Map of module name to path code for child module
     child_path_codes = {}
     paths = []
+    config = {}
+    names_list = []
 
 def to_binary(i: int, digits: int = 32) -> str:
     num: str = bin(i)[2:]
@@ -415,17 +417,20 @@ class ExecutionEngine:
                 sub_manager = ExecutionManager()
                 self.init_run(sub_manager, module)
                 manager.child_num_paths[module.name] = sub_manager.num_paths
+                manager.config[module.name] = to_binary(0)
+                manager.names_list.append(module.name)
             self.populate_child_paths(manager)
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values()))
-            #print(paths)
             print(len(paths))
         self.init_run(manager, ast)
         #print(f"Num paths: {manager.num_paths}")
         print(f"Upper bound on num paths {manager.num_paths}")
         manager.seen = []
-        for i in range(manager.num_paths):
-            manager.path_code = to_binary(i)
+        for i in range(len(paths)):
+            for j in range(len(paths[i])):
+                manager.config[manager.names_list[j]] = paths[i][j]
+            manager.path_code = manager.config[manager.names_list[0]]
             if self.check_dup(manager):
             #if False:
                 continue
@@ -457,10 +462,12 @@ class ExecutionEngine:
         self.init_run(manager_sub, ast)
         #print(f"Num paths: {manager.num_paths}")
         print(f"Num paths {manager_sub.num_paths}")
-        for i in range(manager_sub.num_paths):
-            manager_sub.path_code = to_binary(i)
+        # i'm pretty sure we only ever want to do 1 loop here
+        for i in range(1):
+        #for i in range(manager_sub.num_paths):
+            manager_sub.path_code = manager.config[ast.name]
             print("------------------------")
-            print(f"{ast.name} Path {i}")
+            print(f"{ast.name} Path {manager_sub.path_code}")
             self.visit_module(manager_sub, state, ast, manager.modules)
             if (manager.assertion_violation):
                 print("Assertion violation")
