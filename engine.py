@@ -12,11 +12,16 @@ from typing import Optional
 import random, string
 import time
 from itertools import product
+import logging
+
+with open('errors.log', 'w'):
+    pass
+logging.basicConfig(filename='errors.log', level=logging.DEBUG)
 
 
-INFO = "Verilog code parser"
+INFO = "Verilog Symbolic Execution Engine"
 VERSION = pyverilog.__version__
-USAGE = "Usage: python example_parser.py file ..."
+USAGE = "Usage: python3 -m engine <verilog_file>.v > out.txt"
 
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
 EXPRESSIONS = ["Decl"]
@@ -55,6 +60,7 @@ class ExecutionManager:
     paths = []
     config = {}
     names_list = []
+    instance_count = {}
 
 def to_binary(i: int, digits: int = 32) -> str:
     num: str = bin(i)[2:]
@@ -67,7 +73,7 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
     if isinstance(e, And):
         lhs = parse_expr_to_Z3(e.left, s, branch)
         rhs = parse_expr_to_Z3(e.right, s, branch)
-        return s.add(lhs and rhs)
+        return s.add(lhs.assertions() and rhs.assertions())
     elif isinstance(e, Identifier):
         return BitVec(e.name + "_0", 32)
     elif isinstance(e, Constant):
@@ -100,7 +106,7 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
     elif isinstance(e, Land):
         lhs = parse_expr_to_Z3(e.left, s, branch)
         rhs = parse_expr_to_Z3(e.right, s, branch)
-        return s.add(lhs and rhs)
+        return s.add(lhs.assertions() and rhs.assertions())
     return s
 
 
@@ -117,13 +123,22 @@ def parse_rvalue(rvalue: Rvalue, store) -> (str, str, str):
     rhs = tokens[2]
     if not lhs.isdigit():
         if lhs == "Plus":
-            lhs = tokens[2]
-            rhs = tokens[3]
-        lhs = store[lhs]
+            try:
+                lhs = tokens[2]
+                rhs = tokens[3]
+            except KeyError:
+                logging.debug("hi")
+        try:
+            lhs = store[lhs]
+        except KeyError:
+            logging.debug("hi")
     if not rhs.isdigit():
         # print(store)
         # print(rvalue)
-        rhs = store[rhs]
+        try: 
+            rhs = store[rhs]
+        except KeyError:
+            logging.debug('hi2')
     return (lhs, op, rhs)
 
 
@@ -178,6 +193,8 @@ class ExecutionEngine:
                     if isinstance(item, IfStatement) or isinstance(item, CaseStatement):
                         if isinstance(item, IfStatement):
                             return self.count_conditionals_2(m, item.true_statement) + self.count_conditionals_2(m, item.false_statement)  + 1
+                        if isinstance(items, CaseStatement):
+                            return self.count_conditionals_2(m, items.caselist) + 1
                 if isinstance(item, Block):
                     return self.count_conditionals_2(m, item.items)
                 elif isinstance(item, Always):
@@ -188,6 +205,8 @@ class ExecutionEngine:
             if isinstance(items, IfStatement):
                 return  ( self.count_conditionals_2(m, items.true_statement) + 
                 self.count_conditionals_2(m, items.false_statement)) + 1
+            if isinstance(items, CaseStatement):
+                return self.count_conditionals_2(m, items.caselist) + 1
         return 0
 
     def count_conditionals(self, m: ExecutionManager, items):
@@ -235,11 +254,38 @@ class ExecutionEngine:
         if count >=  nested_ifs:
             return True
         return False
-        
+
+    def module_count(self, m: ExecutionManager, items) -> None:
+        """Traverse a top level module and count up the instances of each type of module."""
+        if isinstance(items, Block):
+            items = items.statements
+        if hasattr(items, '__iter__'):
+            for item in items:
+                if isinstance(item, InstanceList):
+                    if item.module in m.instance_count:
+                        m.instance_count[item.module] += 1
+                    else:
+                        m.instance_count[item.module] = 1
+                    self.module_count(m, item.instances)
+                if isinstance(item, Block):
+                    self.module_count(m, item.items)
+                elif isinstance(item, Always):
+                    self.module_count(m, item.statement)             
+                elif isinstance(item, Initial):
+                    self.module_count(m, item.statement)
+        elif items != None:
+                if isinstance(item, InstanceList):
+                    if item.module in m.instance_count:
+                        m.instance_count[item.module] += 1
+                    else:
+                        m.instance_count[item.module] = 1
+                    self.module_count(m, item.instances)
+
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
         """Initalize run."""
         self.count_conditionals(m, module.items)
+        #self.module_count(m, module.items)
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         if isinstance(expr, Reg):
@@ -305,9 +351,14 @@ class ExecutionEngine:
             if isinstance(stmt.right.var, IntConst):
                 s.store[stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Partselect):
-                s.store[stmt.left.var.name] = f"{s.store[stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
-                m.dependencies[stmt.left.var.name] = stmt.right.var.var.name
-                m.updates[stmt.left.var.name] = 0
+                if isinstance(stmt.left.var, Partselect):
+                    s.store[stmt.left.var.var.name] = f"{s.store[stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+                    m.dependencies[stmt.left.var.var.name] = stmt.right.var.var.name
+                    m.updates[stmt.left.var.var.name] = 0
+                else:
+                    s.store[stmt.left.var.name] = f"{s.store[stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+                    m.dependencies[stmt.left.var.name] = stmt.right.var.var.name
+                    m.updates[stmt.left.var.name] = 0
             else:
                 (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store)
                 if (lhs, op, rhs) != ("","",""):
@@ -353,7 +404,7 @@ class ExecutionEngine:
                 # m.curr_level == (32 - bit_index) this is always true
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
                 if self.seen_all_cases(m, bit_index, nested_ifs):
-                    m.completed.append(bit_index)
+                     m.completed.append(bit_index)
                 self.visit_stmt(m, s, stmt.true_statement, modules)
             else:
                 self.branch = False
@@ -370,6 +421,35 @@ class ExecutionEngine:
         elif isinstance(stmt, InstanceList):
             if stmt.module in modules:
                 self.execute_child(modules[stmt.module], s, m)
+        elif isinstance(stmt, CaseStatement):
+            print("Case Statement")
+            print(stmt.comp)
+            m.curr_level += 1
+            self.cond = True
+            bit_index = len(m.path_code) - m.curr_level
+
+            if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
+                self.branch = True
+
+                # check if i am the final thing/no more conditionals after me
+                # basically, we never want me to be true again after this bc we are wasting time reexploring this
+
+                self.visit_expr(m, s, stmt.comp)
+                if (m.abandon):
+                    m.abandon = False
+                    print("Abandoning this path!")
+                    return
+                # m.curr_level == (32 - bit_index) this is always true
+                #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
+                self.visit_stmt(m, s, stmt.caselist, modules)
+            else:
+                self.branch = False
+                self.visit_expr(m, s, stmt.comp)
+                if (m.abandon):
+                    print("Abandoning this path!")
+                    m.abandon = False
+                    return
+                self.visit_stmt(m, s, stmt.caselist, modules)
 
     def visit_module(self, m: ExecutionManager, s: SymbolicState, module: ModuleDef, modules: Optional):
         """Visit module."""
@@ -417,15 +497,17 @@ class ExecutionEngine:
                 modules_dict[module.name] = module
                 manager.child_path_codes[module.name] = to_binary(0)
                 sub_manager = ExecutionManager()
+                manager.names_list.append(module.name)
                 self.init_run(sub_manager, module)
+                self.module_count(manager, module.items)
                 manager.child_num_paths[module.name] = sub_manager.num_paths
                 manager.config[module.name] = to_binary(0)
-                manager.names_list.append(module.name)
             self.populate_child_paths(manager)
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values()))
             print(len(paths))
         self.init_run(manager, ast)
+        print(manager.instance_count)
         #print(f"Num paths: {manager.num_paths}")
         print(f"Upper bound on num paths {manager.num_paths}")
         manager.seen = []
