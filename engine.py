@@ -4,7 +4,7 @@ from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef, If,
 from pyverilog.vparser.parser import parse
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
-from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql
+from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
 import sys
 import os
 from optparse import OptionParser
@@ -61,6 +61,7 @@ class ExecutionManager:
     config = {}
     names_list = []
     instance_count = {}
+    seen_mod = {}
 
 def to_binary(i: int, digits: int = 32) -> str:
     num: str = bin(i)[2:]
@@ -145,7 +146,7 @@ def parse_rvalue(rvalue: Rvalue, store) -> (str, str, str):
 def init_symbol() -> str:
     """Initializes signal with random symbol."""
     #TODO:change symbol length back to 16 or whatever or make this hash to guarantee good randomness
-    return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(2))
+    return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
     
      
 class ExecutionEngine:
@@ -219,21 +220,31 @@ class ExecutionEngine:
             for item in stmts:
                 if isinstance(item, CONDITIONALS):
                     if isinstance(item, IfStatement) or isinstance(item, CaseStatement):
-                        m.num_paths *= 2
                         if isinstance(item, IfStatement):
+                            m.num_paths *= 2
                             self.count_conditionals(m, item.true_statement)
                             self.count_conditionals(m, item.false_statement)
+                        if isinstance(item, CaseStatement):
+                            for case in item.caselist:
+                                m.num_paths *= 2
+                                self.count_conditionals(m, case.statement)
                 if isinstance(item, Block):
                     self.count_conditionals(m, item.items)
                 elif isinstance(item, Always):
                     self.count_conditionals(m, item.statement)             
                 elif isinstance(item, Initial):
                     self.count_conditionals(m, item.statement)
+                elif isinstance(item, Case):
+                    self.count_conditionals(m, item.statement)
         elif items != None:
             if isinstance(items, IfStatement):
                 m.num_paths *= 2
                 self.count_conditionals(m, items.true_statement)
                 self.count_conditionals(m, items.false_statement)
+            if isinstance(items, CaseStatement):
+                for case in item.caselist:
+                    m.num_paths *= 2
+                    self.count_conditionals(m, case.statement)
 
 
     def seen_all_cases(self, m: ExecutionManager, bit_index: int, nested_ifs: int) -> bool:
@@ -251,7 +262,7 @@ class ExecutionEngine:
         for path in seen:
             if path[bit_index] == '1':
                 count += 1
-        if count >=  nested_ifs:
+        if count >= nested_ifs:
             return True
         return False
 
@@ -420,10 +431,14 @@ class ExecutionEngine:
             self.visit_stmt(m, s, stmt.statement, modules)
         elif isinstance(stmt, InstanceList):
             if stmt.module in modules:
-                self.execute_child(modules[stmt.module], s, m)
+                if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
+                    print("Not seen")
+                    self.execute_child(modules[stmt.module], s, m)
+                else:
+                    print("seen")
+                    #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
+                    self.merge_states(m, s, m.seen_mod[stmt.module][m.config[stmt.module]])
         elif isinstance(stmt, CaseStatement):
-            print("Case Statement")
-            print(stmt.comp)
             m.curr_level += 1
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
@@ -476,6 +491,7 @@ class ExecutionEngine:
             print(s.store)
             print("Final path condition:")
             print(s.pc)
+          
 
     def populate_child_paths(self, manager: ExecutionManager) -> None:
         """Populates child path codes based on number of paths."""
@@ -483,7 +499,23 @@ class ExecutionEngine:
             manager.child_path_codes[child] = []
             for i in range(manager.child_num_paths[child]):
                 manager.child_path_codes[child].append(to_binary(i))
-        
+
+    def populate_seen_mod(self, manager: ExecutionManager) -> None:
+        """Populates child path codes but in a format to keep track of corresponding states that we've seen."""
+        for child in manager.child_num_paths:
+            manager.seen_mod[child] = {}
+            for i in range(manager.child_num_paths[child]):
+                manager.seen_mod[child][(to_binary(i))] = {}
+
+    def merge_states(self, manager: ExecutionManager, state: SymbolicState, store):
+        """Merges two states."""
+        for key in store:
+            if key in state.store.keys():
+                prev_symbol = state.store[key]
+                new_symbol = store[key]
+                state.store[key].replace(prev_symbol, new_symbol)
+            else:
+                state.store[key] = store[key]
             
     def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager]) -> None:
         """Drives symbolic execution."""
@@ -496,6 +528,7 @@ class ExecutionEngine:
             for module in modules:
                 modules_dict[module.name] = module
                 manager.child_path_codes[module.name] = to_binary(0)
+                manager.seen_mod[module.name] = {}
                 sub_manager = ExecutionManager()
                 manager.names_list.append(module.name)
                 self.init_run(sub_manager, module)
@@ -503,13 +536,14 @@ class ExecutionEngine:
                 manager.child_num_paths[module.name] = sub_manager.num_paths
                 manager.config[module.name] = to_binary(0)
             self.populate_child_paths(manager)
+            self.populate_seen_mod(manager)
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values()))
-            print(len(paths))
+            print(f" Upper bound on num paths {len(paths)}")
         self.init_run(manager, ast)
         print(manager.instance_count)
         #print(f"Num paths: {manager.num_paths}")
-        print(f"Upper bound on num paths {manager.num_paths}")
+        #print(f"Upper bound on num paths {manager.num_paths}")
         manager.seen = []
         for i in range(len(paths)):
             for j in range(len(paths[i])):
@@ -546,6 +580,13 @@ class ExecutionEngine:
         self.init_run(manager_sub, ast)
         #print(f"Num paths: {manager.num_paths}")
         print(f"Num paths {manager_sub.num_paths}")
+        manager_sub.path_code = manager.config[ast.name]
+
+        # mark this exploration of the submodule as seen and store the state so we don't have to explore it again.
+        if manager.seen_mod[ast.name][manager_sub.path_code] == {}:
+            manager.seen_mod[ast.name][manager_sub.path_code] = state.store
+        else:
+            print("already seen this")
         # i'm pretty sure we only ever want to do 1 loop here
         for i in range(1):
         #for i in range(manager_sub.num_paths):
