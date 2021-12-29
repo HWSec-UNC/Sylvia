@@ -516,7 +516,6 @@ class ExecutionEngine:
 
     def merge_states(self, manager: ExecutionManager, state: SymbolicState, store):
         """Merges two states."""
-        print(state.store)
         for key, val in state.store.items():
             if type(val) != dict:
                 continue
@@ -558,7 +557,7 @@ class ExecutionEngine:
         #print(f"Num paths: {manager.num_paths}")
         #print(f"Upper bound on num paths {manager.num_paths}")
         manager.seen = []
-        manager.curr_module = module.name
+        manager.curr_module = manager.names_list[0]
         for i in range(len(paths)):
             for j in range(len(paths[i])):
                 manager.config[manager.names_list[j]] = paths[i][j]

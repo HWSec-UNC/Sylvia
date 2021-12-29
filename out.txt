@@ -13,48 +13,41 @@ Num paths 2
 place_holder_2 Path 0
  finishing place_holder_2
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': '7BIInqwH3xxPMUkh', 'RST': 'uiA8IDE0LXY1EgDn', 'enable': 'X0eGTzuzMaeXTliW', 'value': 'RjHY9NcZRWKVLvPx', 'led': 'irEt5wFlnh3CSOsu[23:16]', 'place_holder_out': 'n7kXR6o9QXwXVZPK', 'count': 'irEt5wFlnh3CSOsu', 'state': 'YF1E3qsuIir6p5Db', 'out': 'vUboTeIzb76pMKDw+2'}}
+{'sanity_test': {'CLK': 'cyL8lkbsWrpK8Wr2', 'RST': 'arcDz1QEomZLbRj5', 'enable': 'GzWy1LWHe1OUUVLX', 'value': 'W90GR0hvp7UhtiyM', 'led': 'ewMEVltnu0rImnxY[23:16]', 'place_holder_out': 'qHVrgyb984w16LM3', 'count': 'ewMEVltnu0rImnxY', 'state': 'EQWrtbOIw2Lqyalr'}, 'place_holder': {'CLK': 'P6YgsmI1mQXKI0FN', 'RST': 'iSnfnpAytYmpjLfX', 'out': 'Dv4UB1yNkSte9kVj+1'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}}
 Final path condition:
-[YdvYDWDMesj8I0tW != k!1,
- YF1E3qsuIir6p5Db != k!0,
- YF1E3qsuIir6p5Db != k!1,
- YF1E3qsuIir6p5Db != k!2,
- vFtTrhQT8pk2sGZ6 != k!1,
- uiA8IDE0LXY1EgDn != k!1]
+[arcDz1QEomZLbRj5 != k!1,
+ EQWrtbOIw2Lqyalr != k!0,
+ EQWrtbOIw2Lqyalr != k!1,
+ EQWrtbOIw2Lqyalr != k!2,
+ iSnfnpAytYmpjLfX != k!1,
+ nS7WeR2s62SPt4M7 != k!1]
  finishing place_holder
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': '7BIInqwH3xxPMUkh', 'RST': 'uiA8IDE0LXY1EgDn', 'enable': 'X0eGTzuzMaeXTliW', 'value': 'RjHY9NcZRWKVLvPx', 'led': 'irEt5wFlnh3CSOsu[23:16]', 'place_holder_out': 'n7kXR6o9QXwXVZPK', 'count': 'irEt5wFlnh3CSOsu', 'state': 'YF1E3qsuIir6p5Db', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': '7BIInqwH3xxPMUkh', 'RST': 'uiA8IDE0LXY1EgDn', 'enable': 'X0eGTzuzMaeXTliW', 'value': 'RjHY9NcZRWKVLvPx', 'led': 'irEt5wFlnh3CSOsu[23:16]', 'place_holder_out': 'n7kXR6o9QXwXVZPK', 'count': 'irEt5wFlnh3CSOsu', 'state': 'YF1E3qsuIir6p5Db', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': '7BIInqwH3xxPMUkh', 'RST': 'uiA8IDE0LXY1EgDn', 'enable': 'X0eGTzuzMaeXTliW', 'value': 'RjHY9NcZRWKVLvPx', 'led': 'irEt5wFlnh3CSOsu[23:16]', 'place_holder_out': 'n7kXR6o9QXwXVZPK', 'count': 'irEt5wFlnh3CSOsu', 'state': 'YF1E3qsuIir6p5Db', 'out': 'vUboTeIzb76pMKDw+2'}}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': '7BIInqwH3xxPMUkh', 'RST': 'uiA8IDE0LXY1EgDn', 'enable': 'X0eGTzuzMaeXTliW', 'value': 'RjHY9NcZRWKVLvPx', 'led': 'irEt5wFlnh3CSOsu[23:16]', 'place_holder_out': 'n7kXR6o9QXwXVZPK', 'count': 'irEt5wFlnh3CSOsu', 'state': 'YF1E3qsuIir6p5Db', 'out': 'vUboTeIzb76pMKDw+2'}}
+{'sanity_test': {'CLK': 'cyL8lkbsWrpK8Wr2', 'RST': 'arcDz1QEomZLbRj5', 'enable': 'GzWy1LWHe1OUUVLX', 'value': 'W90GR0hvp7UhtiyM', 'led': 'ewMEVltnu0rImnxY[23:16]', 'place_holder_out': 'qHVrgyb984w16LM3', 'count': 'ewMEVltnu0rImnxY', 'state': 'EQWrtbOIw2Lqyalr'}, 'place_holder': {'CLK': 'P6YgsmI1mQXKI0FN', 'RST': 'iSnfnpAytYmpjLfX', 'out': 'Dv4UB1yNkSte9kVj+1'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}}
 Final path condition:
-[YdvYDWDMesj8I0tW != k!1,
- YF1E3qsuIir6p5Db != k!0,
- YF1E3qsuIir6p5Db != k!1,
- YF1E3qsuIir6p5Db != k!2,
- vFtTrhQT8pk2sGZ6 != k!1,
- uiA8IDE0LXY1EgDn != k!1]
+[arcDz1QEomZLbRj5 != k!1,
+ EQWrtbOIw2Lqyalr != k!0,
+ EQWrtbOIw2Lqyalr != k!1,
+ EQWrtbOIw2Lqyalr != k!2,
+ iSnfnpAytYmpjLfX != k!1,
+ nS7WeR2s62SPt4M7 != k!1]
 ------------------------
 sanity_test Path 1
 ('00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000001')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': 'Ucxs7g3q1vf5peMw', 'RST': 'EtkuAQTIRCRpgblW', 'enable': 'GKi15Yd0kJzxdsA2', 'value': '8lKCcjcCK0WydSSM', 'led': 'qlsERzbjKMnp7vIW[23:16]', 'place_holder_out': 'Xu5IuwhMvQA3m0eD', 'count': 'qlsERzbjKMnp7vIW', 'state': 'm4Y3H3C69adkZvOo', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': 'Ucxs7g3q1vf5peMw', 'RST': 'EtkuAQTIRCRpgblW', 'enable': 'GKi15Yd0kJzxdsA2', 'value': '8lKCcjcCK0WydSSM', 'led': 'qlsERzbjKMnp7vIW[23:16]', 'place_holder_out': 'Xu5IuwhMvQA3m0eD', 'count': 'qlsERzbjKMnp7vIW', 'state': 'm4Y3H3C69adkZvOo', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': 'Ucxs7g3q1vf5peMw', 'RST': 'EtkuAQTIRCRpgblW', 'enable': 'GKi15Yd0kJzxdsA2', 'value': '8lKCcjcCK0WydSSM', 'led': 'qlsERzbjKMnp7vIW[23:16]', 'place_holder_out': 'Xu5IuwhMvQA3m0eD', 'count': 'qlsERzbjKMnp7vIW', 'state': 'm4Y3H3C69adkZvOo', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': 'Ucxs7g3q1vf5peMw', 'RST': 'EtkuAQTIRCRpgblW', 'enable': 'GKi15Yd0kJzxdsA2', 'value': '8lKCcjcCK0WydSSM', 'led': 'qlsERzbjKMnp7vIW[23:16]', 'place_holder_out': 'Xu5IuwhMvQA3m0eD', 'count': 'qlsERzbjKMnp7vIW', 'state': 'm4Y3H3C69adkZvOo', 'out': 'vUboTeIzb76pMKDw+2'}}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'etmDbFokhbTzhu2F', 'RST': 'vFtTrhQT8pk2sGZ6', 'out': 'aY4dphyvUCXkfuHc+1'}, 'place_holder_2': {'CLK': 'Ucxs7g3q1vf5peMw', 'RST': 'EtkuAQTIRCRpgblW', 'enable': 'GKi15Yd0kJzxdsA2', 'value': '8lKCcjcCK0WydSSM', 'led': 'qlsERzbjKMnp7vIW[23:16]', 'place_holder_out': 'Xu5IuwhMvQA3m0eD', 'count': 'qlsERzbjKMnp7vIW', 'state': 'm4Y3H3C69adkZvOo', 'out': 'vUboTeIzb76pMKDw+2'}}
+{'sanity_test': {'CLK': 'UT6F1hR6MwRzqT3c', 'RST': 'd0fzEyogtzBtoQty', 'enable': 'jYzjpDvmoRJgNEqS', 'value': 'I80u4JrLY5hE6QJ0', 'led': '2ksZ2YsEyrxE2hmG[23:16]', 'place_holder_out': 'CghCeLTI9YF2toCD', 'count': '2ksZ2YsEyrxE2hmG', 'state': 'jBz9v9jm7wvFviHB'}, 'place_holder': {'CLK': 'P6YgsmI1mQXKI0FN', 'RST': 'iSnfnpAytYmpjLfX', 'out': 'Dv4UB1yNkSte9kVj+1'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}}
 Final path condition:
-[EtkuAQTIRCRpgblW != k!1,
- m4Y3H3C69adkZvOo != k!0,
- m4Y3H3C69adkZvOo != k!1,
- m4Y3H3C69adkZvOo != k!2]
+[d0fzEyogtzBtoQty != k!1,
+ jBz9v9jm7wvFviHB != k!0,
+ jBz9v9jm7wvFviHB != k!1,
+ jBz9v9jm7wvFviHB != k!2]
 ------------------------
 sanity_test Path 2
 ('00000000000000000000000000000000', '00000000000000000000000000000001', '00000000000000000000000000000000')
@@ -63,180 +56,140 @@ Num paths 2
 ------------------------
 place_holder Path 0
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'n5tonSxolfLi5VWb', 'RST': '7cHqO3C6slBpvXDE', 'enable': 'DFBVrVDBWRnbLNcr', 'value': 'sER7yZWdllU79dB8', 'led': 'SPZnrT5lAdRXZKSR[23:16]', 'place_holder_out': 'Nm63IJb7n3wBp7bc', 'count': 'SPZnrT5lAdRXZKSR', 'state': 'KzTvyXT4EGx61zrF', 'out': 'vUboTeIzb76pMKDw+2'}}
  finishing place_holder
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'n5tonSxolfLi5VWb', 'RST': '7cHqO3C6slBpvXDE', 'enable': 'DFBVrVDBWRnbLNcr', 'value': 'sER7yZWdllU79dB8', 'led': 'SPZnrT5lAdRXZKSR[23:16]', 'place_holder_out': 'Nm63IJb7n3wBp7bc', 'count': 'SPZnrT5lAdRXZKSR', 'state': 'KzTvyXT4EGx61zrF', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'n5tonSxolfLi5VWb', 'RST': '7cHqO3C6slBpvXDE', 'enable': 'DFBVrVDBWRnbLNcr', 'value': 'sER7yZWdllU79dB8', 'led': 'SPZnrT5lAdRXZKSR[23:16]', 'place_holder_out': 'Nm63IJb7n3wBp7bc', 'count': 'SPZnrT5lAdRXZKSR', 'state': 'KzTvyXT4EGx61zrF', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'n5tonSxolfLi5VWb', 'RST': '7cHqO3C6slBpvXDE', 'enable': 'DFBVrVDBWRnbLNcr', 'value': 'sER7yZWdllU79dB8', 'led': 'SPZnrT5lAdRXZKSR[23:16]', 'place_holder_out': 'Nm63IJb7n3wBp7bc', 'count': 'SPZnrT5lAdRXZKSR', 'state': 'KzTvyXT4EGx61zrF', 'out': 'vUboTeIzb76pMKDw+2'}}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'n5tonSxolfLi5VWb', 'RST': '7cHqO3C6slBpvXDE', 'enable': 'DFBVrVDBWRnbLNcr', 'value': 'sER7yZWdllU79dB8', 'led': 'SPZnrT5lAdRXZKSR[23:16]', 'place_holder_out': 'Nm63IJb7n3wBp7bc', 'count': 'SPZnrT5lAdRXZKSR', 'state': 'KzTvyXT4EGx61zrF', 'out': 'vUboTeIzb76pMKDw+2'}}
+{'sanity_test': {'CLK': 'yWu05XGsf9jtJCxi', 'RST': 'YhTk7CZyWfW7CI3x', 'enable': 'KW42smG94cZCaWLu', 'value': '38TOnEj8lnjTEhLV', 'led': 'qX56yRUlyuTgm4Cv[23:16]', 'place_holder_out': 'mU6UBCBaZ2RCfqxU', 'count': 'qX56yRUlyuTgm4Cv', 'state': 'EaVPKG3QclAownKX'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}}
 Final path condition:
-[7cHqO3C6slBpvXDE != k!1,
- KzTvyXT4EGx61zrF != k!0,
- KzTvyXT4EGx61zrF != k!1,
- KzTvyXT4EGx61zrF != k!2,
- 3zm67143tQXjqFum == k!1]
+[YhTk7CZyWfW7CI3x != k!1,
+ EaVPKG3QclAownKX != k!0,
+ EaVPKG3QclAownKX != k!1,
+ EaVPKG3QclAownKX != k!2,
+ JqXP1DdqSKICwOV8 == k!1]
 ------------------------
 sanity_test Path 3
 ('00000000000000000000000000000000', '00000000000000000000000000000001', '00000000000000000000000000000001')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'jUMQdyNRa5Lewd1w', 'RST': 'lx7AhxsfCxPjScdu', 'enable': 'r14I0EacjMx86PlY', 'value': 'ehYCU0fbw4dHe6Bg', 'led': 'roUD8qSBkI5XHY4L[23:16]', 'place_holder_out': 'etwYI7datgKL3I0N', 'count': 'roUD8qSBkI5XHY4L', 'state': 'wsajvP1nQE7d9vMf', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'jUMQdyNRa5Lewd1w', 'RST': 'lx7AhxsfCxPjScdu', 'enable': 'r14I0EacjMx86PlY', 'value': 'ehYCU0fbw4dHe6Bg', 'led': 'roUD8qSBkI5XHY4L[23:16]', 'place_holder_out': 'etwYI7datgKL3I0N', 'count': 'roUD8qSBkI5XHY4L', 'state': 'wsajvP1nQE7d9vMf', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'jUMQdyNRa5Lewd1w', 'RST': 'lx7AhxsfCxPjScdu', 'enable': 'r14I0EacjMx86PlY', 'value': 'ehYCU0fbw4dHe6Bg', 'led': 'roUD8qSBkI5XHY4L[23:16]', 'place_holder_out': 'etwYI7datgKL3I0N', 'count': 'roUD8qSBkI5XHY4L', 'state': 'wsajvP1nQE7d9vMf', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'jUMQdyNRa5Lewd1w', 'RST': 'lx7AhxsfCxPjScdu', 'enable': 'r14I0EacjMx86PlY', 'value': 'ehYCU0fbw4dHe6Bg', 'led': 'roUD8qSBkI5XHY4L[23:16]', 'place_holder_out': 'etwYI7datgKL3I0N', 'count': 'roUD8qSBkI5XHY4L', 'state': 'wsajvP1nQE7d9vMf', 'out': 'vUboTeIzb76pMKDw+2'}}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'jUMQdyNRa5Lewd1w', 'RST': 'lx7AhxsfCxPjScdu', 'enable': 'r14I0EacjMx86PlY', 'value': 'ehYCU0fbw4dHe6Bg', 'led': 'roUD8qSBkI5XHY4L[23:16]', 'place_holder_out': 'etwYI7datgKL3I0N', 'count': 'roUD8qSBkI5XHY4L', 'state': 'wsajvP1nQE7d9vMf', 'out': 'vUboTeIzb76pMKDw+2'}}
+{'sanity_test': {'CLK': 'CQZpuBYWZXQEipYZ', 'RST': 'mHYH2j1l2XoxN40W', 'enable': 'vPRQE4UL2QQoFFva', 'value': 'kK2OoKKvaEng0P2l', 'led': '726WyOJhuGxPWvUt[23:16]', 'place_holder_out': '2NyNqbRtjtVbjQhf', 'count': '726WyOJhuGxPWvUt', 'state': 'EDTrqKIUFQtQxZzK'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}}
 Final path condition:
-[lx7AhxsfCxPjScdu != k!1,
- wsajvP1nQE7d9vMf != k!0,
- wsajvP1nQE7d9vMf != k!1,
- wsajvP1nQE7d9vMf != k!2]
+[mHYH2j1l2XoxN40W != k!1,
+ EDTrqKIUFQtQxZzK != k!0,
+ EDTrqKIUFQtQxZzK != k!1,
+ EDTrqKIUFQtQxZzK != k!2]
 ------------------------
 sanity_test Path 8
 ('00000000000000000000000000000010', '00000000000000000000000000000000', '00000000000000000000000000000000')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'ZvsnuaOQqXZgkqmM', 'RST': 'OcTEvKKjB7nu84I9', 'enable': 'KlXPfLg0QNiAtCtV', 'value': '6VL8yOvCDUFd4Ir0', 'led': 'qPnH2VEFIDQt5JrQ[23:16]', 'place_holder_out': 'Nc8gj5wMAgwvVsfw', 'count': 'qPnH2VEFIDQt5JrQ', 'state': 'sOI2wrTLUWs8iBgx', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'ZvsnuaOQqXZgkqmM', 'RST': 'OcTEvKKjB7nu84I9', 'enable': 'KlXPfLg0QNiAtCtV', 'value': '6VL8yOvCDUFd4Ir0', 'led': 'qPnH2VEFIDQt5JrQ[23:16]', 'place_holder_out': 'Nc8gj5wMAgwvVsfw', 'count': 'qPnH2VEFIDQt5JrQ', 'state': 'sOI2wrTLUWs8iBgx', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'ZvsnuaOQqXZgkqmM', 'RST': 'OcTEvKKjB7nu84I9', 'enable': 'KlXPfLg0QNiAtCtV', 'value': '6VL8yOvCDUFd4Ir0', 'led': 'qPnH2VEFIDQt5JrQ[23:16]', 'place_holder_out': 'Nc8gj5wMAgwvVsfw', 'count': 'qPnH2VEFIDQt5JrQ', 'state': 'sOI2wrTLUWs8iBgx', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'ZvsnuaOQqXZgkqmM', 'RST': 'OcTEvKKjB7nu84I9', 'enable': 'KlXPfLg0QNiAtCtV', 'value': '6VL8yOvCDUFd4Ir0', 'led': 'qPnH2VEFIDQt5JrQ[23:16]', 'place_holder_out': 'Nc8gj5wMAgwvVsfw', 'count': 'qPnH2VEFIDQt5JrQ', 'state': 'sOI2wrTLUWs8iBgx', 'out': 'vUboTeIzb76pMKDw+2'}}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'ZvsnuaOQqXZgkqmM', 'RST': 'OcTEvKKjB7nu84I9', 'enable': 'KlXPfLg0QNiAtCtV', 'value': '6VL8yOvCDUFd4Ir0', 'led': 'qPnH2VEFIDQt5JrQ[23:16]', 'place_holder_out': 'Nc8gj5wMAgwvVsfw', 'count': 'qPnH2VEFIDQt5JrQ', 'state': 'sOI2wrTLUWs8iBgx', 'out': 'vUboTeIzb76pMKDw+2'}}
+{'sanity_test': {'CLK': 'tWd0NXSa5cgHZFvJ', 'RST': 'E1fr1OA2wuHhaeuU', 'enable': 'rPcS6Q97WvXAVwJk', 'value': 'pHzqu0r2pRv3L4nX', 'led': 'PJur6ZGojqj4RxJE[23:16]', 'place_holder_out': 'KKy7HvBAGLtf3Qid', 'count': 'PJur6ZGojqj4RxJE', 'state': 'fXe9LxGJ3NnCLvA1'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}}
 Final path condition:
-[OcTEvKKjB7nu84I9 != k!1,
- sOI2wrTLUWs8iBgx == k!0,
- KlXPfLg0QNiAtCtV != k!1]
+[E1fr1OA2wuHhaeuU != k!1,
+ fXe9LxGJ3NnCLvA1 == k!0,
+ rPcS6Q97WvXAVwJk != k!1]
 ------------------------
 sanity_test Path 9
 ('00000000000000000000000000000010', '00000000000000000000000000000000', '00000000000000000000000000000001')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'CNs3WRUY7qkQZ2y0', 'RST': '3HqwciF0eFci5e5F', 'enable': 'Ubdk3CtHOAnuKoZ5', 'value': 'tk2usl5ssCeVK0na', 'led': '1221D44znA6mhtvP[23:16]', 'place_holder_out': 'qZl2bQUjcQoaYWGg', 'count': '1221D44znA6mhtvP', 'state': 'LcOXGquL1WGyeuSG', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'CNs3WRUY7qkQZ2y0', 'RST': '3HqwciF0eFci5e5F', 'enable': 'Ubdk3CtHOAnuKoZ5', 'value': 'tk2usl5ssCeVK0na', 'led': '1221D44znA6mhtvP[23:16]', 'place_holder_out': 'qZl2bQUjcQoaYWGg', 'count': '1221D44znA6mhtvP', 'state': 'LcOXGquL1WGyeuSG', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'CNs3WRUY7qkQZ2y0', 'RST': '3HqwciF0eFci5e5F', 'enable': 'Ubdk3CtHOAnuKoZ5', 'value': 'tk2usl5ssCeVK0na', 'led': '1221D44znA6mhtvP[23:16]', 'place_holder_out': 'qZl2bQUjcQoaYWGg', 'count': '1221D44znA6mhtvP', 'state': 'LcOXGquL1WGyeuSG', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'CNs3WRUY7qkQZ2y0', 'RST': '3HqwciF0eFci5e5F', 'enable': 'Ubdk3CtHOAnuKoZ5', 'value': 'tk2usl5ssCeVK0na', 'led': '1221D44znA6mhtvP[23:16]', 'place_holder_out': 'qZl2bQUjcQoaYWGg', 'count': '1221D44znA6mhtvP', 'state': 'LcOXGquL1WGyeuSG', 'out': 'vUboTeIzb76pMKDw+2'}}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'CNs3WRUY7qkQZ2y0', 'RST': '3HqwciF0eFci5e5F', 'enable': 'Ubdk3CtHOAnuKoZ5', 'value': 'tk2usl5ssCeVK0na', 'led': '1221D44znA6mhtvP[23:16]', 'place_holder_out': 'qZl2bQUjcQoaYWGg', 'count': '1221D44znA6mhtvP', 'state': 'LcOXGquL1WGyeuSG', 'out': 'vUboTeIzb76pMKDw+2'}}
+{'sanity_test': {'CLK': 'RmU0neXuRTr3JflQ', 'RST': 'Gcb3wxTaBd5AwQip', 'enable': 'HIJ1xpJ0AfcFeSIa', 'value': 'mD8BC07ozw0NeoKK', 'led': 'chsucMfcyZ478lOC[23:16]', 'place_holder_out': 'JDxZzYnkku24hrX9', 'count': 'chsucMfcyZ478lOC', 'state': 'z1MvLlOXqujT8X4R'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}}
 Final path condition:
-[3HqwciF0eFci5e5F != k!1,
- LcOXGquL1WGyeuSG == k!0,
- Ubdk3CtHOAnuKoZ5 != k!1]
+[Gcb3wxTaBd5AwQip != k!1,
+ z1MvLlOXqujT8X4R == k!0,
+ HIJ1xpJ0AfcFeSIa != k!1]
 ------------------------
 sanity_test Path 16
 ('00000000000000000000000000000100', '00000000000000000000000000000000', '00000000000000000000000000000000')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'pnSWHwj7JYAK5YgF', 'RST': '1PSNNqwkIeyK8Ugk', 'enable': 'bFsheodPvCRuRHEX', 'value': 'HbuYxpAfYpPTnaxt', 'led': 'yDCXzjqBM287RQDI[23:16]', 'place_holder_out': 'tdLCsuzxyARRUwj5', 'count': 'yDCXzjqBM287RQDI', 'state': '2', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'pnSWHwj7JYAK5YgF', 'RST': '1PSNNqwkIeyK8Ugk', 'enable': 'bFsheodPvCRuRHEX', 'value': 'HbuYxpAfYpPTnaxt', 'led': 'yDCXzjqBM287RQDI[23:16]', 'place_holder_out': 'tdLCsuzxyARRUwj5', 'count': 'yDCXzjqBM287RQDI', 'state': '2', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'pnSWHwj7JYAK5YgF', 'RST': '1PSNNqwkIeyK8Ugk', 'enable': 'bFsheodPvCRuRHEX', 'value': 'HbuYxpAfYpPTnaxt', 'led': 'yDCXzjqBM287RQDI[23:16]', 'place_holder_out': 'tdLCsuzxyARRUwj5', 'count': 'yDCXzjqBM287RQDI', 'state': '2', 'out': 'vUboTeIzb76pMKDw+2'}}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'pnSWHwj7JYAK5YgF', 'RST': '1PSNNqwkIeyK8Ugk', 'enable': 'bFsheodPvCRuRHEX', 'value': 'HbuYxpAfYpPTnaxt', 'led': 'yDCXzjqBM287RQDI[23:16]', 'place_holder_out': 'tdLCsuzxyARRUwj5', 'count': 'yDCXzjqBM287RQDI', 'state': '2', 'out': 'vUboTeIzb76pMKDw+2'}}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'pnSWHwj7JYAK5YgF', 'RST': '1PSNNqwkIeyK8Ugk', 'enable': 'bFsheodPvCRuRHEX', 'value': 'HbuYxpAfYpPTnaxt', 'led': 'yDCXzjqBM287RQDI[23:16]', 'place_holder_out': 'tdLCsuzxyARRUwj5', 'count': 'yDCXzjqBM287RQDI', 'state': '2', 'out': 'vUboTeIzb76pMKDw+2'}}
+{'sanity_test': {'CLK': 'r33FR4QlVYuPGGKv', 'RST': 'KIhHedmUtr9SB2iF', 'enable': 'OWRqRPto1xBs83C0', 'value': 'Tcmskd0maOhdVnMk', 'led': 'TffSnvbo1pCk19PB[23:16]', 'place_holder_out': 'G8GV6bd7FdJUdMMc', 'count': 'TffSnvbo1pCk19PB', 'state': '2'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}}
 Final path condition:
-[1PSNNqwkIeyK8Ugk != k!1,
- 8WhHBqDsIxrhFXDj != k!0,
- 8WhHBqDsIxrhFXDj == k!1]
+[KIhHedmUtr9SB2iF != k!1,
+ iby1t53Jhu3dEkci != k!0,
+ iby1t53Jhu3dEkci == k!1]
 ------------------------
 sanity_test Path 32
 ('00000000000000000000000000001000', '00000000000000000000000000000000', '00000000000000000000000000000000')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '8CLFdZQ8KFhjXyl4', 'RST': 'qWXVMcMiMC56uqsq', 'enable': 'XKRDkluneaJSJpdF', 'value': 'lDzuAwW9yfcEW7wa', 'led': 'vI2a1gemXx07HdXX[23:16]', 'place_holder_out': 'iZkt7kaNdlJsOhjj', 'count': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa', 'state': '0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '8CLFdZQ8KFhjXyl4', 'RST': 'qWXVMcMiMC56uqsq', 'enable': 'XKRDkluneaJSJpdF', 'value': 'lDzuAwW9yfcEW7wa', 'led': 'vI2a1gemXx07HdXX[23:16]', 'place_holder_out': 'iZkt7kaNdlJsOhjj', 'count': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa', 'state': '0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '8CLFdZQ8KFhjXyl4', 'RST': 'qWXVMcMiMC56uqsq', 'enable': 'XKRDkluneaJSJpdF', 'value': 'lDzuAwW9yfcEW7wa', 'led': 'vI2a1gemXx07HdXX[23:16]', 'place_holder_out': 'iZkt7kaNdlJsOhjj', 'count': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa', 'state': '0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '8CLFdZQ8KFhjXyl4', 'RST': 'qWXVMcMiMC56uqsq', 'enable': 'XKRDkluneaJSJpdF', 'value': 'lDzuAwW9yfcEW7wa', 'led': 'vI2a1gemXx07HdXX[23:16]', 'place_holder_out': 'iZkt7kaNdlJsOhjj', 'count': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa', 'state': '0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa[23:16]'}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '8CLFdZQ8KFhjXyl4', 'RST': 'qWXVMcMiMC56uqsq', 'enable': 'XKRDkluneaJSJpdF', 'value': 'lDzuAwW9yfcEW7wa', 'led': 'vI2a1gemXx07HdXX[23:16]', 'place_holder_out': 'iZkt7kaNdlJsOhjj', 'count': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa', 'state': '0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'vI2a1gemXx07HdXX+lDzuAwW9yfcEW7wa[23:16]'}
+{'sanity_test': {'CLK': 'Bcjj9Y5pLnJfO3mY', 'RST': 'bKbE6XcQouuVvV0J', 'enable': 'OcUKUBR1Rxh7Knwg', 'value': '4snGEbL5qmY67Di9', 'led': 'wGJSvD0wSXfoPrPP[23:16]', 'place_holder_out': 'VdTEoNFRYerSFsRN', 'count': 'wGJSvD0wSXfoPrPP+4snGEbL5qmY67Di9', 'state': '0'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}, 'led': 'wGJSvD0wSXfoPrPP+4snGEbL5qmY67Di9[23:16]'}
 Final path condition:
-[qWXVMcMiMC56uqsq != k!1,
- cxAmqRMYTA0JQdBO != k!0,
- cxAmqRMYTA0JQdBO != k!1,
- cxAmqRMYTA0JQdBO == k!2]
+[bKbE6XcQouuVvV0J != k!1,
+ a1nV3ugXgA0Ud0Wb != k!0,
+ a1nV3ugXgA0Ud0Wb != k!1,
+ a1nV3ugXgA0Ud0Wb == k!2]
 ------------------------
 sanity_test Path 64
 ('00000000000000000000000000010000', '00000000000000000000000000000000', '00000000000000000000000000000000')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '1Z5ipHbMBVXm8lP1', 'RST': 'Xw1vqfcUguGNZg2G', 'enable': 'uJqJOFT9AmL1BHXA', 'value': 'gGWHjOEZ0Rr91K4X', 'led': 'EEMZrX2b8FX5mf50[23:16]', 'place_holder_out': 'HGKUUXP8yk2OyCbl', 'count': 'EEMZrX2b8FX5mf50', 'state': 'hLBmKXGkRpngCDGb', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'EEMZrX2b8FX5mf50[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '1Z5ipHbMBVXm8lP1', 'RST': 'Xw1vqfcUguGNZg2G', 'enable': 'uJqJOFT9AmL1BHXA', 'value': 'gGWHjOEZ0Rr91K4X', 'led': 'EEMZrX2b8FX5mf50[23:16]', 'place_holder_out': 'HGKUUXP8yk2OyCbl', 'count': 'EEMZrX2b8FX5mf50', 'state': 'hLBmKXGkRpngCDGb', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'EEMZrX2b8FX5mf50[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '1Z5ipHbMBVXm8lP1', 'RST': 'Xw1vqfcUguGNZg2G', 'enable': 'uJqJOFT9AmL1BHXA', 'value': 'gGWHjOEZ0Rr91K4X', 'led': 'EEMZrX2b8FX5mf50[23:16]', 'place_holder_out': 'HGKUUXP8yk2OyCbl', 'count': 'EEMZrX2b8FX5mf50', 'state': 'hLBmKXGkRpngCDGb', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'EEMZrX2b8FX5mf50[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '1Z5ipHbMBVXm8lP1', 'RST': 'Xw1vqfcUguGNZg2G', 'enable': 'uJqJOFT9AmL1BHXA', 'value': 'gGWHjOEZ0Rr91K4X', 'led': 'EEMZrX2b8FX5mf50[23:16]', 'place_holder_out': 'HGKUUXP8yk2OyCbl', 'count': 'EEMZrX2b8FX5mf50', 'state': 'hLBmKXGkRpngCDGb', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'EEMZrX2b8FX5mf50[23:16]'}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': '1Z5ipHbMBVXm8lP1', 'RST': 'Xw1vqfcUguGNZg2G', 'enable': 'uJqJOFT9AmL1BHXA', 'value': 'gGWHjOEZ0Rr91K4X', 'led': 'EEMZrX2b8FX5mf50[23:16]', 'place_holder_out': 'HGKUUXP8yk2OyCbl', 'count': 'EEMZrX2b8FX5mf50', 'state': 'hLBmKXGkRpngCDGb', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'EEMZrX2b8FX5mf50[23:16]'}
+{'sanity_test': {'CLK': 'Cu2iWz5DdsGN1nps', 'RST': 'bg0H0Les7lex2ERu', 'enable': 'iOxXTwf0QjeHzPjU', 'value': 'a5fCs2QcVSPRgL6L', 'led': 'AwmViv9N1GpOXDjN[23:16]', 'place_holder_out': 'Z0aXQZgvY05FvrU9', 'count': 'AwmViv9N1GpOXDjN', 'state': 'LdGrk1P7oc8OxePW'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}, 'led': 'AwmViv9N1GpOXDjN[23:16]'}
 Final path condition:
-[Xw1vqfcUguGNZg2G != k!1,
- hLBmKXGkRpngCDGb != k!0,
- hLBmKXGkRpngCDGb != k!1,
- hLBmKXGkRpngCDGb != k!2]
+[bg0H0Les7lex2ERu != k!1,
+ LdGrk1P7oc8OxePW != k!0,
+ LdGrk1P7oc8OxePW != k!1,
+ LdGrk1P7oc8OxePW != k!2]
 ------------------------
 sanity_test Path 65
 ('00000000000000000000000000010000', '00000000000000000000000000000000', '00000000000000000000000000000001')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'dhnmlIyVO8DGyLMk', 'RST': 'xvsVUG9TXrdrMl60', 'enable': 'oqiW8tNLLUztyjbr', 'value': 'khLhmrjB4sNA27Lf', 'led': 'efFUKewiRPn5jOtQ[23:16]', 'place_holder_out': 'LLnVaEvzJcDk6PNj', 'count': 'efFUKewiRPn5jOtQ', 'state': 'nbnyt7luHVNMPQXq', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'efFUKewiRPn5jOtQ[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'dhnmlIyVO8DGyLMk', 'RST': 'xvsVUG9TXrdrMl60', 'enable': 'oqiW8tNLLUztyjbr', 'value': 'khLhmrjB4sNA27Lf', 'led': 'efFUKewiRPn5jOtQ[23:16]', 'place_holder_out': 'LLnVaEvzJcDk6PNj', 'count': 'efFUKewiRPn5jOtQ', 'state': 'nbnyt7luHVNMPQXq', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'efFUKewiRPn5jOtQ[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'dhnmlIyVO8DGyLMk', 'RST': 'xvsVUG9TXrdrMl60', 'enable': 'oqiW8tNLLUztyjbr', 'value': 'khLhmrjB4sNA27Lf', 'led': 'efFUKewiRPn5jOtQ[23:16]', 'place_holder_out': 'LLnVaEvzJcDk6PNj', 'count': 'efFUKewiRPn5jOtQ', 'state': 'nbnyt7luHVNMPQXq', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'efFUKewiRPn5jOtQ[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'dhnmlIyVO8DGyLMk', 'RST': 'xvsVUG9TXrdrMl60', 'enable': 'oqiW8tNLLUztyjbr', 'value': 'khLhmrjB4sNA27Lf', 'led': 'efFUKewiRPn5jOtQ[23:16]', 'place_holder_out': 'LLnVaEvzJcDk6PNj', 'count': 'efFUKewiRPn5jOtQ', 'state': 'nbnyt7luHVNMPQXq', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'efFUKewiRPn5jOtQ[23:16]'}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'dhnmlIyVO8DGyLMk', 'RST': 'xvsVUG9TXrdrMl60', 'enable': 'oqiW8tNLLUztyjbr', 'value': 'khLhmrjB4sNA27Lf', 'led': 'efFUKewiRPn5jOtQ[23:16]', 'place_holder_out': 'LLnVaEvzJcDk6PNj', 'count': 'efFUKewiRPn5jOtQ', 'state': 'nbnyt7luHVNMPQXq', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'efFUKewiRPn5jOtQ[23:16]'}
+{'sanity_test': {'CLK': 'zJY9NAJUdPLmkhFC', 'RST': 'bw70FuejjEQzux6E', 'enable': 'VxlX8Awzbpl3xpYZ', 'value': 'mnYCSJQW4OXiav3W', 'led': 'OedKE0gCqsFbmRix[23:16]', 'place_holder_out': 'c1syh3B1pXvWrfUR', 'count': 'OedKE0gCqsFbmRix', 'state': '0rPvtboyigxTNPGl'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}, 'led': 'OedKE0gCqsFbmRix[23:16]'}
 Final path condition:
-[xvsVUG9TXrdrMl60 != k!1,
- nbnyt7luHVNMPQXq != k!0,
- nbnyt7luHVNMPQXq != k!1,
- nbnyt7luHVNMPQXq != k!2]
+[bw70FuejjEQzux6E != k!1,
+ 0rPvtboyigxTNPGl != k!0,
+ 0rPvtboyigxTNPGl != k!1,
+ 0rPvtboyigxTNPGl != k!2]
 ------------------------
 sanity_test Path 66
 ('00000000000000000000000000010000', '00000000000000000000000000000001', '00000000000000000000000000000000')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'AYjUPtxHUXZUq9wE', 'RST': 'rpmKVEo4WHpXaFb0', 'enable': '9T5ctby77QpehsAH', 'value': '4da5klsjc5YEpq4d', 'led': 'rQgtv2KrlziHqrYm[23:16]', 'place_holder_out': 'bG8pOZ8VMeA6ZQBq', 'count': 'rQgtv2KrlziHqrYm', 'state': 'lIBcF7ngqmjdvHyj', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'rQgtv2KrlziHqrYm[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'AYjUPtxHUXZUq9wE', 'RST': 'rpmKVEo4WHpXaFb0', 'enable': '9T5ctby77QpehsAH', 'value': '4da5klsjc5YEpq4d', 'led': 'rQgtv2KrlziHqrYm[23:16]', 'place_holder_out': 'bG8pOZ8VMeA6ZQBq', 'count': 'rQgtv2KrlziHqrYm', 'state': 'lIBcF7ngqmjdvHyj', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'rQgtv2KrlziHqrYm[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'AYjUPtxHUXZUq9wE', 'RST': 'rpmKVEo4WHpXaFb0', 'enable': '9T5ctby77QpehsAH', 'value': '4da5klsjc5YEpq4d', 'led': 'rQgtv2KrlziHqrYm[23:16]', 'place_holder_out': 'bG8pOZ8VMeA6ZQBq', 'count': 'rQgtv2KrlziHqrYm', 'state': 'lIBcF7ngqmjdvHyj', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'rQgtv2KrlziHqrYm[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'AYjUPtxHUXZUq9wE', 'RST': 'rpmKVEo4WHpXaFb0', 'enable': '9T5ctby77QpehsAH', 'value': '4da5klsjc5YEpq4d', 'led': 'rQgtv2KrlziHqrYm[23:16]', 'place_holder_out': 'bG8pOZ8VMeA6ZQBq', 'count': 'rQgtv2KrlziHqrYm', 'state': 'lIBcF7ngqmjdvHyj', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'rQgtv2KrlziHqrYm[23:16]'}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'AYjUPtxHUXZUq9wE', 'RST': 'rpmKVEo4WHpXaFb0', 'enable': '9T5ctby77QpehsAH', 'value': '4da5klsjc5YEpq4d', 'led': 'rQgtv2KrlziHqrYm[23:16]', 'place_holder_out': 'bG8pOZ8VMeA6ZQBq', 'count': 'rQgtv2KrlziHqrYm', 'state': 'lIBcF7ngqmjdvHyj', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'rQgtv2KrlziHqrYm[23:16]'}
+{'sanity_test': {'CLK': 'j3XN68zaNVW6UZBn', 'RST': 'i55RsosWxDH5sWgj', 'enable': 'W4Vwrzbmu0TwWpUW', 'value': 'AbOystGKeNtichVO', 'led': 'zCLlwRAYWupMhkqt[23:16]', 'place_holder_out': 'lSi7EysPgGgE6LaP', 'count': 'zCLlwRAYWupMhkqt', 'state': 'h9W8SscdemjBtq76'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}, 'led': 'zCLlwRAYWupMhkqt[23:16]'}
 Final path condition:
-[rpmKVEo4WHpXaFb0 != k!1,
- lIBcF7ngqmjdvHyj != k!0,
- lIBcF7ngqmjdvHyj != k!1,
- lIBcF7ngqmjdvHyj != k!2]
+[i55RsosWxDH5sWgj != k!1,
+ h9W8SscdemjBtq76 != k!0,
+ h9W8SscdemjBtq76 != k!1,
+ h9W8SscdemjBtq76 != k!2]
 ------------------------
 sanity_test Path 67
 ('00000000000000000000000000010000', '00000000000000000000000000000001', '00000000000000000000000000000001')
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'qHoBanYN52eGc9fd', 'RST': 'oMWhVMpQ08BBB7Wz', 'enable': 'fDiNThnQDttxxV4T', 'value': 'hPZI9GrKzWOkmqi4', 'led': 'oyrr9bIiaXdaXgXA[23:16]', 'place_holder_out': 'SpulyHekno5xOBwC', 'count': 'oyrr9bIiaXdaXgXA', 'state': 'L8mWZjeD9qmHMGa0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'oyrr9bIiaXdaXgXA[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'qHoBanYN52eGc9fd', 'RST': 'oMWhVMpQ08BBB7Wz', 'enable': 'fDiNThnQDttxxV4T', 'value': 'hPZI9GrKzWOkmqi4', 'led': 'oyrr9bIiaXdaXgXA[23:16]', 'place_holder_out': 'SpulyHekno5xOBwC', 'count': 'oyrr9bIiaXdaXgXA', 'state': 'L8mWZjeD9qmHMGa0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'oyrr9bIiaXdaXgXA[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'qHoBanYN52eGc9fd', 'RST': 'oMWhVMpQ08BBB7Wz', 'enable': 'fDiNThnQDttxxV4T', 'value': 'hPZI9GrKzWOkmqi4', 'led': 'oyrr9bIiaXdaXgXA[23:16]', 'place_holder_out': 'SpulyHekno5xOBwC', 'count': 'oyrr9bIiaXdaXgXA', 'state': 'L8mWZjeD9qmHMGa0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'oyrr9bIiaXdaXgXA[23:16]'}
 seen
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'qHoBanYN52eGc9fd', 'RST': 'oMWhVMpQ08BBB7Wz', 'enable': 'fDiNThnQDttxxV4T', 'value': 'hPZI9GrKzWOkmqi4', 'led': 'oyrr9bIiaXdaXgXA[23:16]', 'place_holder_out': 'SpulyHekno5xOBwC', 'count': 'oyrr9bIiaXdaXgXA', 'state': 'L8mWZjeD9qmHMGa0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'oyrr9bIiaXdaXgXA[23:16]'}
 Final state:
-{'sanity_test': {}, 'place_holder': {'CLK': 'V5EMe30K3u7lbYgn', 'RST': '3zm67143tQXjqFum', 'out': '0'}, 'place_holder_2': {'CLK': 'qHoBanYN52eGc9fd', 'RST': 'oMWhVMpQ08BBB7Wz', 'enable': 'fDiNThnQDttxxV4T', 'value': 'hPZI9GrKzWOkmqi4', 'led': 'oyrr9bIiaXdaXgXA[23:16]', 'place_holder_out': 'SpulyHekno5xOBwC', 'count': 'oyrr9bIiaXdaXgXA', 'state': 'L8mWZjeD9qmHMGa0', 'out': 'vUboTeIzb76pMKDw+2'}, 'led': 'oyrr9bIiaXdaXgXA[23:16]'}
+{'sanity_test': {'CLK': 'pFhpMBssIb9jtZ1o', 'RST': 'pH5fcJ4yhYshvt5m', 'enable': 'hWnNkOn7vQOKeCP0', 'value': 'X6S8yyB1FpNssH5b', 'led': 'FUo6WyRryUxKiUnu[23:16]', 'place_holder_out': 'kQhhPuX21Q6nc8nA', 'count': 'FUo6WyRryUxKiUnu', 'state': 'dGiDDH69qldVu0A4'}, 'place_holder': {'CLK': '6G3McWuRGmuJrm6m', 'RST': 'JqXP1DdqSKICwOV8', 'out': '0'}, 'place_holder_2': {'CLK': 'gj9cfDX1fEcAffsN', 'RST': 'nS7WeR2s62SPt4M7', 'out': 'OaJcdP8MvvFOAuBp+2'}, 'led': 'FUo6WyRryUxKiUnu[23:16]'}
 Final path condition:
-[oMWhVMpQ08BBB7Wz != k!1,
- L8mWZjeD9qmHMGa0 != k!0,
- L8mWZjeD9qmHMGa0 != k!1,
- L8mWZjeD9qmHMGa0 != k!2]
+[pH5fcJ4yhYshvt5m != k!1,
+ dGiDDH69qldVu0A4 != k!0,
+ dGiDDH69qldVu0A4 != k!1,
+ dGiDDH69qldVu0A4 != k!2]
  finishing sanity_test
-Elapsed time 0.10257101058959961
+Elapsed time 0.09752702713012695
