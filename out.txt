@@ -2,6 +2,7 @@
 {'place_holder': 4, 'place_holder_2': 1}
 ------------------------
 sanity_test Path 0
+('00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000')
 Not seen
 Num paths 2
 ------------------------
@@ -12,42 +13,44 @@ Num paths 2
 place_holder_2 Path 0
  finishing place_holder_2
 Final state:
-{'CLK': 'zvDQq6C0kEZC2pJH', 'RST': 'iMrM2nZWcae6CpRt', 'enable': 'c0CmQb8ny03ganFA', 'value': 'XGSqKgrVTQc0RW2H', 'led': 'vPGAFo273HToxvYi[23:16]', 'place_holder_out': 'MKc65F7jjnTQD9c1', 'count': 'vPGAFo273HToxvYi', 'state': 'kKSjP0aMuo1C1Wdj', 'out': 'oaux5FCYVRW4U6iu+2'}
+{'CLK': 'SRsl3uYPw1tDWAbc', 'RST': 'FPrqvPiXoQqizhcl', 'enable': 'TDsVXU0Ur0dSaWxw', 'value': 'Tm9pQPPNZNXKfrUw', 'led': 'mIgHfXm2cTKVGXNo[23:16]', 'place_holder_out': 'aaqQN1e4joEI9qgo', 'count': 'mIgHfXm2cTKVGXNo', 'state': 'LURW8o6YKIUAGyTP', 'out': 'k0OmOAjxbBrkn1uH+2'}
 Final path condition:
-[uqFs78Y0tOfjYr8g != k!1,
- kKSjP0aMuo1C1Wdj != k!0,
- kKSjP0aMuo1C1Wdj != k!1,
- kKSjP0aMuo1C1Wdj != k!2,
- sE5kngCkOmHh2QRB != k!1,
- iMrM2nZWcae6CpRt != k!1]
+[Rw5GZbRxMHr3EbaM != k!1,
+ LURW8o6YKIUAGyTP != k!0,
+ LURW8o6YKIUAGyTP != k!1,
+ LURW8o6YKIUAGyTP != k!2,
+ d7C16koQ0ZGwX2KU != k!1,
+ FPrqvPiXoQqizhcl != k!1]
  finishing place_holder
 seen
 seen
 seen
 Final state:
-{'CLK': 'zvDQq6C0kEZC2pJH', 'RST': 'iMrM2nZWcae6CpRt', 'enable': 'c0CmQb8ny03ganFA', 'value': 'XGSqKgrVTQc0RW2H', 'led': 'vPGAFo273HToxvYi[23:16]', 'place_holder_out': 'MKc65F7jjnTQD9c1', 'count': 'vPGAFo273HToxvYi', 'state': 'kKSjP0aMuo1C1Wdj', 'out': 'oaux5FCYVRW4U6iu+2'}
+{'CLK': 'SRsl3uYPw1tDWAbc', 'RST': 'FPrqvPiXoQqizhcl', 'enable': 'TDsVXU0Ur0dSaWxw', 'value': 'Tm9pQPPNZNXKfrUw', 'led': 'mIgHfXm2cTKVGXNo[23:16]', 'place_holder_out': 'aaqQN1e4joEI9qgo', 'count': 'mIgHfXm2cTKVGXNo', 'state': 'LURW8o6YKIUAGyTP', 'out': 'k0OmOAjxbBrkn1uH+2'}
 Final path condition:
-[uqFs78Y0tOfjYr8g != k!1,
- kKSjP0aMuo1C1Wdj != k!0,
- kKSjP0aMuo1C1Wdj != k!1,
- kKSjP0aMuo1C1Wdj != k!2,
- sE5kngCkOmHh2QRB != k!1,
- iMrM2nZWcae6CpRt != k!1]
+[Rw5GZbRxMHr3EbaM != k!1,
+ LURW8o6YKIUAGyTP != k!0,
+ LURW8o6YKIUAGyTP != k!1,
+ LURW8o6YKIUAGyTP != k!2,
+ d7C16koQ0ZGwX2KU != k!1,
+ FPrqvPiXoQqizhcl != k!1]
 ------------------------
 sanity_test Path 1
+('00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000001')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'qLCqDSr2NZhxq6tI', 'RST': 'qhs1A8GeAlesrY3Y', 'enable': 'SaZis4QAPxQe5HEn', 'value': '6iKqe9zUi3QQvQEK', 'led': 'e3mUNn8vj4xmWl3g[23:16]', 'place_holder_out': '043s9VO2J9bvsqvJ', 'count': 'e3mUNn8vj4xmWl3g', 'state': 'CNbIRPs9qeeBOie0', 'out': 'oaux5FCYVRW4U6iu+2'}
+{'CLK': '3RykHbHDlfrIStCb', 'RST': 'QwWJDYLBlKfSHHnf', 'enable': 'RqELivgpsuKcdrUh', 'value': 'PIrccdP3BLabzqLT', 'led': '6T5KuvvwpWsJXclx[23:16]', 'place_holder_out': 'PAXEM4RNdoveZNPZ', 'count': '6T5KuvvwpWsJXclx', 'state': 'w0fswtISHlhagA32', 'out': 'k0OmOAjxbBrkn1uH+2'}
 Final path condition:
-[qhs1A8GeAlesrY3Y != k!1,
- CNbIRPs9qeeBOie0 != k!0,
- CNbIRPs9qeeBOie0 != k!1,
- CNbIRPs9qeeBOie0 != k!2]
+[QwWJDYLBlKfSHHnf != k!1,
+ w0fswtISHlhagA32 != k!0,
+ w0fswtISHlhagA32 != k!1,
+ w0fswtISHlhagA32 != k!2]
 ------------------------
 sanity_test Path 2
+('00000000000000000000000000000000', '00000000000000000000000000000001', '00000000000000000000000000000000')
 Not seen
 Num paths 2
 ------------------------
@@ -58,126 +61,135 @@ seen
 seen
 seen
 Final state:
-{'CLK': 'V7AevQJj94llLiw2', 'RST': 'dsbSfUGlw2RgfCLH', 'enable': '7QRcPWyitUzZevG9', 'value': 'pUSehzfnEePi0AJa', 'led': 'IVjce1MiNxre0AvB[23:16]', 'place_holder_out': 'VwGsbpOOD3xKPkAd', 'count': 'IVjce1MiNxre0AvB', 'state': 'yXtyj8O1K9VWaFKJ', 'out': '0'}
+{'CLK': 'PdX6nJCkYSPAYkmw', 'RST': 'v6f6gjggoCsYca9Z', 'enable': 'cOhjL17WTJqfiSLG', 'value': 'OBKRwYNN5UWu1Xba', 'led': 'MpOvOsFUtk2SM7o4[23:16]', 'place_holder_out': 'YR0z27aNZGXJ7JPo', 'count': 'MpOvOsFUtk2SM7o4', 'state': '6QqpRJCd6TGwPygM', 'out': '0'}
 Final path condition:
-[6PZggptTFoRt5Ubh != k!1,
- yXtyj8O1K9VWaFKJ != k!0,
- yXtyj8O1K9VWaFKJ != k!1,
- yXtyj8O1K9VWaFKJ != k!2,
- dsbSfUGlw2RgfCLH == k!1]
+[OUFiZnh0G0tYz3f5 != k!1,
+ 6QqpRJCd6TGwPygM != k!0,
+ 6QqpRJCd6TGwPygM != k!1,
+ 6QqpRJCd6TGwPygM != k!2,
+ v6f6gjggoCsYca9Z == k!1]
 ------------------------
 sanity_test Path 3
+('00000000000000000000000000000000', '00000000000000000000000000000001', '00000000000000000000000000000001')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'nrwJJS6FVZ3mSd5Q', 'RST': 'kq05h0QRAWUwrXGI', 'enable': '0WTsmYK2HV5xN9EO', 'value': 'kyE46SUKy4ZkDV2a', 'led': 'eLI3wmDNZ373Ouk6[23:16]', 'place_holder_out': 'eg1KIG4FkIBx4ZpE', 'count': 'eLI3wmDNZ373Ouk6', 'state': 'O0R4E3SelODOYZmx', 'out': '0'}
+{'CLK': 'fkwVZg8axFfuFj40', 'RST': 'gBKp36h5luri7sKD', 'enable': 'aiLf0hkHPNx9lqAN', 'value': '4g9VCtrGiep2l4uR', 'led': 'i0PgtWSepfJc6zj2[23:16]', 'place_holder_out': 'qTQ8ZiZiBbIfrw6s', 'count': 'i0PgtWSepfJc6zj2', 'state': 'S9AYbW5gdLoqRrX0', 'out': '0'}
 Final path condition:
-[kq05h0QRAWUwrXGI != k!1,
- O0R4E3SelODOYZmx != k!0,
- O0R4E3SelODOYZmx != k!1,
- O0R4E3SelODOYZmx != k!2]
+[gBKp36h5luri7sKD != k!1,
+ S9AYbW5gdLoqRrX0 != k!0,
+ S9AYbW5gdLoqRrX0 != k!1,
+ S9AYbW5gdLoqRrX0 != k!2]
 ------------------------
 sanity_test Path 8
+('00000000000000000000000000000010', '00000000000000000000000000000000', '00000000000000000000000000000000')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'jiKcZbG9Tq7c2nW9', 'RST': '8XXVAweMHKYmsLOH', 'enable': '0zvGyE3lKQamF0t6', 'value': '87M2DZmCdlCgSkmo', 'led': 'BxTAUmLHFhrluKLS[23:16]', 'place_holder_out': 'GUnoPaES7rTZ0KXB', 'count': 'BxTAUmLHFhrluKLS', 'state': 'SXk6QAKI6Hn2rfr8', 'out': '0'}
+{'CLK': 'FgqCDXQ36M2ruBDJ', 'RST': '0Uv73uT9SOgN0Zl4', 'enable': 'J4aDK9JinrD5kEvR', 'value': 'ummkLRuDRSJwQQBk', 'led': 'LngjWr0X12RaYGQP[23:16]', 'place_holder_out': 'jS0ZTGoMLOKhWOVA', 'count': 'LngjWr0X12RaYGQP', 'state': 'ncsutVyjKuuX6EMU', 'out': '0'}
 Final path condition:
-[8XXVAweMHKYmsLOH != k!1,
- SXk6QAKI6Hn2rfr8 == k!0,
- 0zvGyE3lKQamF0t6 != k!1]
+[0Uv73uT9SOgN0Zl4 != k!1,
+ ncsutVyjKuuX6EMU == k!0,
+ J4aDK9JinrD5kEvR != k!1]
 ------------------------
 sanity_test Path 9
+('00000000000000000000000000000010', '00000000000000000000000000000000', '00000000000000000000000000000001')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'lVbSjrQNnc8aGr14', 'RST': 'AhFqxEIaASW3QQjc', 'enable': 'IgbLCZtzNXpbdIox', 'value': '3LETxOwCmEgGZbiW', 'led': '88cMzkz9fghcflYX[23:16]', 'place_holder_out': 'eJ4Ch1u56yXLXKq4', 'count': '88cMzkz9fghcflYX', 'state': 'MLPzjpe7sy67Ls2q', 'out': '0'}
+{'CLK': '4lh1PCWHd2GwXx2x', 'RST': 'UQnT2xTo19SWfApQ', 'enable': '7PtuKozjLKpFBP2l', 'value': 'm4qibp5GgZJHJ0Hj', 'led': 'TeWPBA6GXFX93vR4[23:16]', 'place_holder_out': 'Bm3iSA3mgzSnA54r', 'count': 'TeWPBA6GXFX93vR4', 'state': 'ykFTbcYJtljYzUGZ', 'out': '0'}
 Final path condition:
-[AhFqxEIaASW3QQjc != k!1,
- MLPzjpe7sy67Ls2q == k!0,
- IgbLCZtzNXpbdIox != k!1]
+[UQnT2xTo19SWfApQ != k!1,
+ ykFTbcYJtljYzUGZ == k!0,
+ 7PtuKozjLKpFBP2l != k!1]
 ------------------------
 sanity_test Path 16
+('00000000000000000000000000000100', '00000000000000000000000000000000', '00000000000000000000000000000000')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'db1qcZvFiQUSuBEj', 'RST': 'qPvxJUIeIVLmf2Gm', 'enable': '5xoob2wC7cmpcXYF', 'value': 'Cil1ffVXRWQcMiuQ', 'led': '7N6BWjr6ZIMQEqro[23:16]', 'place_holder_out': 'RDAg9t8stq02WVic', 'count': '7N6BWjr6ZIMQEqro', 'state': '2', 'out': '0'}
+{'CLK': '2DWH4clnAt1gehuU', 'RST': 'Tc4B1SDQvUDmazth', 'enable': 'ROQ1Ql7aODqbqmRU', 'value': '5uu5bS05QunBgkXB', 'led': 'q4jTBeosNPzcHPkl[23:16]', 'place_holder_out': 'x02xkvK2QOf3ztUt', 'count': 'q4jTBeosNPzcHPkl', 'state': '2', 'out': '0'}
 Final path condition:
-[qPvxJUIeIVLmf2Gm != k!1,
- qAIp0bFroi8Vek9U != k!0,
- qAIp0bFroi8Vek9U == k!1]
+[Tc4B1SDQvUDmazth != k!1,
+ PF07EMgIE9C67TUl != k!0,
+ PF07EMgIE9C67TUl == k!1]
 ------------------------
 sanity_test Path 32
+('00000000000000000000000000001000', '00000000000000000000000000000000', '00000000000000000000000000000000')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'B64Kw8d8ZF71AEZI', 'RST': 'CGoTeOX18sbmF5MK', 'enable': 'wqJAyNKZxGskVkvq', 'value': 'Ip8hwDdB69IvKWxP', 'led': 'JNhLZEo9sDgy5HEp+Ip8hwDdB69IvKWxP[23:16]', 'place_holder_out': 'JcDxk3NgoeMbhOVr', 'count': 'JNhLZEo9sDgy5HEp+Ip8hwDdB69IvKWxP', 'state': '0', 'out': '0'}
+{'CLK': 'Wz0Q4gobx3Alt247', 'RST': 'MOu2eEmcCxIsMXwk', 'enable': '9iRF9lwAxIZxLvH6', 'value': 'hXVdNV1kVHLiHLQs', 'led': 'WMDH9sytvYeDgZTu+hXVdNV1kVHLiHLQs[23:16]', 'place_holder_out': 'yOkTWnvmwJQd6ILc', 'count': 'WMDH9sytvYeDgZTu+hXVdNV1kVHLiHLQs', 'state': '0', 'out': '0'}
 Final path condition:
-[CGoTeOX18sbmF5MK != k!1,
- 4xTmONdggciI5wkc != k!0,
- 4xTmONdggciI5wkc != k!1,
- 4xTmONdggciI5wkc == k!2]
+[MOu2eEmcCxIsMXwk != k!1,
+ R9tTSTJtC2GcK8XO != k!0,
+ R9tTSTJtC2GcK8XO != k!1,
+ R9tTSTJtC2GcK8XO == k!2]
 ------------------------
 sanity_test Path 64
+('00000000000000000000000000010000', '00000000000000000000000000000000', '00000000000000000000000000000000')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'S0Q6eyRCjdJ6bbwh', 'RST': 'pj32clmMWhMxuHfg', 'enable': 'qSHiCdtWUESLvEdR', 'value': '4XP6jSd5tyXklbcD', 'led': 'Rln40N7rTLLeW9fz[23:16]', 'place_holder_out': 'p7LkYCngPC7Wivpx', 'count': 'Rln40N7rTLLeW9fz', 'state': 'IQNaISOB2mGDfCwQ', 'out': '0'}
+{'CLK': 'ywJHMJ9pNyUWSc6Q', 'RST': 'U40hC1AKV4ASi1lj', 'enable': 'tli8KToF44sPK2Z8', 'value': '0XL64Ath3PfUeUZs', 'led': 'G5z8VWrWjnoa0qyV[23:16]', 'place_holder_out': 'DwPU9qdW8rZB3gNW', 'count': 'G5z8VWrWjnoa0qyV', 'state': 'ZCen5d4CUD3qUxSM', 'out': '0'}
 Final path condition:
-[pj32clmMWhMxuHfg != k!1,
- IQNaISOB2mGDfCwQ != k!0,
- IQNaISOB2mGDfCwQ != k!1,
- IQNaISOB2mGDfCwQ != k!2]
+[U40hC1AKV4ASi1lj != k!1,
+ ZCen5d4CUD3qUxSM != k!0,
+ ZCen5d4CUD3qUxSM != k!1,
+ ZCen5d4CUD3qUxSM != k!2]
 ------------------------
 sanity_test Path 65
+('00000000000000000000000000010000', '00000000000000000000000000000000', '00000000000000000000000000000001')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'MmTRlSyFsmcCIEdj', 'RST': 'SwohIATDsjyGQ3Lk', 'enable': 'EGhvt8qeq1NuZYck', 'value': 'uvzzujUhHPxfeWe6', 'led': 'fvvVoPkdtLSnVKWs[23:16]', 'place_holder_out': 'TsAnLIRbBoxa41kM', 'count': 'fvvVoPkdtLSnVKWs', 'state': 'JM76BP0lSJf5VDpI', 'out': '0'}
+{'CLK': '2LErnx2xxEkfAmVe', 'RST': 'uhWZzkabeSDKSNyY', 'enable': 'Ssh80vXFc79dNWUX', 'value': 'sZXeLwV9zofszNoy', 'led': 'Il0AIH6rsuqNENXx[23:16]', 'place_holder_out': 'YXlgOXcOyEtpCMwY', 'count': 'Il0AIH6rsuqNENXx', 'state': 'opqpKLo8RfuGrlmO', 'out': '0'}
 Final path condition:
-[SwohIATDsjyGQ3Lk != k!1,
- JM76BP0lSJf5VDpI != k!0,
- JM76BP0lSJf5VDpI != k!1,
- JM76BP0lSJf5VDpI != k!2]
+[uhWZzkabeSDKSNyY != k!1,
+ opqpKLo8RfuGrlmO != k!0,
+ opqpKLo8RfuGrlmO != k!1,
+ opqpKLo8RfuGrlmO != k!2]
 ------------------------
 sanity_test Path 66
+('00000000000000000000000000010000', '00000000000000000000000000000001', '00000000000000000000000000000000')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'Rv6UPUuo3u1LBfPZ', 'RST': 'p794azk7GfikFYFG', 'enable': 'LsoL6iAyJ4UTiszx', 'value': 'AjE3APQpAUKi3dNB', 'led': 'vrI0mLzYxxtD0Biw[23:16]', 'place_holder_out': 'JnXGd3f84Am4Nkkx', 'count': 'vrI0mLzYxxtD0Biw', 'state': 'Zd6Kt01jNKfEh4rt', 'out': '0'}
+{'CLK': '3EBhGpG1ikTUQQ5V', 'RST': '3gvGMu909mnW7n7g', 'enable': 'nUvSMz4OB0GbcjGA', 'value': 'RygTc67CcwfiJUEs', 'led': 'yMKB5Gsb5iReFez0[23:16]', 'place_holder_out': 'Rzh0EwoTeIMueFfQ', 'count': 'yMKB5Gsb5iReFez0', 'state': 'RsUxsN1E3ukSiQXf', 'out': '0'}
 Final path condition:
-[p794azk7GfikFYFG != k!1,
- Zd6Kt01jNKfEh4rt != k!0,
- Zd6Kt01jNKfEh4rt != k!1,
- Zd6Kt01jNKfEh4rt != k!2]
+[3gvGMu909mnW7n7g != k!1,
+ RsUxsN1E3ukSiQXf != k!0,
+ RsUxsN1E3ukSiQXf != k!1,
+ RsUxsN1E3ukSiQXf != k!2]
 ------------------------
 sanity_test Path 67
+('00000000000000000000000000010000', '00000000000000000000000000000001', '00000000000000000000000000000001')
 seen
 seen
 seen
 seen
 Final state:
-{'CLK': 'gU3HlugB73XXQTYd', 'RST': 'qwzfA2mUPgbaKsfg', 'enable': 'W8Jd4xufL5R2htpV', 'value': '4d8OZxoqTgCHAd7z', 'led': '57OvsqjiqWWoMPkp[23:16]', 'place_holder_out': 'kQJAtpp74L75zd37', 'count': '57OvsqjiqWWoMPkp', 'state': 'drAwDgj92fFGTDiG', 'out': '0'}
+{'CLK': 'W9X7bIBn5CuioP4O', 'RST': '7602ktO6g3eQmubF', 'enable': 'y4ynxpRelNGcYJaF', 'value': 'V4ySUpNBxDkhGZRD', 'led': 'YPQHwPx7Toz6Pya5[23:16]', 'place_holder_out': 'GYo8JRI0mJ7JIjfi', 'count': 'YPQHwPx7Toz6Pya5', 'state': 'IlupeNCOuoxux96M', 'out': '0'}
 Final path condition:
-[qwzfA2mUPgbaKsfg != k!1,
- drAwDgj92fFGTDiG != k!0,
- drAwDgj92fFGTDiG != k!1,
- drAwDgj92fFGTDiG != k!2]
+[7602ktO6g3eQmubF != k!1,
+ IlupeNCOuoxux96M != k!0,
+ IlupeNCOuoxux96M != k!1,
+ IlupeNCOuoxux96M != k!2]
  finishing sanity_test
-Elapsed time 0.09593868255615234
+Elapsed time 0.16719532012939453

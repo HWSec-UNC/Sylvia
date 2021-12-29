@@ -30,6 +30,8 @@ class SymbolicState:
     pc = Solver()
     sort = BitVecSort(32)
     clock_cycle: int = 0
+    #TODO need to change to be a nested mapping of module names to dictionaries
+    # can be initalized at the beginning of the run 
     store = {}
 
     # set to true when evaluating a conditoin so that
@@ -62,6 +64,7 @@ class ExecutionManager:
     names_list = []
     instance_count = {}
     seen_mod = {}
+    opt_1: bool = True
 
 def to_binary(i: int, digits: int = 32) -> str:
     num: str = bin(i)[2:]
@@ -431,13 +434,16 @@ class ExecutionEngine:
             self.visit_stmt(m, s, stmt.statement, modules)
         elif isinstance(stmt, InstanceList):
             if stmt.module in modules:
-                if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
-                    print("Not seen")
-                    self.execute_child(modules[stmt.module], s, m)
+                if m.opt_1:
+                    if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
+                        print("Not seen")
+                        self.execute_child(modules[stmt.module], s, m)
+                    else:
+                        print("seen")
+                        #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
+                        self.merge_states(m, s, m.seen_mod[stmt.module][m.config[stmt.module]])
                 else:
-                    print("seen")
-                    #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
-                    self.merge_states(m, s, m.seen_mod[stmt.module][m.config[stmt.module]])
+                    self.execute_child(modules[stmt.module], s, m)
         elif isinstance(stmt, CaseStatement):
             m.curr_level += 1
             self.cond = True
@@ -555,6 +561,7 @@ class ExecutionEngine:
             else:
                 print("------------------------")
                 print(f"{ast.name} Path {i}")
+            print(paths[i])
             self.visit_module(manager, state, ast, modules_dict)
             manager.seen.append(manager.path_code)
             if (manager.assertion_violation):
