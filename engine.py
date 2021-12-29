@@ -65,6 +65,7 @@ class ExecutionManager:
     instance_count = {}
     seen_mod = {}
     opt_1: bool = True
+    curr_module: str = ""
 
 def to_binary(i: int, digits: int = 32) -> str:
     num: str = bin(i)[2:]
@@ -114,7 +115,7 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
     return s
 
 
-def parse_rvalue(rvalue: Rvalue, store) -> (str, str, str): 
+def parse_rvalue(rvalue: Rvalue, store, m: ExecutionManager) -> (str, str, str): 
     #print(rvalue)
     tokens = str(rvalue).replace('(','').replace(')','').split()
     #print(tokens)
@@ -133,14 +134,14 @@ def parse_rvalue(rvalue: Rvalue, store) -> (str, str, str):
             except KeyError:
                 logging.debug("hi")
         try:
-            lhs = store[lhs]
+            lhs = store[m.curr_module][lhs]
         except KeyError:
             logging.debug("hi")
     if not rhs.isdigit():
         # print(store)
         # print(rvalue)
         try: 
-            rhs = store[rhs]
+            rhs = store[m.curr_module][rhs]
         except KeyError:
             logging.debug('hi2')
     return (lhs, op, rhs)
@@ -303,10 +304,10 @@ class ExecutionEngine:
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         if isinstance(expr, Reg):
-            s.store[expr.name] =''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
+            s.store[m.curr_module][expr.name] =''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
         elif isinstance(expr, Eq):
             # assume left is identifier
-            x = BitVec(s.store[expr.left.name], 32)
+            x = BitVec(s.store[m.curr_module][expr.left.name], 32)
             # assume right is a value
             y = BitVec(int(expr.right.value), 32)
             if self.branch:
@@ -316,7 +317,7 @@ class ExecutionEngine:
         elif isinstance(expr, Identifier):
             # change this to one since inst is supposed to just be 1 bit width
             # and the identifier class actually doesn't have a width param
-            x = BitVec(s.store[expr.name], 1)
+            x = BitVec(s.store[m.curr_module][expr.name], 1)
             y = BitVec(1, 1)
             if self.branch:
                 s.pc.add(x == y)
@@ -359,36 +360,36 @@ class ExecutionEngine:
                 if m.dependencies[signal] in m.updates:
                     if m.updates[m.dependencies[signal]][0] == 1:
                         prev_symbol = m.updates[m.dependencies[signal]][1]
-                        new_symbol = s.store[m.dependencies[signal]]
-                        s.store[signal] = s.store[signal].replace(prev_symbol, new_symbol)
+                        new_symbol = s.store[m.curr_module][m.dependencies[signal]]
+                        s.store[signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
         elif isinstance(stmt, Assign):
             if isinstance(stmt.right.var, IntConst):
-                s.store[stmt.left.var.name] = stmt.right.var.value
+                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Partselect):
                 if isinstance(stmt.left.var, Partselect):
-                    s.store[stmt.left.var.var.name] = f"{s.store[stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+                    s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
                     m.dependencies[stmt.left.var.var.name] = stmt.right.var.var.name
                     m.updates[stmt.left.var.var.name] = 0
                 else:
-                    s.store[stmt.left.var.name] = f"{s.store[stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+                    s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
                     m.dependencies[stmt.left.var.name] = stmt.right.var.var.name
                     m.updates[stmt.left.var.name] = 0
             else:
-                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store)
+                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
                 if (lhs, op, rhs) != ("","",""):
-                    s.store[stmt.left.var.name] = lhs + op + rhs
+                    s.store[m.curr_module][stmt.left.var.name] = lhs + op + rhs
                 else:
-                    s.store[stmt.left.var.name] = s.store[stmt.right.var.name]
+                    s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
         elif isinstance(stmt, NonblockingSubstitution):
-            prev_symbol = s.store[stmt.left.var.name]
+            prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):
-                s.store[stmt.left.var.name] = stmt.right.var.value
+                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             else:
-                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store)
+                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
                 if (lhs, op, rhs) != ("","",""):
-                    s.store[stmt.left.var.name] = lhs + op + rhs
+                    s.store[m.curr_module][stmt.left.var.name] = lhs + op + rhs
                 else:
-                    s.store[stmt.left.var.name] = s.store[stmt.right.var.name]
+                    s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, Block):
             for item in stmt.statements: 
@@ -482,9 +483,9 @@ class ExecutionEngine:
 
         for port in ports:
             if isinstance(port, Ioport):
-                s.store[port.first.name] = init_symbol()
+                s.store[m.curr_module][port.first.name] = init_symbol()
             else:
-                s.store[port.name] = init_symbol()
+                s.store[m.curr_module][port.name] = init_symbol()
 
         for item in module.items:
             if isinstance(item, Value):
@@ -515,13 +516,18 @@ class ExecutionEngine:
 
     def merge_states(self, manager: ExecutionManager, state: SymbolicState, store):
         """Merges two states."""
-        for key in store:
-            if key in state.store.keys():
-                prev_symbol = state.store[key]
-                new_symbol = store[key]
-                state.store[key].replace(prev_symbol, new_symbol)
+        print(state.store)
+        for key, val in state.store.items():
+            if type(val) != dict:
+                continue
             else:
-                state.store[key] = store[key]
+                for key2, var in val.items():
+                    if var in store.values():
+                        prev_symbol = state.store[key][key2]
+                        new_symbol = store[key][key2]
+                        state.store[key][key2].replace(prev_symbol, new_symbol)
+                    else:
+                        state.store[key][key2] = store[key][key2]
             
     def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager]) -> None:
         """Drives symbolic execution."""
@@ -541,6 +547,7 @@ class ExecutionEngine:
                 self.module_count(manager, module.items)
                 manager.child_num_paths[module.name] = sub_manager.num_paths
                 manager.config[module.name] = to_binary(0)
+                state.store[module.name] = {}
             self.populate_child_paths(manager)
             self.populate_seen_mod(manager)
             manager.modules = modules_dict
@@ -551,6 +558,7 @@ class ExecutionEngine:
         #print(f"Num paths: {manager.num_paths}")
         #print(f"Upper bound on num paths {manager.num_paths}")
         manager.seen = []
+        manager.curr_module = module.name
         for i in range(len(paths)):
             for j in range(len(paths[i])):
                 manager.config[manager.names_list[j]] = paths[i][j]
@@ -584,6 +592,7 @@ class ExecutionEngine:
         # dont call pc solve
         manager_sub = ExecutionManager()
         manager_sub.is_child = True
+        manager_sub.curr_module = ast.name
         self.init_run(manager_sub, ast)
         #print(f"Num paths: {manager.num_paths}")
         print(f"Num paths {manager_sub.num_paths}")
