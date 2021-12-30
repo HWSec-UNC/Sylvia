@@ -54,7 +54,7 @@ class ExecutionManager:
     modules = {}
     dependencies = {}
     updates = {}
-    seen = []
+    seen = {}
     final = False
     completed = []
     is_child: bool = False
@@ -268,7 +268,8 @@ class ExecutionEngine:
                 return False
         count = 0
         seen = m.seen
-        for path in seen:
+        print(seen)
+        for path in seen[m.curr_module]:
             if path[bit_index] == '1':
                 count += 1
         if count >=  2 * nested_ifs:
@@ -442,10 +443,8 @@ class ExecutionEngine:
             if stmt.module in modules:
                 if m.opt_1:
                     if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
-                        print("Not seen")
                         self.execute_child(modules[stmt.module], s, m)
                     else:
-                        print("seen")
                         #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
                         self.merge_states(m, s, m.seen_mod[stmt.module][m.config[stmt.module]])
                 else:
@@ -594,7 +593,7 @@ class ExecutionEngine:
                     print("------------------------")
                     print(f"{ast.name} Path {i}")
                 self.visit_module(manager, state, ast, modules_dict)
-                manager.seen.append(manager.path_code)
+                manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
                     print("Assertion violation")
                     manager.assertion_violation = False
@@ -647,7 +646,9 @@ class ExecutionEngine:
         print(manager.instance_count)
         #print(f"Num paths: {manager.num_paths}")
         #print(f"Upper bound on num paths {manager.num_paths}")
-        manager.seen = []
+        manager.seen = {}
+        for name in manager.names_list:
+            manager.seen[name] = []
         manager.curr_module = manager.names_list[0]
 
         for i in range(len(paths)):
@@ -661,7 +662,7 @@ class ExecutionEngine:
                 print("------------------------")
                 print(f"{ast.name} Path {i}")
             self.visit_module(manager, state, ast, modules_dict)
-            manager.seen.append(manager.path_code)
+            manager.seen[ast.name].append(manager.path_code)
             if (manager.assertion_violation):
                 print("Assertion violation")
                 manager.assertion_violation = False
@@ -687,6 +688,7 @@ class ExecutionEngine:
         #print(f"Num paths: {manager.num_paths}")
         print(f"Num paths {manager_sub.num_paths}")
         manager_sub.path_code = manager.config[ast.name]
+        manager_sub.seen = manager.seen
 
         # mark this exploration of the submodule as seen and store the state so we don't have to explore it again.
         if manager.seen_mod[ast.name][manager_sub.path_code] == {}:
