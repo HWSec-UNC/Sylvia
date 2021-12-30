@@ -13,6 +13,9 @@ import random, string
 import time
 from itertools import product
 import logging
+import gc
+
+gc.collect()
 
 with open('errors.log', 'w'):
     pass
@@ -66,6 +69,8 @@ class ExecutionManager:
     seen_mod = {}
     opt_1: bool = True
     curr_module: str = ""
+    piece_wise: bool = False
+    child_range: range = None
 
 def to_binary(i: int, digits: int = 32) -> str:
     num: str = bin(i)[2:]
@@ -266,7 +271,7 @@ class ExecutionEngine:
         for path in seen:
             if path[bit_index] == '1':
                 count += 1
-        if count >= nested_ifs:
+        if count >=  2 * nested_ifs:
             return True
         return False
 
@@ -504,8 +509,14 @@ class ExecutionEngine:
         """Populates child path codes based on number of paths."""
         for child in manager.child_num_paths:
             manager.child_path_codes[child] = []
-            for i in range(manager.child_num_paths[child]):
-                manager.child_path_codes[child].append(to_binary(i))
+            if manager.piece_wise:
+                manager.child_path_codes[child] = []
+                for i in manager.child_range:
+                    print(len(manager.child_range))
+                    manager.child_path_codes[child].append(to_binary(i))
+            else:
+                for i in range(manager.child_num_paths[child]):
+                    manager.child_path_codes[child].append(to_binary(i))
 
     def populate_seen_mod(self, manager: ExecutionManager) -> None:
         """Populates child path codes but in a format to keep track of corresponding states that we've seen."""
@@ -527,9 +538,78 @@ class ExecutionEngine:
                         state.store[key][key2].replace(prev_symbol, new_symbol)
                     else:
                         state.store[key][key2] = store[key][key2]
-            
+
+    def piece_wise_execute(self, ast: ModuleDef, manager: Optional[ExecutionManager], modules) -> None:
+        """Drives symbolic execution piecewise when number of paths is too large not to breakup. 
+        We break it up to avoid the memory blow up."""
+
+        self.module_depth += 1
+        manager.piece_wise = True
+        state: SymbolicState = SymbolicState()
+        if manager is None:
+            manager: ExecutionManager = ExecutionManager()
+            manager.debugging = False
+        modules_dict = {}
+        for module in modules:
+            modules_dict[module.name] = module
+            manager.child_path_codes[module.name] = to_binary(0)
+            manager.seen_mod[module.name] = {}
+            sub_manager = ExecutionManager()
+            manager.names_list.append(module.name)
+            self.init_run(sub_manager, module)
+            self.module_count(manager, module.items)
+            manager.child_num_paths[module.name] = sub_manager.num_paths
+            manager.config[module.name] = to_binary(0)
+            state.store[module.name] = {}
+
+        total_paths = sum(manager.child_num_paths.values())
+        print(total_paths)
+        manager.piece_wise = True
+        #TODO: things piecewise, say 10,000 at a time.
+        for i in range(0, total_paths, 10000):
+            manager.child_range = range(i*10000, i*10000+10000)
+            self.populate_child_paths(manager)
+            if len(modules) > 1:
+                self.populate_seen_mod(manager)
+                manager.opt_1 = True
+            else:
+                manager.opt_1 = False
+            manager.modules = modules_dict
+            paths = list(product(*manager.child_path_codes.values()))
+            print(f" Upper bound on num paths {len(paths)}")
+            self.init_run(manager, ast)
+            print(manager.instance_count)
+
+            manager.seen = []
+            manager.curr_module = manager.names_list[0]
+
+            for i in range(len(paths)):
+                for j in range(len(paths[i])):
+                    manager.config[manager.names_list[j]] = paths[i][j]
+                manager.path_code = manager.config[manager.names_list[0]]
+                if self.check_dup(manager):
+                #if False:
+                    continue
+                else:
+                    print("------------------------")
+                    print(f"{ast.name} Path {i}")
+                self.visit_module(manager, state, ast, modules_dict)
+                manager.seen.append(manager.path_code)
+                if (manager.assertion_violation):
+                    print("Assertion violation")
+                    manager.assertion_violation = False
+                    self.solve_pc(state.pc)
+                manager.curr_level = 0
+                manager.dependencies = {}
+                state.pc.reset()
+            #manager.path_code = to_binary(0)
+            print(f" finishing {ast.name}")
+            self.module_depth -= 1
+    
+    #@profile     
     def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager]) -> None:
         """Drives symbolic execution."""
+        gc.collect()
         self.module_depth += 1
         state: SymbolicState = SymbolicState()
         if manager is None:
@@ -547,8 +627,19 @@ class ExecutionEngine:
                 manager.child_num_paths[module.name] = sub_manager.num_paths
                 manager.config[module.name] = to_binary(0)
                 state.store[module.name] = {}
+
+            total_paths = sum(manager.child_num_paths.values())
+            print(total_paths)
+            # have do do things piece wise
+            if total_paths > 100000:
+                self.piece_wise_execute(ast, manager, modules)
+                sys.exit()
             self.populate_child_paths(manager)
-            self.populate_seen_mod(manager)
+            if len(modules) > 1:
+                self.populate_seen_mod(manager)
+                manager.opt_1 = True
+            else:
+                manager.opt_1 = False
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values()))
             print(f" Upper bound on num paths {len(paths)}")
@@ -558,6 +649,7 @@ class ExecutionEngine:
         #print(f"Upper bound on num paths {manager.num_paths}")
         manager.seen = []
         manager.curr_module = manager.names_list[0]
+
         for i in range(len(paths)):
             for j in range(len(paths[i])):
                 manager.config[manager.names_list[j]] = paths[i][j]
@@ -568,7 +660,6 @@ class ExecutionEngine:
             else:
                 print("------------------------")
                 print(f"{ast.name} Path {i}")
-            print(paths[i])
             self.visit_module(manager, state, ast, modules_dict)
             manager.seen.append(manager.path_code)
             if (manager.assertion_violation):
