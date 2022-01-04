@@ -1,148 +1,117 @@
-36
- Upper bound on num paths 128
-{'place_holder': 4, 'place_holder_2': 1}
+ Upper bound on num paths 64
+{}
 ------------------------
-sanity_test Path 0
-Num paths 2
-------------------------
-place_holder Path 0
-Num paths 2
-------------------------
-place_holder_2 Path 0
- finishing place_holder_2
+main Path 0
 Final state:
-{'sanity_test': {'CLK': 'mOJ8gUyCPD2XnILw', 'RST': 'tWt4fxlosPy9tmvV', 'enable': 'U9lsnQX1SdNw2lDL', 'value': 'SLUqBH1e0f4PefoK', 'led': 'yAk79RIRnlbK5zsn[23:16]', 'place_holder_out': '0pcod4ohiHN4rdCA', 'count': 'yAk79RIRnlbK5zsn', 'state': '9M8Rmj9fCDvN1WeU'}, 'place_holder': {'CLK': 'TOFVvnRIxMYkflaw', 'RST': 'gK7a5tooBGIdpYNo', 'out': 'hq90fWvdIvFwxyZs+1'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}}
+{'main': {'clock': 'Q1FRWo8Qsl8ivV5r', 'xtal': '5fZ9tD9zefIMRNwz', 'rx_control': 'aEFyAyR4vwj7MbR5', 'reset': 'YKX8Y4tPS2kyaCcC', 'bit_in': 'n6fQRHX1TqIZqUUl', 'preamble_1': 'OdPppdfHNXjgfs0h', 'preamble_2': 'tLWvdbltC8JN7BTV', 'preamble_3': 'PDn3m4mUeYNVSGYs', 'carrier_loss': 'XVSIErEgDez7LWml', 'biphase_violation': '3oiVLcf6Ahfn8T5L', 'clock_out': '0', 'rx_status': {'rx_status_3': 'fqOOHH26WHB0vqj0', 'rx_status_2': 'b5hBNTXC8GSWzP84', 'rx_status_1': '5x8IyJumCz1uv8zC', 'rx_status_0': 'CWhjRzCU9A9M9WMm'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': '0', 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[tWt4fxlosPy9tmvV != k!1,
- 9M8Rmj9fCDvN1WeU != k!0,
- 9M8Rmj9fCDvN1WeU != k!1,
- 9M8Rmj9fCDvN1WeU != k!2,
- gK7a5tooBGIdpYNo != k!1,
- YlFPM133ILYMKNZq != k!1]
- finishing place_holder
-Final state:
-{'sanity_test': {'CLK': 'mOJ8gUyCPD2XnILw', 'RST': 'tWt4fxlosPy9tmvV', 'enable': 'U9lsnQX1SdNw2lDL', 'value': 'SLUqBH1e0f4PefoK', 'led': 'yAk79RIRnlbK5zsn[23:16]', 'place_holder_out': '0pcod4ohiHN4rdCA', 'count': 'yAk79RIRnlbK5zsn', 'state': '9M8Rmj9fCDvN1WeU'}, 'place_holder': {'CLK': 'TOFVvnRIxMYkflaw', 'RST': 'gK7a5tooBGIdpYNo', 'out': 'hq90fWvdIvFwxyZs+1'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}}
-Final path condition:
-[tWt4fxlosPy9tmvV != k!1,
- 9M8Rmj9fCDvN1WeU != k!0,
- 9M8Rmj9fCDvN1WeU != k!1,
- 9M8Rmj9fCDvN1WeU != k!2,
- gK7a5tooBGIdpYNo != k!1,
- YlFPM133ILYMKNZq != k!1]
+[YKX8Y4tPS2kyaCcC != k!1,
+ YKX8Y4tPS2kyaCcC != k!1,
+ YKX8Y4tPS2kyaCcC != k!1,
+ YKX8Y4tPS2kyaCcC != k!1]
 ------------------------
-sanity_test Path 1
+main Path 1
 Final state:
-{'sanity_test': {'CLK': 'inkIMkKqJrYNFtZh', 'RST': 'TUW2hfld4G6PZfV9', 'enable': 'MGEmKPXPFXxyLs2V', 'value': 'l56x8uRzn5myyQUE', 'led': 'BH79KfA8VDJg9C1E[23:16]', 'place_holder_out': 'iCqPUEY0gv6yHAqI', 'count': 'BH79KfA8VDJg9C1E', 'state': '1fjkFLnNkNZQbTXl'}, 'place_holder': {'CLK': 'TOFVvnRIxMYkflaw', 'RST': 'gK7a5tooBGIdpYNo', 'out': 'hq90fWvdIvFwxyZs+1'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}}
+{'main': {'clock': 'Pxzlv7F0GDyJc3WV', 'xtal': 'ftiyYkkvLmSCXR3O', 'rx_control': 'qTD6EZJn2MRxWvbE', 'reset': 'YB5F4ffSY7SBC2Z7', 'bit_in': 'NxrtnNfEwcvX1mUy', 'preamble_1': 's41GQYRMh25oEZPm', 'preamble_2': 'oqPZfHY4Mti6byQo', 'preamble_3': '25Kz9FpozWXA5A0C', 'carrier_loss': 'VTUTr7m8bnER3JT3', 'biphase_violation': 'fDrEnsaF7NNV2pK3', 'clock_out': '0', 'rx_status': {'rx_status_3': 'Onk6YDzGGJznaJRQ', 'rx_status_2': 'QqWfANneJJstAGBK', 'rx_status_1': 'Pl1NxCEulb3cN84L', 'rx_status_0': 'fkHVnuSJZPm2OJSl'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': '0', 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[TUW2hfld4G6PZfV9 != k!1,
- 1fjkFLnNkNZQbTXl != k!0,
- 1fjkFLnNkNZQbTXl != k!1,
- 1fjkFLnNkNZQbTXl != k!2]
+[YB5F4ffSY7SBC2Z7 == k!1, YB5F4ffSY7SBC2Z7 == k!1]
 ------------------------
-sanity_test Path 2
-Num paths 2
-------------------------
-place_holder Path 0
-{'sanity_test': ['00000000000000000000000000000000', '00000000000000000000000000000000'], 'place_holder': [], 'place_holder_2': []}
- finishing place_holder
+main Path 2
 Final state:
-{'sanity_test': {'CLK': 'N4EYOm21H9jw5WDU', 'RST': 'Bw2rIM1a2sE36xN2', 'enable': 'uWuYcNuzW1beqHDE', 'value': '4TW780rKqUlEsHQb', 'led': 'N4hxrzgonVoq6oQA[23:16]', 'place_holder_out': 'ZOliMG9zhazcDGIa', 'count': 'N4hxrzgonVoq6oQA', 'state': 'yJX3g9ThQdjg16NY'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}}
+{'main': {'clock': 'wjwgJ4VzM2IiNCzJ', 'xtal': 'qyRCW0RA777vNps2', 'rx_control': 'SdTUEiMr8uX29UcJ', 'reset': 'e69KAEZa9yrgNWVg', 'bit_in': 'ZwwIcFVzDpIXYww8', 'preamble_1': 'mcyVApMBEDCZAorq', 'preamble_2': 'UUoecDHCY4tZT4Fj', 'preamble_3': 'md4l9rw4CFOVKsBg', 'carrier_loss': 'bYnWTzNFhHna3i4W', 'biphase_violation': 'sXXmATzy9ZYXh80i', 'clock_out': '0', 'rx_status': {'rx_status_3': '8bqIhcykyHKEUGt6', 'rx_status_2': 'LeFMl5sSko8joyzS', 'rx_status_1': 'aBVC8foneOBkfMwe', 'rx_status_0': 'DtKoRK6yXXWDW8ux'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': {'shift_reg': '{}[18:0]', 'bit_in': 'ZwwIcFVzDpIXYww8'}, 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[Bw2rIM1a2sE36xN2 != k!1,
- yJX3g9ThQdjg16NY != k!0,
- yJX3g9ThQdjg16NY != k!1,
- yJX3g9ThQdjg16NY != k!2,
- E8Dthtoi6oCl8Hiy == k!1]
+[e69KAEZa9yrgNWVg != k!1,
+ e69KAEZa9yrgNWVg != k!1,
+ bYnWTzNFhHna3i4W != k!1,
+ sXXmATzy9ZYXh80i != k!1,
+ e69KAEZa9yrgNWVg != k!1,
+ e69KAEZa9yrgNWVg != k!1,
+ bYnWTzNFhHna3i4W != k!1,
+ sXXmATzy9ZYXh80i != k!1]
 ------------------------
-sanity_test Path 3
+main Path 4
 Final state:
-{'sanity_test': {'CLK': 'Eo60JH4HFFNMu4kG', 'RST': 'U9XQjqZqCFEP5d49', 'enable': '80EaINo9qT63TfeL', 'value': '0bRPU6iwECkynY6O', 'led': 'c4Y4MzK8rkciZ5ga[23:16]', 'place_holder_out': 'ArlPLNySrCWIZFsH', 'count': 'c4Y4MzK8rkciZ5ga', 'state': '4E30cfyw4dEa3EoE'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}}
+{'main': {'clock': 'IEfRi57LPuArWUhb', 'xtal': '7ttPk7IGySVlqjST', 'rx_control': 'p7X4keFW7eRYKLg8', 'reset': 'JR4pBcXc3wVa9Efv', 'bit_in': 'LBJofGaFVa8LE4eH', 'preamble_1': '9vtWMuFNvgcHBjTx', 'preamble_2': 'o0wlZztav1QlMrNo', 'preamble_3': 'PRFlawZdIru9KBDZ', 'carrier_loss': '6czcnjRKgzMxtr7c', 'biphase_violation': 'QUGEIknoJ7VRSM1U', 'clock_out': '0', 'rx_status': {'rx_status_3': 'xNmgIxLVj82PgWOH', 'rx_status_2': 'WT5JA5tcieM9Tljo', 'rx_status_1': '6tQ1KuYiGOXMSqZS', 'rx_status_0': 'J4HEbLDS9Au2fUuN'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': '0', 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[U9XQjqZqCFEP5d49 != k!1,
- 4E30cfyw4dEa3EoE != k!0,
- 4E30cfyw4dEa3EoE != k!1,
- 4E30cfyw4dEa3EoE != k!2]
+[JR4pBcXc3wVa9Efv != k!1, JR4pBcXc3wVa9Efv != k!1]
 ------------------------
-sanity_test Path 8
-{'sanity_test': ['00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000'], 'place_holder': [], 'place_holder_2': []}
+main Path 6
 Final state:
-{'sanity_test': {'CLK': 'bKrZyJbgC5yWGYJ9', 'RST': '9a8azEniVXiIegmW', 'enable': 'JrKSU23QgM5Tn6Hz', 'value': '5CRhyvwxyZloJ7jV', 'led': 'GDVYampVxhwlwHRO[23:16]', 'place_holder_out': 'VQ9Wgw2hWOR0P7zI', 'count': 'GDVYampVxhwlwHRO', 'state': 'rwXooqKSyqPCVaY3'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}}
+{'main': {'clock': 'Z4C0uSvMR6k6mCXF', 'xtal': 'LHMrZM648uwyn6WD', 'rx_control': '9qczpraVeSCui8qd', 'reset': '5QxHp8OVRxfLSRR4', 'bit_in': 'iH9FCBz0YFGwPC4t', 'preamble_1': '2H6sPdOkz3LNlirU', 'preamble_2': 'lxgrK1kYXBH3PDoj', 'preamble_3': 'AaDxmHw1Oa1CvPp9', 'carrier_loss': 'QSdcpvCzg2C7yL7y', 'biphase_violation': 'La6LfTq2bfeUIgOi', 'clock_out': '0', 'rx_status': {'rx_status_3': 'UqF9Nb727ZxpGauG', 'rx_status_2': 'eKxrLLjeXCJCVuWj', 'rx_status_1': 'qwP0t0UTpOGUlEQA', 'rx_status_0': 'I0IOBSLZENzI4ewT'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': {'shift_reg': '{}[18:0]', 'bit_in': 'iH9FCBz0YFGwPC4t'}, 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '1', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[9a8azEniVXiIegmW != k!1,
- rwXooqKSyqPCVaY3 == k!0,
- JrKSU23QgM5Tn6Hz != k!1]
+[5QxHp8OVRxfLSRR4 != k!1,
+ 5QxHp8OVRxfLSRR4 != k!1,
+ QSdcpvCzg2C7yL7y == k!1,
+ La6LfTq2bfeUIgOi != k!1,
+ 5QxHp8OVRxfLSRR4 != k!1,
+ 5QxHp8OVRxfLSRR4 != k!1,
+ QSdcpvCzg2C7yL7y == k!1,
+ La6LfTq2bfeUIgOi != k!1]
 ------------------------
-sanity_test Path 9
-{'sanity_test': ['00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000010'], 'place_holder': [], 'place_holder_2': []}
+main Path 8
+['Xor', 'parity', 'bit_in']
 Final state:
-{'sanity_test': {'CLK': 'xtPFohSAeX1SLEbS', 'RST': 'KpQKaqzc7bIjnp1e', 'enable': 'vyFFBeYcBXHalxu4', 'value': 'czg48JQD15R0jI68', 'led': 'Bye3Ycvmexl8EFSU[23:16]', 'place_holder_out': 'oIJwlUutyA04OuE7', 'count': 'Bye3Ycvmexl8EFSU', 'state': 'IEDVzaOmEOcDKM5L'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}}
+{'main': {'clock': '7tTilmY25qq9y0Sv', 'xtal': 'nQ4qES5AQHmTaoDE', 'rx_control': 'cVHuCfTp3qI2M7HF', 'reset': 'cI1IYZ1NuMxPKT79', 'bit_in': 'BScwgFx290Ktkxyd', 'preamble_1': 'xSex0194nFWj4LJc', 'preamble_2': 'nsWRzijtzeVvFaXC', 'preamble_3': 'OakzzTfm6feQZmlu', 'carrier_loss': 'iqQYBrIzVEjafkOl', 'biphase_violation': 'AqPYfW1PZD21peq4', 'clock_out': '0', 'rx_status': {'rx_status_3': 'MURmxRvrf5EAEC0J', 'rx_status_2': 'A9fcIo3NWRVMZRfQ', 'rx_status_1': 'm7uo6hQr2KpG2pjB', 'rx_status_0': 'LllUL8jVv8TymVNP'}, 'parity': 'parity^BScwgFx290Ktkxyd', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': '0', 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[KpQKaqzc7bIjnp1e != k!1,
- IEDVzaOmEOcDKM5L == k!0,
- vyFFBeYcBXHalxu4 != k!1]
+[cI1IYZ1NuMxPKT79 != k!1,
+ cI1IYZ1NuMxPKT79 != k!1,
+ cI1IYZ1NuMxPKT79 != k!1,
+ cI1IYZ1NuMxPKT79 != k!1]
 ------------------------
-sanity_test Path 10
-{'sanity_test': ['00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000010', '00000000000000000000000000000010'], 'place_holder': [], 'place_holder_2': []}
+main Path 10
 Final state:
-{'sanity_test': {'CLK': 'Wbb3I1UUMWYeujkn', 'RST': 'asa7VEe3ObqLA15G', 'enable': 'mGEmANxPxNaHrqyR', 'value': '7ASIyRYIlrZbNqx1', 'led': '6jZfAnaaox0Pi7K0[23:16]', 'place_holder_out': 'oq9ni61Y3qmSJF7T', 'count': '6jZfAnaaox0Pi7K0', 'state': 'iANlZC3aZ6kED6eL'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}}
+{'main': {'clock': 'wpNFEHVrdzPCSeWX', 'xtal': 'Cuy6BSdxLCWlnPfc', 'rx_control': 'U4szZ6sPYQCWlRDK', 'reset': '9NOpbikgtpzeXE87', 'bit_in': 'Emupdnmr1LenHTOQ', 'preamble_1': 'tNTydtedjza4kQ4B', 'preamble_2': 'CvxwTiUhmqLWmLyM', 'preamble_3': 'XLx331nG8qHwccz8', 'carrier_loss': 'HBQid5wLuLkvskDo', 'biphase_violation': '6XNyRDjZmFRxmwtp', 'clock_out': '0', 'rx_status': {'rx_status_3': 'ZoABhqniG2BLAGn6', 'rx_status_2': 'RwEsqn13jFurgYxq', 'rx_status_1': '5OcM17wgpzQhua8N', 'rx_status_0': 'q2Oq0JJpn4RQrC2l'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': {'shift_reg': '{}[18:0]', 'bit_in': 'Emupdnmr1LenHTOQ'}, 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '1', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[asa7VEe3ObqLA15G != k!1,
- iANlZC3aZ6kED6eL == k!0,
- mGEmANxPxNaHrqyR != k!1]
+[9NOpbikgtpzeXE87 != k!1,
+ 9NOpbikgtpzeXE87 != k!1,
+ HBQid5wLuLkvskDo != k!1,
+ 6XNyRDjZmFRxmwtp == k!1,
+ 9NOpbikgtpzeXE87 != k!1,
+ 9NOpbikgtpzeXE87 != k!1,
+ HBQid5wLuLkvskDo != k!1,
+ 6XNyRDjZmFRxmwtp == k!1]
 ------------------------
-sanity_test Path 16
-{'sanity_test': ['00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000010', '00000000000000000000000000000010', '00000000000000000000000000000010'], 'place_holder': [], 'place_holder_2': []}
+main Path 12
 Final state:
-{'sanity_test': {'CLK': 'ZRkLkVoIPf8uQzb3', 'RST': 'OoOnGD14L2DQZdUd', 'enable': 'Fpj2EG93IGBtCQdq', 'value': 'qE3qUfoCkaHrz8G0', 'led': 'iyOdImrXZETZiahZ[23:16]', 'place_holder_out': 'qnuWRjDqqDcvgsrX', 'count': 'iyOdImrXZETZiahZ', 'state': '2'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}}
+{'main': {'clock': 'G59tzJXFQHvnL8hN', 'xtal': 'jkHD0bVblhVe5W2M', 'rx_control': 'ct6Wx2BGkdIxR8iV', 'reset': 'lNQ2yB8KJvuTzbR5', 'bit_in': 'eRys5gEGMCoENo6D', 'preamble_1': 'UCmvYvbtpkVbjNJh', 'preamble_2': '2chXw6uGPtZzLgpb', 'preamble_3': 'tNyzTWOhsOX4vg0f', 'carrier_loss': 'jz51GuZg5GRBeW9W', 'biphase_violation': 'n547D6gJuBajyLib', 'clock_out': '0', 'rx_status': {'rx_status_3': 'xFCD8eDBAPcaLoam', 'rx_status_2': 'n618BfdOnC6lAxhc', 'rx_status_1': 'xmiZx2Gnl8XfBxSB', 'rx_status_0': 'm812Y3OrlWexP2d2'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': '0', 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[OoOnGD14L2DQZdUd != k!1,
- 3dmir8mcK3udCDhg != k!0,
- 3dmir8mcK3udCDhg == k!1]
+[lNQ2yB8KJvuTzbR5 != k!1, lNQ2yB8KJvuTzbR5 != k!1]
 ------------------------
-sanity_test Path 32
-{'sanity_test': ['00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000000', '00000000000000000000000000000010', '00000000000000000000000000000010', '00000000000000000000000000000010', '00000000000000000000000000000100'], 'place_holder': [], 'place_holder_2': []}
+main Path 16
 Final state:
-{'sanity_test': {'CLK': 'buwgL9QDtCXq5JKe', 'RST': 'Lncavl80GUb8cCLH', 'enable': '8tf9pW5S6DmVQbsk', 'value': 'E0K2CPuhH8TxEwFH', 'led': '7B8qJFuFsh3CUwWS[23:16]', 'place_holder_out': 'JLXrz5OjmT6FQBD9', 'count': '7B8qJFuFsh3CUwWS+E0K2CPuhH8TxEwFH', 'state': '0'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}, 'led': '7B8qJFuFsh3CUwWS+E0K2CPuhH8TxEwFH[23:16]'}
+{'main': {'clock': 'Gh7GvBvp6NnLclDY', 'xtal': '13KWQBTdOlyK8FQi', 'rx_control': 'e08WfYJgeQHrCV2j', 'reset': 'YEHlBOjKbfGUY3DB', 'bit_in': 'j5qRSkNbwdpof5Tj', 'preamble_1': 'MFuszJnsrmKKI10A', 'preamble_2': 'QjYX0eZFLTH6lJWf', 'preamble_3': 'dtHTRAL5M8WqjPpI', 'carrier_loss': 'C3EgLrgTnXZiaav4', 'biphase_violation': 'mDx3Y9Ar3wWYTgj4', 'clock_out': '0', 'rx_status': {'rx_status_3': 'ODQksUqgZLNWz5dB', 'rx_status_2': 'qlHPWd0iq0iW4LBZ', 'rx_status_1': 'eJiYmZTrnwFOx1ha', 'rx_status_0': 'RjLTZHkWVXDuEBKT'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': '0', 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[Lncavl80GUb8cCLH != k!1,
- 6g72ujYFEtnT84k9 != k!0,
- 6g72ujYFEtnT84k9 != k!1,
- 6g72ujYFEtnT84k9 == k!2]
+[YEHlBOjKbfGUY3DB != k!1,
+ YEHlBOjKbfGUY3DB != k!1,
+ YEHlBOjKbfGUY3DB != k!1,
+ YEHlBOjKbfGUY3DB != k!1]
 ------------------------
-sanity_test Path 64
+main Path 24
+['Xor', 'parity', 'bit_in']
 Final state:
-{'sanity_test': {'CLK': 'DnKJ8UY8ceXn79CP', 'RST': 'asXuvgB7A1v4ASsE', 'enable': 'psYLQLL1SaRJm5Pa', 'value': 'AcXzDQMwhDcGWYUO', 'led': 'XsEC9YcL7YCvC6DV[23:16]', 'place_holder_out': 'wuoMZrzOI3AhBaCZ', 'count': 'XsEC9YcL7YCvC6DV', 'state': 'nc3gK3sfhlaQkI2E'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}, 'led': 'XsEC9YcL7YCvC6DV[23:16]'}
+{'main': {'clock': 'gOgrMN67x5ZuxJoB', 'xtal': 'YhHp3xwZiW6dPL4A', 'rx_control': 'C5vk8SBYzDns3JIQ', 'reset': 'Ek6mE9EHpsrDgyuF', 'bit_in': 'QgqdcWYmkMDg97a5', 'preamble_1': 'ThzUXiW1UrzvUXG3', 'preamble_2': 'dX9u2lCERTKPcAv4', 'preamble_3': 'lBiB2hJmJuC7WysA', 'carrier_loss': 'GZtEUPsbaJV0FmoD', 'biphase_violation': '3buITqXHqfdigwzT', 'clock_out': '0', 'rx_status': {'rx_status_3': 'j95A07tZUnt1KnFm', 'rx_status_2': '8l31usQ7Yf4inuNr', 'rx_status_1': 'bgvGMh8l7fZclW7A', 'rx_status_0': '8YJ7EIrH6fPfLJtS'}, 'parity': 'parity^QgqdcWYmkMDg97a5', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': '0', 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[asXuvgB7A1v4ASsE != k!1,
- nc3gK3sfhlaQkI2E != k!0,
- nc3gK3sfhlaQkI2E != k!1,
- nc3gK3sfhlaQkI2E != k!2]
+[Ek6mE9EHpsrDgyuF != k!1,
+ Ek6mE9EHpsrDgyuF != k!1,
+ Ek6mE9EHpsrDgyuF != k!1,
+ Ek6mE9EHpsrDgyuF != k!1]
 ------------------------
-sanity_test Path 65
+main Path 32
 Final state:
-{'sanity_test': {'CLK': 'sV5A9ROlbD0tBynO', 'RST': 'sNpEk07SvnK599jD', 'enable': 'a8o3ioBooVqql05u', 'value': 'vgzzwFVh2vHlQc7n', 'led': 'EOyCxRyH6tbdlU6H[23:16]', 'place_holder_out': 'aosTUoEx4XXVytk4', 'count': 'EOyCxRyH6tbdlU6H', 'state': 'N0oVLfszLalXCxhy'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}, 'led': 'EOyCxRyH6tbdlU6H[23:16]'}
+{'main': {'clock': 'ULdUO3bfsh5oQXus', 'xtal': 'ksPioUk64vlfPOMz', 'rx_control': 'UpQzgPzzkhUqCDhh', 'reset': 'pNPB5HJ1KCMRZZdh', 'bit_in': 'QpUFiJ3dL8vJcBOf', 'preamble_1': '8uzDw9nZWZrBp2pw', 'preamble_2': 'F6RyTghReLOPTvIz', 'preamble_3': '9c0eZ1i8AKsdBkZi', 'carrier_loss': 'nXZb21mAW5jCguaV', 'biphase_violation': '0prEzBv5bBClForU', 'clock_out': '0', 'rx_status': {'rx_status_3': '1gkhlHeWveyN6t1F', 'rx_status_2': 'tEmjLPHZWv8lA4KK', 'rx_status_1': '7tubzdpF1QgPboIJ', 'rx_status_0': 'yUrvljsgT1A9ayab'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': '0', 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[sNpEk07SvnK599jD != k!1,
- N0oVLfszLalXCxhy != k!0,
- N0oVLfszLalXCxhy != k!1,
- N0oVLfszLalXCxhy != k!2]
+[pNPB5HJ1KCMRZZdh != k!1,
+ pNPB5HJ1KCMRZZdh != k!1,
+ pNPB5HJ1KCMRZZdh != k!1,
+ pNPB5HJ1KCMRZZdh != k!1]
 ------------------------
-sanity_test Path 66
+main Path 48
 Final state:
-{'sanity_test': {'CLK': 'Ndc1fZlcr2vGwWez', 'RST': '4Dq7HJLpngI9ocG7', 'enable': 'I2nC0grRo7DfgnIm', 'value': 'AqbrSOlFfMYbXzdb', 'led': 'A63fOTBKxAwfOEuk[23:16]', 'place_holder_out': '0mOtJ1ZpzjIY4Mfn', 'count': 'A63fOTBKxAwfOEuk', 'state': 'uFoVIW4kwP7onRwa'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}, 'led': 'A63fOTBKxAwfOEuk[23:16]'}
+{'main': {'clock': '4oLFGs5gTDtqgN70', 'xtal': 'oE66h22PgM6XVQ5k', 'rx_control': 'wwQzsXpHKS1zTvWh', 'reset': 'UpWl72Mlo53d8lSN', 'bit_in': 'dURdB3u6HWfccIzY', 'preamble_1': 'lS238hZPIzSpNt5v', 'preamble_2': 'cBiuhE8VYX0gX8Kg', 'preamble_3': 'rlDxSELcOCRqPest', 'carrier_loss': 'ZbrM5MJXHX8htld9', 'biphase_violation': 'ipBMEKwIeChsnSNG', 'clock_out': '0', 'rx_status': {'rx_status_3': 'DHBTQE2KJqofWayz', 'rx_status_2': 'Jevsu6GymYpJX1h1', 'rx_status_1': 'q0D7Z2AtPVlrJPJf', 'rx_status_0': 'tzQ8hjkTYK6vdgYo'}, 'parity': '0', 'load_A': '0', 'load_B': '0', 'load_buff': '0', 'shift_reg': '0', 'frame_ofs': '0[1:0]', 'bit_count_A': '0', 'bit_count_B': '0', 'frame_counter': '0', 'rx_status_3': '0', 'rx_status_2': '0', 'rx_status_1': '0', 'rx_status_0': '0', 'pc': 0, 'L0': 0, 'L1': 1, 'L2': 2, 'L3': 3, 'L4': 4, 'L5': 5, 'L6': 6, 'L7': 7, 'L8': 8, 'L9': 9, 'L10': 10}}
 Final path condition:
-[4Dq7HJLpngI9ocG7 != k!1,
- uFoVIW4kwP7onRwa != k!0,
- uFoVIW4kwP7onRwa != k!1,
- uFoVIW4kwP7onRwa != k!2]
-------------------------
-sanity_test Path 67
-Final state:
-{'sanity_test': {'CLK': 'xsa6C3xY0bfbasDW', 'RST': 'X6QHBsWzoPKSi5Q3', 'enable': '0wQ5MKTGn9QzyxTI', 'value': 'U0W1IsYlgEjkZHjf', 'led': 'PYxGbl9XOvczHc3N[23:16]', 'place_holder_out': 'hoHwm5k3aP5Kj8ed', 'count': 'PYxGbl9XOvczHc3N', 'state': 'Tn4m1CnhkeKKDw00'}, 'place_holder': {'CLK': 'sDQ09Cb0RInvoy9X', 'RST': 'E8Dthtoi6oCl8Hiy', 'out': '0'}, 'place_holder_2': {'CLK': 'q2vmWh2MAraq70p4', 'RST': 'YlFPM133ILYMKNZq', 'out': 'YjNKEUzW6DvYZLkd+2'}, 'led': 'PYxGbl9XOvczHc3N[23:16]'}
-Final path condition:
-[X6QHBsWzoPKSi5Q3 != k!1,
- Tn4m1CnhkeKKDw00 != k!0,
- Tn4m1CnhkeKKDw00 != k!1,
- Tn4m1CnhkeKKDw00 != k!2]
- finishing sanity_test
-Elapsed time 0.12313079833984375
+[UpWl72Mlo53d8lSN != k!1,
+ UpWl72Mlo53d8lSN != k!1,
+ UpWl72Mlo53d8lSN != k!1,
+ UpWl72Mlo53d8lSN != k!1]
+ finishing main
+Elapsed time 0.10105562210083008

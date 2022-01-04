@@ -5,6 +5,7 @@ from pyverilog.vparser.parser import parse
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
+from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter
 import sys
 import os
 from optparse import OptionParser
@@ -20,6 +21,7 @@ gc.collect()
 with open('errors.log', 'w'):
     pass
 logging.basicConfig(filename='errors.log', level=logging.DEBUG)
+logging.debug("Starting over")
 
 
 INFO = "Verilog Symbolic Execution Engine"
@@ -121,14 +123,15 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
 
 
 def parse_rvalue(rvalue: Rvalue, store, m: ExecutionManager) -> (str, str, str): 
-    #print(rvalue)
     tokens = str(rvalue).replace('(','').replace(')','').split()
-    #print(tokens)
+    print(tokens)
     op = ""
     if 'Plus' in tokens[0]:
         op = "+"
     elif 'Minus' in tokens[0]:
         op = '-'
+    elif "Xor" in tokens[0]:
+        op = "^"
     lhs = tokens[1]
     rhs = tokens[2]
     if not lhs.isdigit():
@@ -137,18 +140,18 @@ def parse_rvalue(rvalue: Rvalue, store, m: ExecutionManager) -> (str, str, str):
                 lhs = tokens[2]
                 rhs = tokens[3]
             except KeyError:
-                logging.debug("hi")
-        try:
+                logging.debug(" line 141")
+        # try:
             lhs = store[m.curr_module][lhs]
-        except KeyError:
-            logging.debug("hi")
+        # except KeyError:
+            # logging.debug("line 145")
     if not rhs.isdigit():
         # print(store)
         # print(rvalue)
-        try: 
+        # try: 
             rhs = store[m.curr_module][rhs]
-        except KeyError:
-            logging.debug('hi2')
+        # except KeyError:
+            # logging.debug("line 152")
     return (lhs, op, rhs)
 
 
@@ -268,7 +271,7 @@ class ExecutionEngine:
                 return False
         count = 0
         seen = m.seen
-        print(seen)
+        #print(seen)
         for path in seen[m.curr_module]:
             if path[bit_index] == '1':
                 count += 1
@@ -355,6 +358,13 @@ class ExecutionEngine:
                 # ref_width = int(item.width.msb.value) + 1
                 #  dont want to actually call z3 here, just when looking at PC
                 # x = BitVec(ref_name, ref_width)
+        elif isinstance(stmt, Parameter):
+            if isinstance(stmt.value.var, IntConst):
+                s.store[m.curr_module][stmt.name] = stmt.value.var
+            elif isinstance(stmt.value.var, Identifier):
+                s.store[m.curr_module][stmt.name] = s.store[m.curr_module][stmt.value.var]
+            else:
+                s.store[m.curr_module][stmt.name] = init_symbol()
         elif isinstance(stmt, Always):
             sens_list = stmt.sens_list
             # print(sens_list.list[0].sig) # clock
@@ -367,7 +377,7 @@ class ExecutionEngine:
                     if m.updates[m.dependencies[signal]][0] == 1:
                         prev_symbol = m.updates[m.dependencies[signal]][1]
                         new_symbol = s.store[m.curr_module][m.dependencies[signal]]
-                        s.store[signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
+                        s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
         elif isinstance(stmt, Assign):
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
@@ -380,6 +390,11 @@ class ExecutionEngine:
                     s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
                     m.dependencies[stmt.left.var.name] = stmt.right.var.var.name
                     m.updates[stmt.left.var.name] = 0
+            
+            elif isinstance(stmt.right.var, Concat):
+                s.store[m.curr_module][stmt.left.var.name] = {}
+                for item in stmt.right.var.list:
+                    s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             else:
                 (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
                 if (lhs, op, rhs) != ("","",""):
@@ -390,6 +405,32 @@ class ExecutionEngine:
             prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+            elif isinstance(stmt.right.var, Identifier):
+                s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
+            elif isinstance(stmt.right.var, Concat):
+                s.store[m.curr_module][stmt.left.var.name] = {}
+                for item in stmt.right.var.list:
+                    s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
+            else:
+                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
+                if (lhs, op, rhs) != ("","",""):
+                    s.store[m.curr_module][stmt.left.var.name] = lhs + op + rhs
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
+            m.updates[stmt.left.var.name] = (1, prev_symbol)
+        elif isinstance(stmt, BlockingSubstitution):
+            prev_symbol = s.store[m.curr_module][stmt.left.var.name]
+            if isinstance(stmt.right.var, IntConst):
+                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+            elif isinstance(stmt.right.var, Identifier):
+                s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
+            elif isinstance(stmt.right.var, Concat):
+                s.store[m.curr_module][stmt.left.var.name] = {}
+                for item in stmt.right.var.list:
+                    if isinstance(item, Partselect):
+                        s.store[m.curr_module][stmt.left.var.name][item.var.name] = f"{s.store[m.curr_module][item.var.name]}[{item.msb}:{item.lsb}]"
+                    else:
+                        s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             else:
                 (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
                 if (lhs, op, rhs) != ("","",""):
@@ -579,7 +620,9 @@ class ExecutionEngine:
             self.init_run(manager, ast)
             print(manager.instance_count)
 
-            manager.seen = []
+            manager.seen = {}
+            for name in manager.names_list:
+                manager.seen[name] = []
             manager.curr_module = manager.names_list[0]
 
             for i in range(len(paths)):
@@ -627,8 +670,10 @@ class ExecutionEngine:
                 manager.config[module.name] = to_binary(0)
                 state.store[module.name] = {}
 
-            total_paths = sum(manager.child_num_paths.values())
-            print(total_paths)
+            total_paths = 1
+            for x in manager.child_num_paths.values():
+                total_paths *= x
+            #print(total_paths)
             # have do do things piece wise
             if total_paths > 100000:
                 self.piece_wise_execute(ast, manager, modules)
