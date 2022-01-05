@@ -1,11 +1,11 @@
 import pyverilog
 import z3
-from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef, If, BitVecVal
+from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef, If, BitVecVal, And
 from pyverilog.vparser.parser import parse
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
-from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter
+from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire
 import sys
 import os
 from optparse import OptionParser
@@ -74,7 +74,7 @@ class ExecutionManager:
     piece_wise: bool = False
     child_range: range = None
 
-def to_binary(i: int, digits: int = 32) -> str:
+def to_binary(i: int, digits: int = 128) -> str:
     num: str = bin(i)[2:]
     padding_len: int = digits - len(num)
     return  ("0" * padding_len) + num 
@@ -103,14 +103,14 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
         rhs = parse_expr_to_Z3(e.right, s, branch)
         if branch:          
             # only RHS is BitVec (Lhs is a more complex expr)
-            if isinstance(rhs, z3.z3.BitVecRef) and not isinstance(lhs, BitVecRef):
+            if isinstance(rhs, z3.z3.BitVecRef) and not isinstance(lhs, z3.z3.BitVecRef):
                 c = If(lhs, BitVecVal(1, 32), BitVecVal(0, 32))
                 s.add(c != rhs)
             else:
                 s.add(lhs != rhs)
         else:
             # only RHS is bitVEC 
-            if isinstance(rhs, z3.z3.BitVecRef) and not isinstance(lhs, BitVecRef):
+            if isinstance(rhs, z3.z3.BitVecRef) and not isinstance(lhs, z3.z3.BitVecRef):
                 c = If(lhs, BitVecVal(1, 32), BitVecVal(0, 32))
                 s.add(c == rhs)
             else:
@@ -118,13 +118,30 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
     elif isinstance(e, Land):
         lhs = parse_expr_to_Z3(e.left, s, branch)
         rhs = parse_expr_to_Z3(e.right, s, branch)
-        return s.add(lhs.assertions() and rhs.assertions())
+
+        # if lhs and rhs are just simple bit vecs
+        if isinstance(rhs, BitVecRef) and isinstance(lhs, BitVecRef):
+            #TODO fix this right now im not doing anything
+            #s.add(rhs)
+            return s
+        elif isinstance(rhs, BitVecRef):
+            return  s
+        elif isinstance(lhs, BitVecRef):
+            return  s
+        else:
+            if lhs is None:
+                return s.add(rhs.assertions())
+            
+            if rhs is None:
+                return s.add(rhs.assertions())
+
+            return s.add(lhs.assertions() and rhs.assertions())
     return s
 
 
 def parse_rvalue(rvalue: Rvalue, store, m: ExecutionManager) -> (str, str, str): 
     tokens = str(rvalue).replace('(','').replace(')','').split()
-    print(tokens)
+    #print(tokens)
     op = ""
     if 'Plus' in tokens[0]:
         op = "+"
@@ -141,17 +158,17 @@ def parse_rvalue(rvalue: Rvalue, store, m: ExecutionManager) -> (str, str, str):
                 rhs = tokens[3]
             except KeyError:
                 logging.debug(" line 141")
-        # try:
+        try:
             lhs = store[m.curr_module][lhs]
-        # except KeyError:
-            # logging.debug("line 145")
+        except KeyError:
+            logging.debug("line 145")
     if not rhs.isdigit():
         # print(store)
         # print(rvalue)
-        # try: 
+        try: 
             rhs = store[m.curr_module][rhs]
-        # except KeyError:
-            # logging.debug("line 152")
+        except KeyError:
+            logging.debug("line 152")
     return (lhs, op, rhs)
 
 
@@ -254,7 +271,7 @@ class ExecutionEngine:
                 self.count_conditionals(m, items.true_statement)
                 self.count_conditionals(m, items.false_statement)
             if isinstance(items, CaseStatement):
-                for case in item.caselist:
+                for case in items.caselist:
                     m.num_paths *= 2
                     self.count_conditionals(m, case.statement)
 
@@ -298,12 +315,12 @@ class ExecutionEngine:
                 elif isinstance(item, Initial):
                     self.module_count(m, item.statement)
         elif items != None:
-                if isinstance(item, InstanceList):
-                    if item.module in m.instance_count:
-                        m.instance_count[item.module] += 1
+                if isinstance(items, InstanceList):
+                    if items.module in m.instance_count:
+                        m.instance_count[items.module] += 1
                     else:
-                        m.instance_count[item.module] = 1
-                    self.module_count(m, item.instances)
+                        m.instance_count[items.module] = 1
+                    self.module_count(m, items.instances)
 
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
@@ -314,11 +331,16 @@ class ExecutionEngine:
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         if isinstance(expr, Reg):
             s.store[m.curr_module][expr.name] =''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(16))
+        elif isinstance(expr, Wire):
+            s.store[m.curr_module][expr.name] = init_symbol()
         elif isinstance(expr, Eq):
             # assume left is identifier
             x = BitVec(s.store[m.curr_module][expr.left.name], 32)
-            # assume right is a value
-            y = BitVec(int(expr.right.value), 32)
+            
+            if isinstance(expr.right, IntConst):
+                y = BitVec(expr.right.value, 32)
+            else:
+                y = BitVec(expr.right.name, 32)
             if self.branch:
                 s.pc.add(x == y)
             else: 
@@ -381,6 +403,8 @@ class ExecutionEngine:
         elif isinstance(stmt, Assign):
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+            elif isinstance(stmt.right.var, Identifier):
+                s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             elif isinstance(stmt.right.var, Partselect):
                 if isinstance(stmt.left.var, Partselect):
                     s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
@@ -411,6 +435,8 @@ class ExecutionEngine:
                 s.store[m.curr_module][stmt.left.var.name] = {}
                 for item in stmt.right.var.list:
                     s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
+            elif isinstance(stmt.right.var, StringConst):
+                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             else:
                 (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
                 if (lhs, op, rhs) != ("","",""):
@@ -431,6 +457,8 @@ class ExecutionEngine:
                         s.store[m.curr_module][stmt.left.var.name][item.var.name] = f"{s.store[m.curr_module][item.var.name]}[{item.msb}:{item.lsb}]"
                     else:
                         s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
+            elif isinstance(stmt.right.var, StringConst):
+                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             else:
                 (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
                 if (lhs, op, rhs) != ("","",""):
@@ -444,12 +472,9 @@ class ExecutionEngine:
         elif isinstance(stmt, Initial):
             self.visit_stmt(m, s, stmt.statement, modules)
         elif isinstance(stmt, IfStatement):
-            # print("forking")
-            # print(stmt.__dict__)
             m.curr_level += 1
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
-
             if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
                 self.branch = True
 
@@ -521,10 +546,12 @@ class ExecutionEngine:
     def visit_module(self, m: ExecutionManager, s: SymbolicState, module: ModuleDef, modules: Optional):
         """Visit module."""
         m.currLevel = 0
-        #print(m.path_code)
         params = module.paramlist.params
         ports = module.portlist.ports
 
+        for param in params:
+            if isinstance(param.list[0], Parameter):
+                s.store[m.curr_module][param.list[0].name] = init_symbol()
 
         for port in ports:
             if isinstance(port, Ioport):
@@ -552,7 +579,6 @@ class ExecutionEngine:
             if manager.piece_wise:
                 manager.child_path_codes[child] = []
                 for i in manager.child_range:
-                    print(len(manager.child_range))
                     manager.child_path_codes[child].append(to_binary(i))
             else:
                 for i in range(manager.child_num_paths[child]):
@@ -616,9 +642,8 @@ class ExecutionEngine:
                 manager.opt_1 = False
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values()))
-            print(f" Upper bound on num paths {len(paths)}")
+            #print(f" Upper bound on num paths {len(paths)}")
             self.init_run(manager, ast)
-            print(manager.instance_count)
 
             manager.seen = {}
             for name in manager.names_list:
@@ -686,7 +711,7 @@ class ExecutionEngine:
                 manager.opt_1 = False
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values()))
-            print(f" Upper bound on num paths {len(paths)}")
+            #print(f" Upper bound on num paths {len(paths)}")
         self.init_run(manager, ast)
         print(manager.instance_count)
         #print(f"Num paths: {manager.num_paths}")
