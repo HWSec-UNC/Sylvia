@@ -73,6 +73,11 @@ class ExecutionManager:
     curr_module: str = ""
     piece_wise: bool = False
     child_range: range = None
+    always_writes = {}
+    curr_always = None
+    opt_2: bool = True
+    opt_3: bool = True
+    assertions = []
 
 def to_binary(i: int, digits: int = 128) -> str:
     num: str = bin(i)[2:]
@@ -275,6 +280,97 @@ class ExecutionEngine:
                     m.num_paths *= 2
                     self.count_conditionals(m, case.statement)
 
+    def lhs_signals(self, m: ExecutionManager, items):
+        """Take stock of which signals are written to in which always blocks for COI analysis."""
+        stmts = items
+        if isinstance(items, Block):
+            stmts = items.statements
+            items.cname = "Block"
+        if hasattr(stmts, '__iter__'):
+            for item in stmts:
+                if isinstance(item, IfStatement) or isinstance(item, CaseStatement):
+                    if isinstance(item, IfStatement):
+                        self.lhs_signals(m, item.true_statement)
+                        self.lhs_signals(m, item.false_statement)
+                    if isinstance(item, CaseStatement):
+                        for case in item.caselist:
+                            self.lhs_signals(m, case.statement)
+                if isinstance(item, Block):
+                    self.lhs_signals(m, item.items)
+                elif isinstance(item, Always):
+                    m.curr_always = item
+                    m.always_writes[item] = []
+                    self.lhs_signals(m, item.statement)             
+                elif isinstance(item, Initial):
+                    self.lhs_signals(m, item.statement)
+                elif isinstance(item, Case):
+                    self.lhs_signals(m, item.statement)
+                elif isinstance(item, Assign):
+                    if m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
+                        m.always_writes[m.curr_always].append(item.left.var.name)
+                elif isinstance(item, NonblockingSubstitution):
+                    if m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
+                        m.always_writes[m.curr_always].append(item.left.var.name)
+                elif isinstance(item, BlockingSubstitution):
+                    if m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
+                        m.always_writes[m.curr_always].append(item.left.var.name)
+        elif items != None:
+            if isinstance(items, IfStatement):
+                self.lhs_signals(m, items.true_statement)
+                self.lhs_signals(m, items.false_statement)
+            if isinstance(items, CaseStatement):
+                for case in items.caselist:
+                    self.lhs_signals(m, case.statement)
+            elif isinstance(items, Assign):
+                if m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
+                    m.always_writes[m.curr_always].append(items.left.var.name)
+            elif isinstance(items, NonblockingSubstitution):
+                if m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
+                    m.always_writes[m.curr_always].append(items.left.var.name)
+            elif isinstance(items, BlockingSubstitution):
+                if m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
+                    m.always_writes[m.curr_always].append(items.left.var.name)
+
+
+    def get_assertions(self, m: ExecutionManager, items):
+        """Traverse the AST and get the assertion violating conditions."""
+        stmts = items
+        if isinstance(items, Block):
+            stmts = items.statements
+            items.cname = "Block"
+        if hasattr(stmts, '__iter__'):
+            for item in stmts:
+                if isinstance(item, IfStatement) or isinstance(item, CaseStatement):
+                    if isinstance(item, IfStatement):
+                        # starting to check for the assertions
+                        if isinstance(item.true_statement, Block):
+                            if isinstance(item.true_statement.statements[0], SingleStatement):
+                                if isinstance(item.true_statement.statements[0].statement, SystemCall) and "ASSERTION" in item.true_statement.statements[0].statement.args[0].value:
+                                    print("assertion found")
+                                    m.assertions.append(item.cond)
+                        else:     
+                            return 
+                            #self.get_assertions(m, item.true_statement)
+                            #self.get_assertions(m, item.false_statement)
+                    if isinstance(item, CaseStatement):
+                        for case in item.caselist:
+                            self.get_assertions(m, case.statement)
+                elif isinstance(item, Block):
+                    self.get_assertions(m, item.items)
+                elif isinstance(item, Always):
+                    self.get_assertions(m, item.statement)             
+                elif isinstance(item, Initial):
+                    self.get_assertions(m, item.statement)
+                elif isinstance(item, Case):
+                    self.get_assertions(m, item.statement)
+        elif items != None:
+            if isinstance(items, IfStatement):
+                self.get_assertions(m, items.true_statement)
+                self.get_assertions(m, items.false_statement)
+            if isinstance(items, CaseStatement):
+                for case in items.caselist:
+                    self.get_assertions(m, case.statement)
+
 
     def seen_all_cases(self, m: ExecutionManager, bit_index: int, nested_ifs: int) -> bool:
         """Checks if we've seen all the cases for this index in the bit string.
@@ -326,6 +422,8 @@ class ExecutionEngine:
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
         """Initalize run."""
         self.count_conditionals(m, module.items)
+        self.lhs_signals(m, module.items)
+        self.get_assertions(m, module.items)
         #self.module_count(m, module.items)
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
@@ -370,6 +468,7 @@ class ExecutionEngine:
         return None
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
+        #print(type(stmt))
         if isinstance(stmt, Decl):
             for item in stmt.list:
                 if isinstance(item, Value):
@@ -472,6 +571,7 @@ class ExecutionEngine:
         elif isinstance(stmt, Initial):
             self.visit_stmt(m, s, stmt.statement, modules)
         elif isinstance(stmt, IfStatement):
+
             m.curr_level += 1
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
@@ -674,7 +774,7 @@ class ExecutionEngine:
             self.module_depth -= 1
     
     #@profile     
-    def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager]) -> None:
+    def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager], directives) -> None:
         """Drives symbolic execution."""
         gc.collect()
         self.module_depth += 1
@@ -712,8 +812,10 @@ class ExecutionEngine:
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values()))
             #print(f" Upper bound on num paths {len(paths)}")
-        self.init_run(manager, ast)
         print(manager.instance_count)
+        print(manager.always_writes)
+        print(manager.assertions)
+        print(state.store)
         #print(f"Num paths: {manager.num_paths}")
         #print(f"Upper bound on num paths {manager.num_paths}")
         manager.seen = {}
@@ -824,7 +926,7 @@ def main():
     top_level_module: ModuleDef = description.children()[0]
     modules = description.definitions
     start = time.time()
-    engine.execute(top_level_module, modules, None)
+    engine.execute(top_level_module, modules, None, directives)
     end = time.time()
     print(f"Elapsed time {end - start}")
 

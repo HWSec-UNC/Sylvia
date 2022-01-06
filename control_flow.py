@@ -61,7 +61,9 @@ def main():
     analyzer.generate()
 
     directives = analyzer.get_directives()
+
     terms = analyzer.getTerms()
+
     binddict = analyzer.getBinddict()
 
     optimizer = VerilogDataflowOptimizer(terms, binddict)
@@ -74,6 +76,7 @@ def main():
 
     canalyzer = VerilogControlflowAnalyzer(options.topmodule, terms, binddict,
                                            resolved_terms, resolved_binddict, constlist, fsm_vars)
+
     fsms = canalyzer.getFiniteStateMachines()
 
     for signame, fsm in fsms.items():
