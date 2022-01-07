@@ -78,6 +78,7 @@ class ExecutionManager:
     opt_2: bool = True
     opt_3: bool = True
     assertions = []
+    blocks_of_interest = []
 
 def to_binary(i: int, digits: int = 128) -> str:
     num: str = bin(i)[2:]
@@ -370,6 +371,24 @@ class ExecutionEngine:
             if isinstance(items, CaseStatement):
                 for case in items.caselist:
                     self.get_assertions(m, case.statement)
+
+    def map_assertions_signals(self, m: ExecutionManager):
+        """Map the assertions to a list of relevant signals."""
+        signals = []
+        for assertion in m.assertions:
+            if isinstance(assertion.left, Identifier):
+                signals.append(assertion.left.name)
+        return signals
+
+    def assertions_always_intersect(self, m: ExecutionManager):
+        """Get the always blocks that have the signals relevant to the assertions."""
+        signals_of_interest = self.map_assertions_signals(m)
+        blocks_of_interest = []
+        for block in m.always_writes:
+            for signal in signals_of_interest:
+                if signal in m.always_writes[block]:
+                    blocks_of_interest.append(block)
+        m.blocks_of_interest = blocks_of_interest
 
 
     def seen_all_cases(self, m: ExecutionManager, bit_index: int, nested_ifs: int) -> bool:
@@ -815,7 +834,10 @@ class ExecutionEngine:
         print(manager.instance_count)
         print(manager.always_writes)
         print(manager.assertions)
-        print(state.store)
+
+    
+        self.assertions_always_intersect(manager)
+        print(manager.blocks_of_interest)
         #print(f"Num paths: {manager.num_paths}")
         #print(f"Upper bound on num paths {manager.num_paths}")
         manager.seen = {}
