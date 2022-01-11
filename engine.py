@@ -26,7 +26,7 @@ logging.debug("Starting over")
 
 INFO = "Verilog Symbolic Execution Engine"
 VERSION = pyverilog.__version__
-USAGE = "Usage: python3 -m engine <verilog_file>.v > out.txt"
+USAGE = "Usage: python3 -m engine <num_cycles> <verilog_file>.v > out.txt"
 
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
 EXPRESSIONS = ["Decl"]
@@ -356,8 +356,8 @@ class ExecutionEngine:
                         if isinstance(item.true_statement, Block):
                             if isinstance(item.true_statement.statements[0], SingleStatement):
                                 if isinstance(item.true_statement.statements[0].statement, SystemCall) and "ASSERTION" in item.true_statement.statements[0].statement.args[0].value:
-                                    print("assertion found")
                                     m.assertions.append(item.cond)
+                                    print("assertion found")
                         else:     
                             return 
                             #self.get_assertions(m, item.true_statement)
@@ -813,9 +813,10 @@ class ExecutionEngine:
             self.module_depth -= 1
     
     #@profile     
-    def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager], directives) -> None:
+    def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager], directives, num_cycles: int) -> None:
         """Drives symbolic execution."""
         gc.collect()
+        print(f"Executing for {num_cycles} clock cycles")
         self.module_depth += 1
         state: SymbolicState = SymbolicState()
         if manager is None:
@@ -869,21 +870,24 @@ class ExecutionEngine:
             for j in range(len(paths[i])):
                 manager.config[manager.names_list[j]] = paths[i][j]
             manager.path_code = manager.config[manager.names_list[0]]
-            if self.check_dup(manager):
-            #if False:
-                continue
-            else:
-                print("------------------------")
-                print(f"{ast.name} Path {i}")
-            self.visit_module(manager, state, ast, modules_dict)
-            manager.seen[ast.name].append(manager.path_code)
-            if (manager.assertion_violation):
-                print("Assertion violation")
-                manager.assertion_violation = False
-                self.solve_pc(state.pc)
-            manager.curr_level = 0
-            manager.dependencies = {}
-            state.pc.reset()
+
+            for cycle in range(int(num_cycles)):
+                print(cycle)
+                if self.check_dup(manager):
+                #if False:
+                    continue
+                else:
+                    print("------------------------")
+                    print(f"{ast.name} Path {i}")
+                self.visit_module(manager, state, ast, modules_dict)
+                manager.seen[ast.name].append(manager.path_code)
+                if (manager.assertion_violation):
+                    print("Assertion violation")
+                    manager.assertion_violation = False
+                    self.solve_pc(state.pc)
+                manager.curr_level = 0
+                manager.dependencies = {}
+                state.pc.reset()
         #manager.path_code = to_binary(0)
         print(f" finishing {ast.name}")
         self.module_depth -= 1
@@ -947,7 +951,8 @@ def main():
                          default=[], help="Macro Definition")
     (options, args) = optparser.parse_args()
 
-    filelist = args
+    num_cycles = args[0]
+    filelist = args[1:]
     if options.showversion:
         showVersion()
 
@@ -963,12 +968,13 @@ def main():
                             preprocess_define=options.define)
 
     #ast.show()
+    print(ast.children()[0].definitions)
 
     description: Description = ast.children()[0]
     top_level_module: ModuleDef = description.children()[0]
     modules = description.definitions
     start = time.time()
-    engine.execute(top_level_module, modules, None, directives)
+    engine.execute(top_level_module, modules, None, directives, num_cycles)
     end = time.time()
     print(f"Elapsed time {end - start}")
 
