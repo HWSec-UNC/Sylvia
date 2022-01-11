@@ -50,7 +50,7 @@
 
 // configuration file
 
-`include "../rtl/config.vh"
+`include "config.vh"
 
 module darkriscv
 //#(

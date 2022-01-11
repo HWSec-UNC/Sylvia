@@ -947,7 +947,7 @@ def main():
     optparser.add_option("-v", "--version", action="store_true", dest="showversion",
                          default=False, help="Show the version")
     optparser.add_option("-I", "--include", dest="include", action="append",
-                         default=["or1200/"], help="Include path")
+                         default=["or1200/", "darkriscv/"], help="Include path")
     optparser.add_option("-D", dest="define", action="append",
                          default=[], help="Macro Definition")
     (options, args) = optparser.parse_args()
