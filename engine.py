@@ -15,6 +15,7 @@ import time
 from itertools import product
 import logging
 import gc
+from pyverilog.vparser.preprocessor import preprocess
 
 gc.collect()
 
@@ -946,13 +947,15 @@ def main():
     optparser.add_option("-v", "--version", action="store_true", dest="showversion",
                          default=False, help="Show the version")
     optparser.add_option("-I", "--include", dest="include", action="append",
-                         default=[], help="Include path")
+                         default=["or1200/"], help="Include path")
     optparser.add_option("-D", dest="define", action="append",
                          default=[], help="Macro Definition")
     (options, args) = optparser.parse_args()
 
+
     num_cycles = args[0]
     filelist = args[1:]
+
     if options.showversion:
         showVersion()
 
@@ -963,6 +966,8 @@ def main():
     if len(filelist) == 0:
         showVersion()
 
+    text = preprocess(filelist, include=options.include, define=options.define)
+    print(text)
     ast, directives = parse(filelist,
                             preprocess_include=options.include,
                             preprocess_define=options.define)
