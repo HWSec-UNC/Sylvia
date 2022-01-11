@@ -307,13 +307,22 @@ class ExecutionEngine:
                 elif isinstance(item, Case):
                     self.lhs_signals(m, item.statement)
                 elif isinstance(item, Assign):
-                    if m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
+                    if isinstance(item.left.var, Partselect):
+                        if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
+                            m.always_writes[m.curr_always].append(item.left.var.var.name)
+                    elif m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
                         m.always_writes[m.curr_always].append(item.left.var.name)
                 elif isinstance(item, NonblockingSubstitution):
-                    if m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
+                    if isinstance(item.left.var, Partselect):
+                        if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
+                            m.always_writes[m.curr_always].append(item.left.var.var.name)
+                    elif m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
                         m.always_writes[m.curr_always].append(item.left.var.name)
                 elif isinstance(item, BlockingSubstitution):
-                    if m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
+                    if isinstance(item.left.var, Partselect):
+                        if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
+                            m.always_writes[m.curr_always].append(item.left.var.var.name)
+                    elif m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
                         m.always_writes[m.curr_always].append(item.left.var.name)
         elif items != None:
             if isinstance(items, IfStatement):
@@ -507,17 +516,29 @@ class ExecutionEngine:
                 s.store[m.curr_module][stmt.name] = init_symbol()
         elif isinstance(stmt, Always):
             sens_list = stmt.sens_list
-            # print(sens_list.list[0].sig) # clock
-            # print(sens_list.list[0].type) # posedge
-            sub_stmt = stmt.statement
-            m.in_always = True
-            self.visit_stmt(m, s, sub_stmt, modules)
-            for signal in m.dependencies:
-                if m.dependencies[signal] in m.updates:
-                    if m.updates[m.dependencies[signal]][0] == 1:
-                        prev_symbol = m.updates[m.dependencies[signal]][1]
-                        new_symbol = s.store[m.curr_module][m.dependencies[signal]]
-                        s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
+            if m.opt_3:
+                if stmt in m.blocks_of_interest:
+                    sub_stmt = stmt.statement
+                    m.in_always = True
+                    self.visit_stmt(m, s, sub_stmt, modules)
+                    for signal in m.dependencies:
+                        if m.dependencies[signal] in m.updates:
+                            if m.updates[m.dependencies[signal]][0] == 1:
+                                prev_symbol = m.updates[m.dependencies[signal]][1]
+                                new_symbol = s.store[m.curr_module][m.dependencies[signal]]
+                                s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
+            else: 
+                # print(sens_list.list[0].sig) # clock
+                # print(sens_list.list[0].type) # posedge
+                sub_stmt = stmt.statement
+                m.in_always = True
+                self.visit_stmt(m, s, sub_stmt, modules)
+                for signal in m.dependencies:
+                    if m.dependencies[signal] in m.updates:
+                        if m.updates[m.dependencies[signal]][0] == 1:
+                            prev_symbol = m.updates[m.dependencies[signal]][1]
+                            new_symbol = s.store[m.curr_module][m.dependencies[signal]]
+                            s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
         elif isinstance(stmt, Assign):
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
@@ -590,7 +611,6 @@ class ExecutionEngine:
         elif isinstance(stmt, Initial):
             self.visit_stmt(m, s, stmt.statement, modules)
         elif isinstance(stmt, IfStatement):
-
             m.curr_level += 1
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
@@ -684,7 +704,7 @@ class ExecutionEngine:
             else:
                 self.visit_stmt(m, s, item, modules)
         
-        if not m.is_child:
+        if not m.is_child and m.assertion_violation:
             print("Final state:")
             print(s.store)
             print("Final path condition:")

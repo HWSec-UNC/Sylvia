@@ -83,6 +83,12 @@ parts:
 
 // Modified by Rajdeep Mukherjee <rajdeep.mukherjee@cs.ox.ac.uk>
 
+`define assert(signal, value) \
+        if (signal !== value) begin \
+            $display("ASSERTION FAILED"); \
+            $finish; \
+        end  
+
 module main(clock,xtal,rx_control,reset,bit_in,
 		     preamble_1,preamble_2,preamble_3,
 		     carrier_loss,biphase_violation,
@@ -265,5 +271,9 @@ module main(clock,xtal,rx_control,reset,bit_in,
 	 end else if (pc != L0 && pc != L1) begin
 	   parity = parity ^ bit_in;
 	 end
+  end
+
+    initial begin
+    `assert(parity, 0)
   end
 endmodule
