@@ -1,875 +1,145 @@
-/*
- * Copyright (c) 2018, Marcelo Samsoniuk
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * 
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * 
- * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
- */
-
-`timescale 1ns / 1ps
-
-// implemented opcodes:
-
-
-
-
-
-
-
-
-
-
-
-
-// not implemented opcodes:
-
-//`define FCC     7'b00011_11      // fencex
-
-
-// configuration file
-
- 
-/*
- * Copyright (c) 2018, Marcelo Samsoniuk
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * 
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * 
- * * Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
- */
-
-`timescale 1ns / 1ps
-
-////////////////////////////////////////////////////////////////////////////////
-// darkriscv configuration
-////////////////////////////////////////////////////////////////////////////////
- 
-// pipeline stages:
-// 
-// 2-stage version: core and memory in different clock edges result in less
-// clock performance, but less losses when the program counter changes
-// (pipeline flush = 1 clock).  Works like a 4-stage pipeline and remember
-// the 68040 clock scheme, with instruction per clock = 1.  alternatively,
-// it is possible work w/ 1 wait-state and 1 clock edge, but with a penalty
-// in performance (instruction per clock = 0.5).
-// 
-// 3-stage version: core and memory in the same clock edge require one extra
-// stage in the pipeline, but keep a good performance most of time
-// (instruction per clock = 1).  of course, read operations require 1
-// wait-state, which means sometimes the read performance is reduced.
-
-
-// RV32I vs RV32E:
-//
-// The difference between the RV32I and RV32E regarding the logic space is 
-// minimal in typical applications with modern 5 or 6 input LUT based FPGAs, 
-// but the RV32E is better with old 4 input LUT based FPGAs.
-
-
-// muti-threading support:
-//
-// Decreases clock performance by 20% (80MHz), but enables two or more 
-// contexts (threads) in the core. The threads work in symmetrical way, 
-// which means that they will start with the same exactly core parameters 
-// (same initial PC, same initial SP, etc). The boot.s code is designed 
-// to handle this difference and set each thread to different 
-// applications.
-// Notes: 
-// a) threading is currently supported only in the 3-stage pipeline version.
-// b) the old experimental "interrupt mode" was removed, which means that
-//    the multi-thread mode does not make anything "visible" other than
-//    increment the gpio register.
-// c) the threading in the non-interrupt mode switches when the program flow
-//    changes, i.e. every jal instruction. When the core is idle, it is 
-//    probably in a jal loop.
-// The number of threads must be 2**n (i.e. THREADS = 3 means 8 threads)
-//`define __THREADS__ 3
-//
-// mac instruction: 
-// 
-// The mac instruction is similar to other register to register
-// instructions, but with a different opcode 7'h1111111.  the format is mac
-// rd,r1,r2, but is not currently possible encode in asm, by this way it is
-// available in licb as int mac(int rd, short r1, short r2).  Although it
-// can be used to accelerate the mul/div operations, the mac operation is
-// designed for DSP applications.  with some effort (low level machine
-// code), it is possible peak 100MMAC/s @100MHz.
-//`define __MAC16X16__
-
-// flexbuzz interface (experimental):
-//
-// A new data bus interface similar to a well known c*ldfire bus interface, in 
-// a way that part of the bus routing is moved to the core, in a way that 
-// is possible support different bus widths (8, 16 or 32 bit) and endians more 
-// easily (the new interface is natively big-endian, but the endian can be adjusted
-// in the bus interface dinamically). Similarly to the standard 32-bit interface, 
-// the external logic must detect the RD/WR operation quick enough and assert HLT 
-// in order to insert wait-states and perform the required multiplexing to fit 
-// the DLEN operand size in the data bus width available.
-//`define __FLEXBUZZ__
-
-// interrupt support
-// 
-// The interrupt support in the core uses the machine registers mtvec and 
-// mepc, which means support the control special register instruction csrrw,
-// in a way that is possible read/write the mtvec and mepc.
-// the interrupt itself works like the thread switch, with the difference
-// that:
-// a) the PC will be saved in the mepc register
-// b)the PC will receive the mtvec value
-// c) single interrupt, which means that the mtvec offset is always zero
-// The interrupt support cannot be used with threading (because makes no 
-// much sense?)... also, it requires the 3 stage pipeline (again, makes no
-// much sense use it with the 2-stage pipeline).
-
-
-// initial PC and SP
-//
-// it is possible program the initial PC and SP.  Typically, the PC is set
-// to address 0, representing the start of ROM memory and the SP is set to
-// the final of RAM memory.  In the linker, the start of ROM memory matches
-// with the .text area, which is defined in the boot.c code and the start of
-// RAM memory matches with the .data and other volatile data, in a way that
-// the stack can be positioned in the top of RAM and does not match with the
-// .data.
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-// darksocv configuration:
-////////////////////////////////////////////////////////////////////////////////
-
-// interactive simulation:
-// 
-// When enabled, will trick the simulator in order to enable interactive
-// access via the stdin, in a way that is possible type interactive commands,
-// which will make your simulator crazy! unfortunately, it works only with
-// iverilog... at least, Xilinx ISIM does not liket the $fgetc()
-//`define __INTERACTIVE__
-
-// performance measurement:
-//
-// The performance measurement can be done in the simulation level by
-// eabling the __PERFMETER__ define, in order to check how the clock cycles
-// are used in the core. The report is displayed when the FINISH_REQ signal
-// is actived by the UART.
-
-
-// full harvard architecture:
-// 
-// When defined, enforses that the instruction and data buses are connected
-// to fully separate memory banks.  Although the darkriscv always use
-// harvard architecture in the core, with separate instruction and data
-// buses, the logic levels outside the core can use different architectures
-// and concepts, including von neumann, wich a single bus shared by
-// instruction and data access, as well a mix between harvard and von
-// neumann, which is possible in the case of dual-port blockrams, where is
-// possible connect two separate buses in a single memory bank.  the main
-// advantage of a single memory bank is that the .text and .data areas can
-// be better allocated, but in this case is not possible protect the .text
-// area as in the case of separate memory banks.
-//`define __HARVARD__
-
-// read-modify-write cycle:
-//
-// Generate RMW cycles when writing in the memory. This option basically 
-// makes the read and write cycle symmetric and may work better in the cases
-// when the 32-bit memory does not support separate write enables for 
-// separate 16-bit and 8-bit words. Typically, the RMW cycle results in a
-// decrease of 5% in the performance (not the clock, but the instruction
-// pipeline eficiency) due to memory wait-states.
-//`define __RMW_CYCLE__
-
-// instruction wait-states:
-// 
-// option to add wait-states in order to use the 2-stage pipeline AND a 
-// single phase clock... decrease the IPC, but increases the clock from 50 to 80MHz! 
-// maybe, in the future, can use associated to a large 64 or 128 bit burst based 
-// bus in order to get a quick 2-stage pipeline w/ an efficient instruction bus.
-// do not forget to see the cache options below!
-//`define __WAITSTATES__
-
-// instruction and data caches:
-// 
-// the option for instruction and data caches were developed for 2-stage 
-// version and, of course, is part of the original effort to make the core
-// more efficient when the wait-states are enabled.
-//`define __ICACHE__ // not working, must debug it! :(
-//`define __DCACHE__ // not working, must debug it! :(
-
-// UART speed is set in bits per second, typically 115200 bps:
-//`define __UARTSPEED__ 115200
-
-// UART queue: 
-// 
-// Optional RX/TX queue for communication oriented applications. The concept
-// foreseen 256 bytes for TX and RX, in a way that frames up to 128 bytes can
-// be easily exchanged via UART.
-//`define __UARTQUEUE__
-
-////////////////////////////////////////////////////////////////////////////////
-// board definition:
-////////////////////////////////////////////////////////////////////////////////
- 
-// The board is automatically defined in the xst/xise files via Makefile or
-// ISE. Case it is not the case, please define you board name here:
-//`define AVNET_MICROBOARD_LX9
-//`define XILINX_AC701_A200
-//`define QMTECH_SDRAM_LX16
-
-// the following defines are automatically defined:
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
-
-    
-
-
-
-
-// darkuart baudrate automtically calculated according to board clock:
-
- 
-  
-
-
-
-
-module darkriscv
-//#(
-//    parameter [31:0] RESET_PC = 0,
-//    parameter [31:0] RESET_SP = 4096
-//) 
-(
-    input             CLK,   // clock
-    input             RES,   // reset
-    input             HLT,   // halt
-    
-
-
-    
-
-
-    input             INT,   // interrupt request
-
-
-    input      [31:0] IDATA, // instruction data bus
-    output     [31:0] IADDR, // instruction addr bus
-    
-    input      [31:0] DATAI, // data bus (input)
-    output     [31:0] DATAO, // data bus (output)
-    output     [31:0] DADDR, // addr bus
-
-
-
-
-    
-    output     [ 3:0] BE,   // byte enable
-    output            WR,    // write enable
-    output            RD,    // read enable 
-    
-
-    output            IDLE,   // idle output
-    
-    output [3:0]  DEBUG       // old-school osciloscope based debug! :)
-);
-
-    // dummy 32-bit words w/ all-0s and all-1s: 
-
-    wire [31:0] ALL0  = 0;
-    wire [31:0] ALL1  = -1;
-
-
-
-
-
-
-    
-    // pre-decode: IDATA is break apart as described in the RV32I specification
-
-    reg [31:0] XIDATA;
-
-    reg XLUI, XAUIPC, XJAL, XJALR, XBCC, XLCC, XSCC, XMCC, XRCC, XMAC, XRES=1, XCCC; //, XFCC, XCCC;
-
-    reg [31:0] XSIMM;
-    reg [31:0] XUIMM;
-
-    always@(posedge CLK)
-    begin
-        XIDATA <= XRES ? 0 : HLT ? XIDATA : IDATA;
-        
-        XLUI   <= XRES ? 0 : HLT ? XLUI   : IDATA[6:0]==7'b01101_11;
-        XAUIPC <= XRES ? 0 : HLT ? XAUIPC : IDATA[6:0]==7'b00101_11;
-        XJAL   <= XRES ? 0 : HLT ? XJAL   : IDATA[6:0]==7'b11011_11;
-        XJALR  <= XRES ? 0 : HLT ? XJALR  : IDATA[6:0]==7'b11001_11;        
-
-        XBCC   <= XRES ? 0 : HLT ? XBCC   : IDATA[6:0]==7'b11000_11;
-        XLCC   <= XRES ? 0 : HLT ? XLCC   : IDATA[6:0]==7'b00000_11;
-        XSCC   <= XRES ? 0 : HLT ? XSCC   : IDATA[6:0]==7'b01000_11;
-        XMCC   <= XRES ? 0 : HLT ? XMCC   : IDATA[6:0]==7'b00100_11;
-
-        XRCC   <= XRES ? 0 : HLT ? XRCC   : IDATA[6:0]==7'b01100_11;
-        XMAC   <= XRES ? 0 : HLT ? XRCC   : IDATA[6:0]==7'b11111_11;
-        //XFCC   <= XRES ? 0 : HLT ? XFCC   : IDATA[6:0]==`FCC;
-        XCCC   <= XRES ? 0 : HLT ? XCCC   : IDATA[6:0]==7'b11100_11;
-
-        // signal extended immediate, according to the instruction type:
-        
-        XSIMM  <= XRES ? 0 : HLT ? XSIMM :
-                 IDATA[6:0]==7'b01000_11 ? { IDATA[31] ? ALL1[31:12]:ALL0[31:12], IDATA[31:25],IDATA[11:7] } : // s-type
-                 IDATA[6:0]==7'b11000_11 ? { IDATA[31] ? ALL1[31:13]:ALL0[31:13], IDATA[31],IDATA[7],IDATA[30:25],IDATA[11:8],ALL0[0] } : // b-type
-                 IDATA[6:0]==7'b11011_11 ? { IDATA[31] ? ALL1[31:21]:ALL0[31:21], IDATA[31], IDATA[19:12], IDATA[20], IDATA[30:21], ALL0[0] } : // j-type
-                 IDATA[6:0]==7'b01101_11||
-                 IDATA[6:0]==7'b00101_11 ? { IDATA[31:12], ALL0[11:0] } : // u-type
-                                      { IDATA[31] ? ALL1[31:12]:ALL0[31:12], IDATA[31:20] }; // i-type
-        // non-signal extended immediate, according to the instruction type:
-
-        XUIMM  <= XRES ? 0: HLT ? XUIMM :
-                 IDATA[6:0]==7'b01000_11 ? { ALL0[31:12], IDATA[31:25],IDATA[11:7] } : // s-type
-                 IDATA[6:0]==7'b11000_11 ? { ALL0[31:13], IDATA[31],IDATA[7],IDATA[30:25],IDATA[11:8],ALL0[0] } : // b-type
-                 IDATA[6:0]==7'b11011_11 ? { ALL0[31:21], IDATA[31], IDATA[19:12], IDATA[20], IDATA[30:21], ALL0[0] } : // j-type
-                 IDATA[6:0]==7'b01101_11||
-                 IDATA[6:0]==7'b00101_11 ? { IDATA[31:12], ALL0[11:0] } : // u-type
-                                      { ALL0[31:12], IDATA[31:20] }; // i-type
-    end
-
-    // decode: after XIDATA
-
-    reg [1:0] FLUSH = -1;  // flush instruction pipeline
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-        reg [3:0] RESMODE = -1;
-    
-        wire [3:0] DPTR   = XRES ? RESMODE : XIDATA[10: 7]; // set SP_RESET when RES==1
-        wire [3:0] S1PTR  = XIDATA[18:15];
-        wire [3:0] S2PTR  = XIDATA[23:20];
-    
-
-
-
-
-
-
-
-
-    wire [6:0] OPCODE = FLUSH ? 0 : XIDATA[6:0];
-    wire [2:0] FCT3   = XIDATA[14:12];
-    wire [6:0] FCT7   = XIDATA[31:25];
-
-    wire [31:0] SIMM  = XSIMM;
-    wire [31:0] UIMM  = XUIMM;
-    
-    // main opcode decoder:
-                                
-    wire    LUI = FLUSH ? 0 : XLUI;   // OPCODE==7'b0110111;
-    wire  AUIPC = FLUSH ? 0 : XAUIPC; // OPCODE==7'b0010111;
-    wire    JAL = FLUSH ? 0 : XJAL;   // OPCODE==7'b1101111;
-    wire   JALR = FLUSH ? 0 : XJALR;  // OPCODE==7'b1100111;
-    
-    wire    BCC = FLUSH ? 0 : XBCC; // OPCODE==7'b1100011; //FCT3
-    wire    LCC = FLUSH ? 0 : XLCC; // OPCODE==7'b0000011; //FCT3
-    wire    SCC = FLUSH ? 0 : XSCC; // OPCODE==7'b0100011; //FCT3
-    wire    MCC = FLUSH ? 0 : XMCC; // OPCODE==7'b0010011; //FCT3
-    
-    wire    RCC = FLUSH ? 0 : XRCC; // OPCODE==7'b0110011; //FCT3
-    wire    MAC = FLUSH ? 0 : XMAC; // OPCODE==7'b0110011; //FCT3
-    //wire    FCC = FLUSH ? 0 : XFCC; // OPCODE==7'b0001111; //FCT3
-    wire    CCC = FLUSH ? 0 : XCCC; // OPCODE==7'b1110011; //FCT3
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-        reg [31:0] NXPC2;       // 32-bit program counter t+2
-    
-
-    
-        reg [31:0] REG1 [0:15];	// general-purpose 16x32-bit registers (s1)
-        reg [31:0] REG2 [0:15];	// general-purpose 16x32-bit registers (s2)
-    
-
-
-
-
-
-    reg [31:0] NXPC;        // 32-bit program counter t+1
-    reg [31:0] PC;		    // 32-bit program counter t+0
-
-    // source-1 and source-1 register selection
-
-    wire          [31:0] U1REG = REG1[S1PTR];
-    wire          [31:0] U2REG = REG2[S2PTR];
-
-    wire signed   [31:0] S1REG = U1REG;
-    wire signed   [31:0] S2REG = U2REG;
-    
-
-    // L-group of instructions (OPCODE==7'b0000011)
-
-
-
-
-
-
-
-    wire [31:0] LDATA = FCT3==0||FCT3==4 ? ( DADDR[1:0]==3 ? { FCT3==0&&DATAI[31] ? ALL1[31: 8]:ALL0[31: 8] , DATAI[31:24] } :
-                                             DADDR[1:0]==2 ? { FCT3==0&&DATAI[23] ? ALL1[31: 8]:ALL0[31: 8] , DATAI[23:16] } :
-                                             DADDR[1:0]==1 ? { FCT3==0&&DATAI[15] ? ALL1[31: 8]:ALL0[31: 8] , DATAI[15: 8] } :
-                                                             { FCT3==0&&DATAI[ 7] ? ALL1[31: 8]:ALL0[31: 8] , DATAI[ 7: 0] } ):
-                        FCT3==1||FCT3==5 ? ( DADDR[1]==1   ? { FCT3==1&&DATAI[31] ? ALL1[31:16]:ALL0[31:16] , DATAI[31:16] } :
-                                                             { FCT3==1&&DATAI[15] ? ALL1[31:16]:ALL0[31:16] , DATAI[15: 0] } ) :
-                                             DATAI;
-
-
-    // S-group of instructions (OPCODE==7'b0100011)
-
-
-
-
-
-
-
-    wire [31:0] SDATA = FCT3==0 ? ( DADDR[1:0]==3 ? { U2REG[ 7: 0], ALL0 [23:0] } : 
-                                    DADDR[1:0]==2 ? { ALL0 [31:24], U2REG[ 7:0], ALL0[15:0] } : 
-                                    DADDR[1:0]==1 ? { ALL0 [31:16], U2REG[ 7:0], ALL0[7:0] } :
-                                                    { ALL0 [31: 8], U2REG[ 7:0] } ) :
-                        FCT3==1 ? ( DADDR[1]==1   ? { U2REG[15: 0], ALL0 [15:0] } :
-                                                    { ALL0 [31:16], U2REG[15:0] } ) :
-                                    U2REG;
-
-
-    // C-group: CSRRW
-
-
-
-    reg [31:0] MEPC  = 0;
-    reg [31:0] MTVEC = 0;
-    reg        MIE   = 0;
-    reg        MIP   = 0;
-
-    wire [31:0] CDATA = XIDATA[31:20]==12'h344 ? MIP  : // machine interrupt pending
-                        XIDATA[31:20]==12'h304 ? MIE   : // machine interrupt enable
-                        XIDATA[31:20]==12'h341 ? MEPC  : // machine exception PC
-                        XIDATA[31:20]==12'h305 ? MTVEC : // machine vector table
-                                                 0;	 // unknown
-                                                 
-    wire MRET = CCC && FCT3==0;
-    wire CSRW = CCC && FCT3==1;
-    wire CSRR = CCC && FCT3==2;
-
-
-    // RM-group of instructions (OPCODEs==7'b0010011/7'b0110011), merged! src=immediate(M)/register(R)
-
-    wire signed [31:0] S2REGX = XMCC ? SIMM : S2REG;
-    wire        [31:0] U2REGX = XMCC ? UIMM : U2REG;
-
-    wire [31:0] RMDATA = FCT3==7 ? U1REG&S2REGX :
-                         FCT3==6 ? U1REG|S2REGX :
-                         FCT3==4 ? U1REG^S2REGX :
-                         FCT3==3 ? U1REG<U2REGX?1:0 : // unsigned
-                         FCT3==2 ? S1REG<S2REGX?1:0 : // signed
-                         FCT3==0 ? (XRCC&&FCT7[5] ? U1REG-U2REGX : U1REG+S2REGX) :
-                         FCT3==1 ? U1REG<<U2REGX[4:0] :                         
-                         //FCT3==5 ? 
-                         !FCT7[5] ? U1REG>>U2REGX[4:0] :
-
-
-
-                                   $signed(S1REG>>>U2REGX[4:0]);  // (FCT7[5] ? U1REG>>>U2REG[4:0] : 
-                        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // J/B-group of instructions (OPCODE==7'b1100011)
-    
-    wire BMUX       = BCC==1 && (
-                          FCT3==4 ? S1REG< S2REGX : // blt
-                          FCT3==5 ? S1REG>=S2REG : // bge
-                          FCT3==6 ? U1REG< U2REGX : // bltu
-                          FCT3==7 ? U1REG>=U2REG : // bgeu
-                          FCT3==0 ? !(U1REG^S2REGX) : //U1REG==U2REG : // beq
-                          /*FCT3==1 ? */ U1REG^S2REGX); //U1REG!=U2REG); // bne
-                                    //0);
-
-    wire [31:0] PCSIMM = PC+SIMM;
-    wire        JREQ = (JAL||JALR||BMUX);
-    wire [31:0] JVAL = JALR ? DADDR : PCSIMM; // SIMM + (JALR ? U1REG : PC);
-
-
-
-    always@(posedge CLK)
-    begin
-        RESMODE <= RES ? -1 : RESMODE ? RESMODE-1 : 0;
-        
-        XRES <= |RESMODE;
-
-
-	    FLUSH <= XRES ? 2 : HLT ? FLUSH :        // reset and halt                              
-	                       FLUSH ? FLUSH-1 :
-    
-                            MRET ? 2 : 
-                               
-	                       JREQ ? 2 : 0;  // flush the pipeline!
-
-
-
-
-
-        if(XRES)
-        begin
-            MTVEC <= 0;
-            MEPC  <= 0;
-            MIP   <= 0;
-            MIE   <= 0;
-        end
-        else
-        if(MIP&&MIE&&JREQ)
-        begin
-            MEPC <= JVAL;
-            MIP  <= 1;
-            MIE  <= 0;
-        end
-        else
-        if(CSRW)
-        begin
-            case(XIDATA[31:20])
-                12'h305: MTVEC <= S1REG;
-                12'h341: MEPC  <= S1REG;
-                12'h304: MIE   <= S1REG;
-            endcase
-        end
-        else
-        if(MRET)
-        begin
-            MIP <= 0;
-            MIE <= 1;
-        end
-        else
-        if(INT==1&&MIE==1)
-        begin
-            MIP <= 1;
-        end
-
-
-        REG1[DPTR] <=   XRES ? (RESMODE[3:0]==2 ? 32'd8192 : 0)  :        // reset sp
-
-
-
-                       HLT ? REG1[DPTR] :        // halt
-                     !DPTR ? 0 :                // x0 = 0, always!
-                     AUIPC ? PCSIMM :
-                      JAL||
-                      JALR ? NXPC :
-                       LUI ? SIMM :
-                       LCC ? LDATA :
-                  MCC||RCC ? RMDATA:
-
-
-
-
-                       CSRR ? CDATA : 
-
-                             REG1[DPTR];
-
-        REG2[DPTR] <=   XRES ? (RESMODE[3:0]==2 ? 32'd8192 : 0) :        // reset sp
-
-
-        
-                       HLT ? REG2[DPTR] :        // halt
-                     !DPTR ? 0 :                // x0 = 0, always!
-                     AUIPC ? PCSIMM :
-                      JAL||
-                      JALR ? NXPC :
-                       LUI ? SIMM :
-                       LCC ? LDATA :
-                  MCC||RCC ? RMDATA:
-
-
-
-                       
-                       CSRR ? CDATA : 
-
-                             REG2[DPTR];
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-        NXPC <= /*XRES ? `__RESETPC__ :*/ HLT ? NXPC : NXPC2;
-	
-	    NXPC2 <=  XRES ? 32'd0 : HLT ? NXPC2 :   // reset and halt
-        
-                     MRET ? MEPC : 
-                    MIE&&MIP&&JREQ ? MTVEC : // pending interrupt + pipeline flush                    
-        
-	                 JREQ ? JVAL :                    // jmp/bra
-	                        NXPC2+4;                   // normal flow
-
-    
-
-
-
-
-
-
-        PC   <= /*XRES ? `__RESETPC__ :*/ HLT ? PC : NXPC; // current program counter
-    end
-
-    // IO and memory interface
-
-    assign DATAO = SDATA; // SCC ? SDATA : 0;
-    assign DADDR = U1REG + SIMM; // (SCC||LCC) ? U1REG + SIMM : 0;
-
-    // based in the Scc and Lcc   
-
-
-
-
-
-
-
-    assign RD = LCC;
-    assign WR = SCC;
-    assign BE = FCT3==0||FCT3==4 ? ( DADDR[1:0]==3 ? 4'b1000 : // sb/lb
-                                     DADDR[1:0]==2 ? 4'b0100 : 
-                                     DADDR[1:0]==1 ? 4'b0010 :
-                                                     4'b0001 ) :
-                FCT3==1||FCT3==5 ? ( DADDR[1]==1   ? 4'b1100 : // sh/lh
-                                                     4'b0011 ) :
-                                                     4'b1111; // sw/lw
-
-
-
-    
-
-
-        assign IADDR = NXPC2;
-        
-
-
-
-
-    assign IDLE = |FLUSH;
-
-    assign DEBUG = { INT, MIP, MIE, MRET };
-
-
-
-
-endmodule
+(<pyverilog.vparser.ast.ModuleDef object at 0x7f1abe1e9640>, <pyverilog.vparser.ast.ModuleDef object at 0x7f1abe01fe20>, <pyverilog.vparser.ast.ModuleDef object at 0x7f1abdfb72e0>)
+Executing for 1 clock cycles
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'xgjgLBKMCEdsejb2', 'RST': 'aoHCtI3zMjbGtAoA', 'enable': 'MR4hRCX8OeOy1BwV', 'value': 'Ai3PMVU1nWXENByZ', 'led': '7ABJzhrydpsa9r7K', 'place_holder_out': 'zxb3P2OGXVQRsghS'}, 'place_holder': {}, 'place_holder_2': {}}
+ finishing place_holder_2
+Final state:
+{'sanity_test': {'CLK': 'xgjgLBKMCEdsejb2', 'RST': 'aoHCtI3zMjbGtAoA', 'enable': 'MR4hRCX8OeOy1BwV', 'value': 'Ai3PMVU1nWXENByZ', 'led': '11frXCNQAZkK7uul[23:16]', 'place_holder_out': 'zxb3P2OGXVQRsghS', 'count': '11frXCNQAZkK7uul', 'state': 'iFLwJckl8D8VBznf'}, 'place_holder': {'CLK': 'ygYSiZs2Rtz4SXvE', 'RST': 'VO07G2uxrgn4ttgO', 'out': 'Bu8iFXeBlhDd3rxv+1', 'out_wire': 'Wp6hb0fM0fvF0tlD'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[aoHCtI3zMjbGtAoA != k!1,
+ iFLwJckl8D8VBznf != 0,
+ iFLwJckl8D8VBznf != 1,
+ iFLwJckl8D8VBznf != 2,
+ VO07G2uxrgn4ttgO != k!1,
+ bkgcgGl1opwq4Ton != k!1]
+ finishing place_holder
+Final state:
+{'sanity_test': {'CLK': 'xgjgLBKMCEdsejb2', 'RST': 'aoHCtI3zMjbGtAoA', 'enable': 'MR4hRCX8OeOy1BwV', 'value': 'Ai3PMVU1nWXENByZ', 'led': '11frXCNQAZkK7uul[23:16]', 'place_holder_out': 'zxb3P2OGXVQRsghS', 'count': '11frXCNQAZkK7uul', 'state': 'iFLwJckl8D8VBznf'}, 'place_holder': {'CLK': 'ygYSiZs2Rtz4SXvE', 'RST': 'VO07G2uxrgn4ttgO', 'out': 'Bu8iFXeBlhDd3rxv+1', 'out_wire': 'Wp6hb0fM0fvF0tlD'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[aoHCtI3zMjbGtAoA != k!1,
+ iFLwJckl8D8VBznf != 0,
+ iFLwJckl8D8VBznf != 1,
+ iFLwJckl8D8VBznf != 2,
+ VO07G2uxrgn4ttgO != k!1,
+ bkgcgGl1opwq4Ton != k!1]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'F1V23yEtWAycKrpn', 'RST': '0bV81YawbiMLU00m', 'enable': 'cnekGNODm1MzdZDn', 'value': 'fvXZmVYUghIXPzkH', 'led': 'hDrFE5x0Jnzmjax1', 'place_holder_out': 'izSsRn0no2fOthEL', 'count': '11frXCNQAZkK7uul', 'state': 'iFLwJckl8D8VBznf'}, 'place_holder': {'CLK': 'ygYSiZs2Rtz4SXvE', 'RST': 'VO07G2uxrgn4ttgO', 'out': 'Bu8iFXeBlhDd3rxv+1', 'out_wire': 'Wp6hb0fM0fvF0tlD'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 'F1V23yEtWAycKrpn', 'RST': '0bV81YawbiMLU00m', 'enable': 'cnekGNODm1MzdZDn', 'value': 'fvXZmVYUghIXPzkH', 'led': 'dxTRnFjsElMnk67M[23:16]', 'place_holder_out': 'izSsRn0no2fOthEL', 'count': 'dxTRnFjsElMnk67M', 'state': '8v5dncjz9Ig3553S'}, 'place_holder': {'CLK': 'ygYSiZs2Rtz4SXvE', 'RST': 'VO07G2uxrgn4ttgO', 'out': 'Bu8iFXeBlhDd3rxv+1', 'out_wire': 'Wp6hb0fM0fvF0tlD'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[0bV81YawbiMLU00m != k!1,
+ 8v5dncjz9Ig3553S != 0,
+ 8v5dncjz9Ig3553S != 1,
+ 8v5dncjz9Ig3553S != 2]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'cnsiprQ4mYdcrDXr', 'RST': 'Xrl0Q6yDCUUO6sEs', 'enable': 'CrGeLYgEM94iph5M', 'value': 'NuYDX15y14WoLWNA', 'led': 'FZQa8Q9bXmTBLoa6', 'place_holder_out': '3lRHDzZB9lolpM7Y', 'count': 'dxTRnFjsElMnk67M', 'state': '8v5dncjz9Ig3553S'}, 'place_holder': {'CLK': 'ygYSiZs2Rtz4SXvE', 'RST': 'VO07G2uxrgn4ttgO', 'out': 'Bu8iFXeBlhDd3rxv+1', 'out_wire': 'Wp6hb0fM0fvF0tlD'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+ finishing place_holder
+Final state:
+{'sanity_test': {'CLK': 'cnsiprQ4mYdcrDXr', 'RST': 'Xrl0Q6yDCUUO6sEs', 'enable': 'CrGeLYgEM94iph5M', 'value': 'NuYDX15y14WoLWNA', 'led': 'fWVYYDOERieCJWQN[23:16]', 'place_holder_out': '3lRHDzZB9lolpM7Y', 'count': 'fWVYYDOERieCJWQN', 'state': 'NlrV80kXoTzPZlM1'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[Xrl0Q6yDCUUO6sEs != k!1,
+ NlrV80kXoTzPZlM1 != 0,
+ NlrV80kXoTzPZlM1 != 1,
+ NlrV80kXoTzPZlM1 != 2,
+ BDLpoqtS9VZqNQ7T == k!1]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 't1tt5XTxChlHQYFn', 'RST': 'n3dNjJHsgYWFx8OU', 'enable': 'jyasAqQzG3m6WGAu', 'value': 'Erg2w3oiEmT1Pt8N', 'led': 'f9BRuOYPFL2g9j2L', 'place_holder_out': 'cVtuBQ3MQ4CduIgg', 'count': 'fWVYYDOERieCJWQN', 'state': 'NlrV80kXoTzPZlM1'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 't1tt5XTxChlHQYFn', 'RST': 'n3dNjJHsgYWFx8OU', 'enable': 'jyasAqQzG3m6WGAu', 'value': 'Erg2w3oiEmT1Pt8N', 'led': 'h8erQiFrLFkJqB7d[23:16]', 'place_holder_out': 'cVtuBQ3MQ4CduIgg', 'count': 'h8erQiFrLFkJqB7d', 'state': 'eJA3mkwXWXk5H9Vk'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[n3dNjJHsgYWFx8OU != k!1,
+ eJA3mkwXWXk5H9Vk != 0,
+ eJA3mkwXWXk5H9Vk != 1,
+ eJA3mkwXWXk5H9Vk != 2]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'PBoJ9UmYEWQGq4BC', 'RST': 'T28XG1yUBkpWkg93', 'enable': 'ENCMhwl96X9GLtTg', 'value': 'Ajlz1dIc4YUF6KLk', 'led': 'KCp1H1vmrcieFRS4', 'place_holder_out': 'yVdjuR5JHx7lNsYb', 'count': 'h8erQiFrLFkJqB7d', 'state': 'eJA3mkwXWXk5H9Vk'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 'PBoJ9UmYEWQGq4BC', 'RST': 'T28XG1yUBkpWkg93', 'enable': 'ENCMhwl96X9GLtTg', 'value': 'Ajlz1dIc4YUF6KLk', 'led': 'Iv5KGSbruEo3WBWL[23:16]', 'place_holder_out': 'yVdjuR5JHx7lNsYb', 'count': 'Iv5KGSbruEo3WBWL', 'state': 'LXDLUeEiOxqQzqJG'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[T28XG1yUBkpWkg93 != k!1,
+ LXDLUeEiOxqQzqJG == 0,
+ ENCMhwl96X9GLtTg != k!1]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'fV12KK78hdeiBtxE', 'RST': 'Ae0yv6NEB0xmBP34', 'enable': 'bA3fhfFG6HDZRgjX', 'value': 'lFn8vwloK2x5QClq', 'led': 'jCNxfnisqDyZcHQU', 'place_holder_out': 'K0z32x3QqRElmJWh', 'count': 'Iv5KGSbruEo3WBWL', 'state': 'LXDLUeEiOxqQzqJG'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 'fV12KK78hdeiBtxE', 'RST': 'Ae0yv6NEB0xmBP34', 'enable': 'bA3fhfFG6HDZRgjX', 'value': 'lFn8vwloK2x5QClq', 'led': 'Qq7gFtp55WJUNSPN[23:16]', 'place_holder_out': 'K0z32x3QqRElmJWh', 'count': 'Qq7gFtp55WJUNSPN', 'state': 'mWzpf20wKpzj7lN7'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[Ae0yv6NEB0xmBP34 != k!1,
+ mWzpf20wKpzj7lN7 == 0,
+ bA3fhfFG6HDZRgjX != k!1]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'UboVpFLvNBoV115A', 'RST': '2dRv87kRyeMacBIL', 'enable': '5tKNyBg3ylb2lnVl', 'value': 'Q9GB8URtccKNWWAp', 'led': 'a3U0rPB4n3zqWBof', 'place_holder_out': 'o3uz8EA7fyx9lC7Y', 'count': 'Qq7gFtp55WJUNSPN', 'state': 'mWzpf20wKpzj7lN7'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 'UboVpFLvNBoV115A', 'RST': '2dRv87kRyeMacBIL', 'enable': '5tKNyBg3ylb2lnVl', 'value': 'Q9GB8URtccKNWWAp', 'led': 'ncPkh99eJbo4fgqb[23:16]', 'place_holder_out': 'o3uz8EA7fyx9lC7Y', 'count': 'ncPkh99eJbo4fgqb', 'state': 'x07e7Cat5hYX5rI0'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[2dRv87kRyeMacBIL != k!1,
+ x07e7Cat5hYX5rI0 == 0,
+ 5tKNyBg3ylb2lnVl != k!1]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'utghj4vFg792JAI5', 'RST': '3BPNLhKQhZAxQzbi', 'enable': 'WVNVoTsxbkf4xAtQ', 'value': 'Qqf8FqfrfRYgGb1g', 'led': 'l82LmqWPUabB3PaF', 'place_holder_out': '7upmQwfrLGrEJnJ1', 'count': 'ncPkh99eJbo4fgqb', 'state': 'x07e7Cat5hYX5rI0'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 'utghj4vFg792JAI5', 'RST': '3BPNLhKQhZAxQzbi', 'enable': 'WVNVoTsxbkf4xAtQ', 'value': 'Qqf8FqfrfRYgGb1g', 'led': 'rj1yfUdfk0lcWIXr[23:16]', 'place_holder_out': '7upmQwfrLGrEJnJ1', 'count': 'rj1yfUdfk0lcWIXr', 'state': '2'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[3BPNLhKQhZAxQzbi != k!1,
+ W7FOSddVl6zdITIe != 0,
+ W7FOSddVl6zdITIe == 1]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': '4qxWOywULOapYGn2', 'RST': 'DipEmoIZiVzmxhqi', 'enable': '8pSUxI4UHwdOFbaR', 'value': '1i1YnwhzTnytuH0A', 'led': 'bwADUTAdFOClaIwk', 'place_holder_out': '3PYbTFKKi5sk6Nnw', 'count': 'rj1yfUdfk0lcWIXr', 'state': '2'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': '4qxWOywULOapYGn2', 'RST': 'DipEmoIZiVzmxhqi', 'enable': '8pSUxI4UHwdOFbaR', 'value': '1i1YnwhzTnytuH0A', 'led': 'LkIrFDLrycgtohsz+1i1YnwhzTnytuH0A[23:16]', 'place_holder_out': '3PYbTFKKi5sk6Nnw', 'count': 'LkIrFDLrycgtohsz+1i1YnwhzTnytuH0A', 'state': '0'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[DipEmoIZiVzmxhqi != k!1,
+ 837rz3jFXIz3I21J != 0,
+ 837rz3jFXIz3I21J != 1,
+ 837rz3jFXIz3I21J == 2]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'Bf4ELLXF9kbgegAP', 'RST': 'gfVITNjC2JLg3Pzu', 'enable': 'IvvCwDuFdUhxFz7R', 'value': '1qv9vVBVcb4NmAj8', 'led': '8pViPrylIessQfau', 'place_holder_out': '2wCqC3XhYJz2L7jh', 'count': 'LkIrFDLrycgtohsz+1i1YnwhzTnytuH0A', 'state': '0'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 'Bf4ELLXF9kbgegAP', 'RST': 'gfVITNjC2JLg3Pzu', 'enable': 'IvvCwDuFdUhxFz7R', 'value': '1qv9vVBVcb4NmAj8', 'led': 'YE2Mku7NQ9GOtCue[23:16]', 'place_holder_out': '2wCqC3XhYJz2L7jh', 'count': 'YE2Mku7NQ9GOtCue', 'state': 'IhrZSJ0Xiho63bmq'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[gfVITNjC2JLg3Pzu != k!1,
+ IhrZSJ0Xiho63bmq != 0,
+ IhrZSJ0Xiho63bmq != 1,
+ IhrZSJ0Xiho63bmq != 2]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'jc9mGsx0Hwdjnf7y', 'RST': 'ImuSRvgbtdziwnFG', 'enable': 'HhybkAJQR2AjHkfu', 'value': 'NaGhrmW8yfrVeTvn', 'led': 'OyKCQr8DsJGhq91C', 'place_holder_out': 'EQa7nikw52Kft4Wj', 'count': 'YE2Mku7NQ9GOtCue', 'state': 'IhrZSJ0Xiho63bmq'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 'jc9mGsx0Hwdjnf7y', 'RST': 'ImuSRvgbtdziwnFG', 'enable': 'HhybkAJQR2AjHkfu', 'value': 'NaGhrmW8yfrVeTvn', 'led': 'P7kqhyVp0QE2XpYd[23:16]', 'place_holder_out': 'EQa7nikw52Kft4Wj', 'count': 'P7kqhyVp0QE2XpYd', 'state': '20d3P6f7zaXRcMyp'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[ImuSRvgbtdziwnFG != k!1,
+ 20d3P6f7zaXRcMyp != 0,
+ 20d3P6f7zaXRcMyp != 1,
+ 20d3P6f7zaXRcMyp != 2]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'PH39m5JhNY24XsTD', 'RST': 'SuII9ML5fNgdNX9y', 'enable': 'A1AM3yGW48fUodO3', 'value': 'lEElha1Uv4gNrQu9', 'led': 'OMDXos3kyKwh9orV', 'place_holder_out': 'gcY2Mu9AhU5tiFBd', 'count': 'P7kqhyVp0QE2XpYd', 'state': '20d3P6f7zaXRcMyp'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 'PH39m5JhNY24XsTD', 'RST': 'SuII9ML5fNgdNX9y', 'enable': 'A1AM3yGW48fUodO3', 'value': 'lEElha1Uv4gNrQu9', 'led': 'HKYzGwVh0cc82eux[23:16]', 'place_holder_out': 'gcY2Mu9AhU5tiFBd', 'count': 'HKYzGwVh0cc82eux', 'state': 'oBZBj1cq783BUuw9'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[SuII9ML5fNgdNX9y != k!1,
+ oBZBj1cq783BUuw9 != 0,
+ oBZBj1cq783BUuw9 != 1,
+ oBZBj1cq783BUuw9 != 2]
+------------------------
+Inital state:
+{'sanity_test': {'CLK': 'RZbuYSkVejitqczX', 'RST': 'hvjfukNihkTOR8hY', 'enable': 'NVZKkdOgNwNMUYrs', 'value': 'us6kwwfiTuU7tyQw', 'led': '5H01o5BYURjIRDpv', 'place_holder_out': 'i8QrxEM7xR5yA9oy', 'count': 'HKYzGwVh0cc82eux', 'state': 'oBZBj1cq783BUuw9'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final state:
+{'sanity_test': {'CLK': 'RZbuYSkVejitqczX', 'RST': 'hvjfukNihkTOR8hY', 'enable': 'NVZKkdOgNwNMUYrs', 'value': 'us6kwwfiTuU7tyQw', 'led': 'amzBZ9ITKyWv5FkU[23:16]', 'place_holder_out': 'i8QrxEM7xR5yA9oy', 'count': 'amzBZ9ITKyWv5FkU', 'state': 'zsWyqtssHSzRed5o'}, 'place_holder': {'CLK': 'wH0BzwZeIERM4jvK', 'RST': 'BDLpoqtS9VZqNQ7T', 'out': '0', 'out_wire': '5ulvoQctzfcv4LML'}, 'place_holder_2': {'CLK': 'qJ1oVGpawxCxREsT', 'RST': 'bkgcgGl1opwq4Ton', 'out': 'Vt6wAdxasvfeV8Nb+2'}}
+Final path condition:
+[hvjfukNihkTOR8hY != k!1,
+ zsWyqtssHSzRed5o != 0,
+ zsWyqtssHSzRed5o != 1,
+ zsWyqtssHSzRed5o != 2]
+ finishing sanity_test
+Elapsed time 0.11393356323242188

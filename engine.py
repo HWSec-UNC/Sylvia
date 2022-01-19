@@ -77,9 +77,10 @@ class ExecutionManager:
     always_writes = {}
     curr_always = None
     opt_2: bool = True
-    opt_3: bool = True
+    opt_3: bool = False
     assertions = []
     blocks_of_interest = []
+    init_run: bool = False
 
 def to_binary(i: int, digits: int = 128) -> str:
     num: str = bin(i)[2:]
@@ -450,9 +451,11 @@ class ExecutionEngine:
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
         """Initalize run."""
+        m.init_run = True
         self.count_conditionals(m, module.items)
         self.lhs_signals(m, module.items)
         self.get_assertions(m, module.items)
+        m.init_run = False
         #self.module_count(m, module.items)
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
@@ -698,6 +701,10 @@ class ExecutionEngine:
                 s.store[m.curr_module][port.first.name] = init_symbol()
             else:
                 s.store[m.curr_module][port.name] = init_symbol()
+        
+        if not m.is_child and not m.init_run:
+            print("Inital state:")
+            print(s.store)
 
         for item in module.items:
             if isinstance(item, Value):
@@ -705,7 +712,8 @@ class ExecutionEngine:
             else:
                 self.visit_stmt(m, s, item, modules)
         
-        if not m.is_child and m.assertion_violation:
+        if not m.is_child and not m.init_run:
+        #if not m.is_child and m.assertion_violation:
             print("Final state:")
             print(s.store)
             print("Final path condition:")
@@ -799,7 +807,7 @@ class ExecutionEngine:
                     continue
                 else:
                     print("------------------------")
-                    print(f"{ast.name} Path {i}")
+                    #print(f"{ast.name} Path {i}")
                 self.visit_module(manager, state, ast, modules_dict)
                 manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
@@ -847,19 +855,19 @@ class ExecutionEngine:
             self.populate_child_paths(manager)
             if len(modules) > 1:
                 self.populate_seen_mod(manager)
-                manager.opt_1 = True
+                #manager.opt_1 = True
             else:
                 manager.opt_1 = False
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values()))
             #print(f" Upper bound on num paths {len(paths)}")
-        print(manager.instance_count)
-        print(manager.always_writes)
-        print(manager.assertions)
+        # print(manager.instance_count)
+        # print(manager.always_writes)
+        # print(manager.assertions)
 
     
         self.assertions_always_intersect(manager)
-        print(manager.blocks_of_interest)
+        #print(manager.blocks_of_interest)
         #print(f"Num paths: {manager.num_paths}")
         #print(f"Upper bound on num paths {manager.num_paths}")
         manager.seen = {}
@@ -873,13 +881,14 @@ class ExecutionEngine:
             manager.path_code = manager.config[manager.names_list[0]]
 
             for cycle in range(int(num_cycles)):
-                print(cycle)
+                #print(cycle)
                 if self.check_dup(manager):
                 #if False:
                     continue
                 else:
                     print("------------------------")
-                    print(f"{ast.name} Path {i}")
+                    #print(f"{ast.name} Path {i}")
+                
                 self.visit_module(manager, state, ast, modules_dict)
                 manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
@@ -905,7 +914,7 @@ class ExecutionEngine:
         manager_sub.curr_module = ast.name
         self.init_run(manager_sub, ast)
         #print(f"Num paths: {manager.num_paths}")
-        print(f"Num paths {manager_sub.num_paths}")
+        #print(f"Num paths {manager_sub.num_paths}")
         manager_sub.path_code = manager.config[ast.name]
         manager_sub.seen = manager.seen
 
@@ -918,8 +927,8 @@ class ExecutionEngine:
         for i in range(1):
         #for i in range(manager_sub.num_paths):
             manager_sub.path_code = manager.config[ast.name]
-            print("------------------------")
-            print(f"{ast.name} Path {i}")
+            #print("------------------------")
+            #print(f"{ast.name} Path {i}")
             self.visit_module(manager_sub, state, ast, manager.modules)
             if (manager.assertion_violation):
                 print("Assertion violation")
@@ -967,7 +976,7 @@ def main():
         showVersion()
 
     text = preprocess(filelist, include=options.include, define=options.define)
-    print(text)
+    #print(text)
     ast, directives = parse(filelist,
                             preprocess_include=options.include,
                             preprocess_define=options.define)
