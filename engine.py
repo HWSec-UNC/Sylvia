@@ -5,7 +5,7 @@ from pyverilog.vparser.parser import parse
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
-from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire
+from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg
 import sys
 import os
 from optparse import OptionParser
@@ -150,6 +150,7 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
 def parse_rvalue(rvalue: Rvalue, store, m: ExecutionManager) -> (str, str, str): 
     tokens = str(rvalue).replace('(','').replace(')','').split()
     #print(tokens)
+    print(rvalue)
     op = ""
     if 'Plus' in tokens[0]:
         op = "+"
@@ -526,10 +527,10 @@ class ExecutionEngine:
                     m.in_always = True
                     self.visit_stmt(m, s, sub_stmt, modules)
                     for signal in m.dependencies:
-                        if m.dependencies[signal] in m.updates:
-                            if m.updates[m.dependencies[signal]][0] == 1:
-                                prev_symbol = m.updates[m.dependencies[signal]][1]
-                                new_symbol = s.store[m.curr_module][m.dependencies[signal]]
+                        if m.dependencies[m.curr_module][signal] in m.updates:
+                            if m.updates[m.dependencies[m.curr_module][signal]][0] == 1:
+                                prev_symbol = m.updates[m.dependencies[m.curr_module][signal]][1]
+                                new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
                                 s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
             else: 
                 # print(sens_list.list[0].sig) # clock
@@ -537,12 +538,13 @@ class ExecutionEngine:
                 sub_stmt = stmt.statement
                 m.in_always = True
                 self.visit_stmt(m, s, sub_stmt, modules)
-                for signal in m.dependencies:
-                    if m.dependencies[signal] in m.updates:
-                        if m.updates[m.dependencies[signal]][0] == 1:
-                            prev_symbol = m.updates[m.dependencies[signal]][1]
-                            new_symbol = s.store[m.curr_module][m.dependencies[signal]]
-                            s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
+                for module in m.dependencies:
+                    for signal in m.dependencies[module]:
+                        if m.dependencies[module][signal] in m.updates:
+                            if m.updates[m.dependencies[module][signal]][0] == 1:
+                                prev_symbol = m.updates[m.dependencies[module][signal]][1]
+                                new_symbol = s.store[module][m.dependencies[module][signal]]
+                                s.store[module][signal] = s.store[module][signal].replace(prev_symbol, new_symbol)
         elif isinstance(stmt, Assign):
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
@@ -551,11 +553,13 @@ class ExecutionEngine:
             elif isinstance(stmt.right.var, Partselect):
                 if isinstance(stmt.left.var, Partselect):
                     s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
-                    m.dependencies[stmt.left.var.var.name] = stmt.right.var.var.name
+                    m.dependencies[m.curr_module][stmt.left.var.var.name] = stmt.right.var.var.name
                     m.updates[stmt.left.var.var.name] = 0
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
-                    m.dependencies[stmt.left.var.name] = stmt.right.var.var.name
+                    print(m.dependencies)
+                    print(stmt.left.var.name)
+                    m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
                     m.updates[stmt.left.var.name] = 0
             
             elif isinstance(stmt.right.var, Concat):
@@ -650,13 +654,27 @@ class ExecutionEngine:
             self.visit_stmt(m, s, stmt.statement, modules)
         elif isinstance(stmt, InstanceList):
             if stmt.module in modules:
+                for port in stmt.instances[0].portlist:
+                    if port.argname not in s.store[m.curr_module]:
+                        s.store[m.curr_module][port.argname] = init_symbol()
+                        s.store[stmt.module][port.portname] = s.store[m.curr_module][port.argname]
+                m.opt_1 = False
                 if m.opt_1:
                     if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
+                        print("hello")
                         self.execute_child(modules[stmt.module], s, m)
                     else:
                         #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
+                        print("ho")
                         self.merge_states(m, s, m.seen_mod[stmt.module][m.config[stmt.module]])
+                        # this loop updates all the signals in the top level module
+                        # so that the param connections seem like cont. assigns
+                        for port in stmt.instances[0].portlist:
+                            s.store[m.curr_module][port.argname] = s.store[stmt.module][port.portname]
                 else:
+                    print("hey")
+                    for port in stmt.instances[0].portlist:
+                        s.store[m.curr_module][port.argname] = s.store[stmt.module][port.portname]
                     self.execute_child(modules[stmt.module], s, m)
         elif isinstance(stmt, CaseStatement):
             m.curr_level += 1
@@ -843,6 +861,8 @@ class ExecutionEngine:
                 manager.child_num_paths[module.name] = sub_manager.num_paths
                 manager.config[module.name] = to_binary(0)
                 state.store[module.name] = {}
+            
+                manager.dependencies[module.name] = {}
 
             total_paths = 1
             for x in manager.child_num_paths.values():
@@ -896,7 +916,8 @@ class ExecutionEngine:
                     manager.assertion_violation = False
                     self.solve_pc(state.pc)
                 manager.curr_level = 0
-                manager.dependencies = {}
+                for module in manager.dependencies:
+                    module = {}
                 state.pc.reset()
         #manager.path_code = to_binary(0)
         print(f" finishing {ast.name}")
@@ -922,7 +943,8 @@ class ExecutionEngine:
         if manager.seen_mod[ast.name][manager_sub.path_code] == {}:
             manager.seen_mod[ast.name][manager_sub.path_code] = state.store
         else:
-            print("already seen this")
+            ...
+            #print("already seen this")
         # i'm pretty sure we only ever want to do 1 loop here
         for i in range(1):
         #for i in range(manager_sub.num_paths):
