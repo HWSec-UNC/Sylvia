@@ -81,6 +81,8 @@ class ExecutionManager:
     assertions = []
     blocks_of_interest = []
     init_run: bool = False
+    ignore = False
+    inital_state = {}
 
 def to_binary(i: int, digits: int = 128) -> str:
     num: str = bin(i)[2:]
@@ -149,8 +151,8 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
 
 def parse_rvalue(rvalue: Rvalue, store, m: ExecutionManager) -> (str, str, str): 
     tokens = str(rvalue).replace('(','').replace(')','').split()
-    #print(tokens)
-    print(rvalue)
+    # print(tokens)
+    # print(rvalue)
     op = ""
     if 'Plus' in tokens[0]:
         op = "+"
@@ -210,14 +212,14 @@ class ExecutionEngine:
                 return True
         return False
 
-    def solve_pc(self, s: Solver) -> None:
+    def solve_pc(self, s: Solver) -> bool:
         """Solve path condition."""
         result = str(s.check())
         if str(result) == "sat":
             model = s.model()
-            print(model)
+            return True
         else:
-            print("UNSAT/FAILED")
+            return False
 
     def count_conditionals_2(self, m:ExecutionManager, items) -> int:
         """Rewrite to actually return an int."""
@@ -419,7 +421,7 @@ class ExecutionEngine:
         for path in seen[m.curr_module]:
             if path[bit_index] == '1':
                 count += 1
-        if count >=  2 * nested_ifs:
+        if count >  2 * nested_ifs:
             return True
         return False
 
@@ -473,18 +475,51 @@ class ExecutionEngine:
             else:
                 y = BitVec(expr.right.name, 32)
             if self.branch:
-                s.pc.add(x == y)
+                s.pc.push()
+                s.pc.add(x==y)
+                if not self.solve_pc(s.pc):
+                    s.pc.pop()
+                    #print("Abandoning infeasible path")
+                    m.abandon = True
+                    m.ignore  = True
+                    return
+                    print("BAD!")
             else: 
+                s.pc.push()
                 s.pc.add(x != y)
+                if not self.solve_pc(s.pc):
+                    s.pc.pop()
+                    #print("Abandoning infeasible path")
+                    m.abandon = True
+                    m.ignore = True
+                    return
+                    print("BAD2")
+               
         elif isinstance(expr, Identifier):
             # change this to one since inst is supposed to just be 1 bit width
             # and the identifier class actually doesn't have a width param
             x = BitVec(s.store[m.curr_module][expr.name], 1)
             y = BitVec(1, 1)
             if self.branch:
-                s.pc.add(x == y)
+                s.pc.push()
+                s.pc.add(x==y)
+                if not self.solve_pc(s.pc):
+                    s.pc.pop()
+                    #print("Abandoning infeasible path")
+                    m.abandon = True
+                    m.ignore = True
+                    return
+                    print("BAD!!")
             else: 
+                s.pc.push()
                 s.pc.add(x != y)
+                if not self.solve_pc(s.pc):
+                    s.pc.pop()
+                    #print("Abandoning infeasible path")
+                    m.abandon = True
+                    m.ignore = True
+                    return
+                    print("BAD2!")
 
 
         # Handling Assertions
@@ -557,8 +592,6 @@ class ExecutionEngine:
                     m.updates[stmt.left.var.var.name] = 0
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
-                    print(m.dependencies)
-                    print(stmt.left.var.name)
                     m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
                     m.updates[stmt.left.var.name] = 0
             
@@ -568,6 +601,8 @@ class ExecutionEngine:
                     s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             else:
                 (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
+                if m.curr_module == "place_holder" and lhs == "out":
+                    print("spotted")
                 if (lhs, op, rhs) != ("","",""):
                     s.store[m.curr_module][stmt.left.var.name] = lhs + op + rhs
                 else:
@@ -588,6 +623,8 @@ class ExecutionEngine:
                 (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
                 if (lhs, op, rhs) != ("","",""):
                     s.store[m.curr_module][stmt.left.var.name] = lhs + op + rhs
+                    if m.curr_module == "place_holder" and stmt.left.var.name == "out":
+                        s.store[m.curr_module][stmt.left.var.name] += op + s.store[m.curr_module]["out_wire"]
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             m.updates[stmt.left.var.name] = (1, prev_symbol)
@@ -608,6 +645,9 @@ class ExecutionEngine:
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             else:
                 (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
+
+                if m.curr_module == "place_holder" and lhs == "out":
+                    print("spotted")
                 if (lhs, op, rhs) != ("","",""):
                     s.store[m.curr_module][stmt.left.var.name] = lhs + op + rhs
                 else:
@@ -630,8 +670,8 @@ class ExecutionEngine:
 
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
-                    m.abandon = False
-                    print("Abandoning this path!")
+
+                    #print("Abandoning this path!")
                     return
                 nested_ifs = self.count_conditionals_2(m, stmt.true_statement)
                 diff = 32 - bit_index
@@ -644,8 +684,8 @@ class ExecutionEngine:
                 self.branch = False
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
-                    print("Abandoning this path!")
-                    m.abandon = False
+                    #print("Abandoning this path!")
+
                     return
                 self.visit_stmt(m, s, stmt.false_statement, modules)
         elif isinstance(stmt, SystemCall):
@@ -655,26 +695,28 @@ class ExecutionEngine:
         elif isinstance(stmt, InstanceList):
             if stmt.module in modules:
                 for port in stmt.instances[0].portlist:
-                    if port.argname not in s.store[m.curr_module]:
-                        s.store[m.curr_module][port.argname] = init_symbol()
-                        s.store[stmt.module][port.portname] = s.store[m.curr_module][port.argname]
+                    if str(port.argname) not in s.store[m.curr_module]:
+                        s.store[m.curr_module][str(port.argname)] = init_symbol()
+                        s.store[stmt.module][str(port.portname)] = s.store[m.curr_module][str(port.argname)]
+                    else:
+                        s.store[stmt.module][str(port.portname)] = s.store[m.curr_module][str(port.argname)]
                 m.opt_1 = False
                 if m.opt_1:
                     if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
-                        print("hello")
+                        #print("hello")
                         self.execute_child(modules[stmt.module], s, m)
                     else:
                         #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
-                        print("ho")
+                        #print("ho")
                         self.merge_states(m, s, m.seen_mod[stmt.module][m.config[stmt.module]])
                         # this loop updates all the signals in the top level module
                         # so that the param connections seem like cont. assigns
                         for port in stmt.instances[0].portlist:
-                            s.store[m.curr_module][port.argname] = s.store[stmt.module][port.portname]
+                            s.store[m.curr_module][str(port.argname)] = s.store[stmt.module][str(port.portname)]
                 else:
-                    print("hey")
+                    #print("hey")
                     for port in stmt.instances[0].portlist:
-                        s.store[m.curr_module][port.argname] = s.store[stmt.module][port.portname]
+                        s.store[m.curr_module][str(port.argname)] = s.store[stmt.module][str(port.portname)]
                     self.execute_child(modules[stmt.module], s, m)
         elif isinstance(stmt, CaseStatement):
             m.curr_level += 1
@@ -689,8 +731,8 @@ class ExecutionEngine:
 
                 self.visit_expr(m, s, stmt.comp)
                 if (m.abandon):
-                    m.abandon = False
-                    print("Abandoning this path!")
+ 
+                    #print("Abandoning this path!")
                     return
                 # m.curr_level == (32 - bit_index) this is always true
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
@@ -699,8 +741,8 @@ class ExecutionEngine:
                 self.branch = False
                 self.visit_expr(m, s, stmt.comp)
                 if (m.abandon):
-                    print("Abandoning this path!")
-                    m.abandon = False
+                    #print("Abandoning this path!")
+
                     return
                 self.visit_stmt(m, s, stmt.caselist, modules)
 
@@ -712,15 +754,18 @@ class ExecutionEngine:
 
         for param in params:
             if isinstance(param.list[0], Parameter):
-                s.store[m.curr_module][param.list[0].name] = init_symbol()
+                if param.list[0].name not in s.store[m.curr_module]:
+                    s.store[m.curr_module][param.list[0].name] = init_symbol()
 
         for port in ports:
             if isinstance(port, Ioport):
-                s.store[m.curr_module][port.first.name] = init_symbol()
+                if str(port.first.name) not in s.store[m.curr_module]:
+                    s.store[m.curr_module][str(port.first.name)] = init_symbol()
             else:
-                s.store[m.curr_module][port.name] = init_symbol()
-        
-        if not m.is_child and not m.init_run:
+                if port.name not in s.store[m.curr_module]:
+                    s.store[m.curr_module][port.name] = init_symbol()
+
+        if not m.is_child and not m.init_run and not m.ignore:
             print("Inital state:")
             print(s.store)
 
@@ -729,13 +774,22 @@ class ExecutionEngine:
                 self.visit_expr(m, s, item)
             else:
                 self.visit_stmt(m, s, item, modules)
+
+        if m.ignore:
+            print("infeasible path...")
         
-        if not m.is_child and not m.init_run:
+        if not m.is_child and not m.init_run and not m.ignore:
         #if not m.is_child and m.assertion_violation:
             print("Final state:")
             print(s.store)
+       
             print("Final path condition:")
             print(s.pc)
+        elif m.ignore:
+            #print("Path abandoned")
+            m.abandon = False
+            m.ignore = False
+            return
           
 
     def populate_child_paths(self, manager: ExecutionManager) -> None:
@@ -821,7 +875,7 @@ class ExecutionEngine:
                     manager.config[manager.names_list[j]] = paths[i][j]
                 manager.path_code = manager.config[manager.names_list[0]]
                 if self.check_dup(manager):
-                #if False:
+                # #if False:
                     continue
                 else:
                     print("------------------------")
@@ -836,7 +890,7 @@ class ExecutionEngine:
                 manager.dependencies = {}
                 state.pc.reset()
             #manager.path_code = to_binary(0)
-            print(f" finishing {ast.name}")
+            #print(f" finishing {ast.name}")
             self.module_depth -= 1
     
     #@profile     
@@ -904,7 +958,8 @@ class ExecutionEngine:
                 #print(cycle)
                 if self.check_dup(manager):
                 #if False:
-                    continue
+                    print("------------------------")
+                    #continue
                 else:
                     print("------------------------")
                     #print(f"{ast.name} Path {i}")
@@ -919,8 +974,16 @@ class ExecutionEngine:
                 for module in manager.dependencies:
                     module = {}
                 state.pc.reset()
+            for name in manager.names_list:
+                state.store[name] = {}
+
+            # for module_store in state.store:
+            #     for signal in module_store:
+            #         if signal != "CLK" or signal != "RST":
+            #             print("hi")
+            #             state.store[module_store][signal] = init_symbol()
         #manager.path_code = to_binary(0)
-        print(f" finishing {ast.name}")
+        #print(f" finishing {ast.name}")
         self.module_depth -= 1
         ## print(state.store)
 
@@ -959,9 +1022,11 @@ class ExecutionEngine:
             manager.curr_level = 0
             #state.pc.reset()
         #manager.path_code = to_binary(0)
-        print(f" finishing {ast.name}")
+        #print(f" finishing {ast.name}")
+        if manager_sub.ignore:
+            manager.ignore = True
         self.module_depth -= 1
-        manager.is_child = False
+        #manager.is_child = False
         ## print(state.store)
     
 
