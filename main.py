@@ -16,6 +16,9 @@ from itertools import product
 import logging
 import gc
 from pyverilog.vparser.preprocessor import preprocess
+from engine.execution_manager import ExecutionManager
+from engine.symbolic_state import SymbolicState
+from helpers.rvalue_parser import tokenize, parse_tokens, evaluate
 
 gc.collect()
 
@@ -31,58 +34,6 @@ USAGE = "Usage: python3 -m engine <num_cycles> <verilog_file>.v > out.txt"
 
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
 EXPRESSIONS = ["Decl"]
-
-class SymbolicState:
-    pc = Solver()
-    sort = BitVecSort(32)
-    clock_cycle: int = 0
-    #TODO need to change to be a nested mapping of module names to dictionaries
-    # can be initalized at the beginning of the run 
-    store = {}
-
-    # set to true when evaluating a conditoin so that
-    # evaluating the expression knows to add the expr to the
-    # PC, set to false after
-    cond: bool = False
-
-class ExecutionManager:
-    num_paths: int = 1
-    curr_level: int = 0
-    path_code: str = "0" * 12
-    ast_str: str = ""
-    debugging: bool = False
-    abandon: bool = False
-    assertion_violation: bool = False
-    in_always: bool = False
-    modules = {}
-    dependencies = {}
-    updates = {}
-    seen = {}
-    final = False
-    completed = []
-    is_child: bool = False
-    # Map of module name to path nums for child module
-    child_num_paths = {}    
-    # Map of module name to path code for child module
-    child_path_codes = {}
-    paths = []
-    config = {}
-    names_list = []
-    instance_count = {}
-    seen_mod = {}
-    opt_1: bool = True
-    curr_module: str = ""
-    piece_wise: bool = False
-    child_range: range = None
-    always_writes = {}
-    curr_always = None
-    opt_2: bool = True
-    opt_3: bool = False
-    assertions = []
-    blocks_of_interest = []
-    init_run: bool = False
-    ignore = False
-    inital_state = {}
 
 def to_binary(i: int, digits: int = 128) -> str:
     num: str = bin(i)[2:]
@@ -147,41 +98,6 @@ def parse_expr_to_Z3(e: Value, s: Solver, branch: bool):
 
             return s.add(lhs.assertions() and rhs.assertions())
     return s
-
-
-def parse_rvalue(rvalue: Rvalue, store, m: ExecutionManager) -> (str, str, str): 
-    tokens = str(rvalue).replace('(','').replace(')','').split()
-    # print(tokens)
-    # print(rvalue)
-    op = ""
-    if 'Plus' in tokens[0]:
-        op = "+"
-    elif 'Minus' in tokens[0]:
-        op = '-'
-    elif "Xor" in tokens[0]:
-        op = "^"
-    lhs = tokens[1]
-    rhs = tokens[2]
-    if not lhs.isdigit():
-        if lhs == "Plus":
-            try:
-                lhs = tokens[2]
-                rhs = tokens[3]
-            except KeyError:
-                logging.debug(" line 141")
-        try:
-            lhs = store[m.curr_module][lhs]
-        except KeyError:
-            logging.debug("line 145")
-    if not rhs.isdigit():
-        # print(store)
-        # print(rvalue)
-        try: 
-            rhs = store[m.curr_module][rhs]
-        except KeyError:
-            logging.debug("line 152")
-    return (lhs, op, rhs)
-
 
 def init_symbol() -> str:
     """Initializes signal with random symbol."""
@@ -600,11 +516,9 @@ class ExecutionEngine:
                 for item in stmt.right.var.list:
                     s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             else:
-                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
-                if m.curr_module == "place_holder" and lhs == "out":
-                    print("spotted")
-                if (lhs, op, rhs) != ("","",""):
-                    s.store[m.curr_module][stmt.left.var.name] = lhs + op + rhs
+                new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
+                if new_r_value != None:
+                    s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
         elif isinstance(stmt, NonblockingSubstitution):
@@ -620,11 +534,9 @@ class ExecutionEngine:
             elif isinstance(stmt.right.var, StringConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             else:
-                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
-                if (lhs, op, rhs) != ("","",""):
-                    s.store[m.curr_module][stmt.left.var.name] = lhs + op + rhs
-                    if m.curr_module == "place_holder" and stmt.left.var.name == "out":
-                        s.store[m.curr_module][stmt.left.var.name] += op + s.store[m.curr_module]["out_wire"]
+                new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
+                if new_r_value != None:
+                    s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             m.updates[stmt.left.var.name] = (1, prev_symbol)
@@ -644,12 +556,9 @@ class ExecutionEngine:
             elif isinstance(stmt.right.var, StringConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             else:
-                (lhs, op, rhs) = parse_rvalue(stmt.right.var, s.store, m)
-
-                if m.curr_module == "place_holder" and lhs == "out":
-                    print("spotted")
-                if (lhs, op, rhs) != ("","",""):
-                    s.store[m.curr_module][stmt.left.var.name] = lhs + op + rhs
+                new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
+                if  new_r_value != None:
+                    s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             m.updates[stmt.left.var.name] = (1, prev_symbol)
@@ -766,8 +675,9 @@ class ExecutionEngine:
                     s.store[m.curr_module][port.name] = init_symbol()
 
         if not m.is_child and not m.init_run and not m.ignore:
-            print("Inital state:")
-            print(s.store)
+            # print("Inital state:")
+            # print(s.store)
+            ...
 
         for item in module.items:
             if isinstance(item, Value):
@@ -776,15 +686,17 @@ class ExecutionEngine:
                 self.visit_stmt(m, s, item, modules)
 
         if m.ignore:
-            print("infeasible path...")
+            # print("infeasible path...")
+            ...
         
         if not m.is_child and not m.init_run and not m.ignore:
         #if not m.is_child and m.assertion_violation:
-            print("Final state:")
-            print(s.store)
+            # print("Final state:")
+            #print(s.store)
        
-            print("Final path condition:")
-            print(s.pc)
+            # print("Final path condition:")
+            # print(s.pc)
+            ...
         elif m.ignore:
             #print("Path abandoned")
             m.abandon = False

@@ -1,518 +1,1187 @@
-(<pyverilog.vparser.ast.ModuleDef object at 0x7f74d974b640>, <pyverilog.vparser.ast.ModuleDef object at 0x7f74d9526e20>, <pyverilog.vparser.ast.ModuleDef object at 0x7f74d95422e0>)
+(<pyverilog.vparser.ast.ModuleDef object at 0x7fd8742ccaf0>, <pyverilog.vparser.ast.ModuleDef object at 0x7fd8742d5d30>, <pyverilog.vparser.ast.ModuleDef object at 0x7fd8742d5a30>)
 Executing for 1 clock cycles
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'UKtdmQY53RTpcZ82', 'RST': 'Ok070nECRnMkEZbM', 'enable': 'Q71zCgB5WW5kxcu0', 'value': 'Ma9KvPxAEPq0v8ki', 'led': 'H5QxZRSNW2zQ37YM', 'place_holder_out': 'lRFFGjuUUV7r2KBW'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'UKtdmQY53RTpcZ82', 'RST': 'Ok070nECRnMkEZbM', 'enable': 'Q71zCgB5WW5kxcu0', 'value': 'Ma9KvPxAEPq0v8ki', 'led': 'JF86cdxFd4aoVOGS[23:16]', 'place_holder_out': 'lRFFGjuUUV7r2KBW', 'count': 'JF86cdxFd4aoVOGS', 'state': 'rraAqhEUMo1kM4NM', 'test_1_out': 'jCfT1r7DWaqir1Lc', 'test_2_out': 'nyZC5iyELVLyBULm', 'test_3_out': '7rT5m7r9hPRxpNVM', 'test_4_out': 'ZGLYU7hRxRsaZvFJ'}, 'place_holder': {'CLK': 'UKtdmQY53RTpcZ82', 'RST': 'Ok070nECRnMkEZbM', 'out': 'ZGLYU7hRxRsaZvFJ+1+mgccQDANoEUFS2DM', 'out_wire': 'mgccQDANoEUFS2DM'}, 'place_holder_2': {'CLK': 'UKtdmQY53RTpcZ82', 'RST': 'Ok070nECRnMkEZbM', 'out': 'mgccQDANoEUFS2DM+2'}}
-Final path condition:
-[Ok070nECRnMkEZbM != k!1,
- rraAqhEUMo1kM4NM != 0,
- rraAqhEUMo1kM4NM != 1,
- rraAqhEUMo1kM4NM != 2,
- Ok070nECRnMkEZbM != k!1,
- Ok070nECRnMkEZbM != k!1,
- Ok070nECRnMkEZbM != k!1,
- Ok070nECRnMkEZbM != k!1,
- Ok070nECRnMkEZbM != k!1,
- Ok070nECRnMkEZbM != k!1,
- Ok070nECRnMkEZbM != k!1,
- Ok070nECRnMkEZbM != k!1]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'FzeKIkB4bM8dNSNA', 'RST': 'dDGemAeeO7I06dCD', 'enable': '161DoJMh7hGEfQ9C', 'value': 'f9aFFT7naqTfExBk', 'led': 'iNFGRKmlbbJZbqVI', 'place_holder_out': 'ZfCPdmFEELASDtZ8'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'FzeKIkB4bM8dNSNA', 'RST': 'dDGemAeeO7I06dCD', 'enable': '161DoJMh7hGEfQ9C', 'value': 'f9aFFT7naqTfExBk', 'led': '0[23:16]', 'place_holder_out': 'ZfCPdmFEELASDtZ8', 'count': '0', 'state': '0', 'test_1_out': 'itsm7dd15BUcDpv9', 'test_2_out': 'od1IFqoWxqHTB9TJ', 'test_3_out': 'U5F9OgATWXDbtW3q', 'test_4_out': 'rL0pDyndu7iIt8Wz'}, 'place_holder': {'CLK': 'FzeKIkB4bM8dNSNA', 'RST': 'dDGemAeeO7I06dCD', 'out': '0', 'out_wire': '0HNR2KVmaFy7Sb2Q'}, 'place_holder_2': {'CLK': 'FzeKIkB4bM8dNSNA', 'RST': 'dDGemAeeO7I06dCD', 'out': '0'}}
-Final path condition:
-[dDGemAeeO7I06dCD == k!1,
- dDGemAeeO7I06dCD == k!1,
- dDGemAeeO7I06dCD == k!1,
- dDGemAeeO7I06dCD == k!1,
- dDGemAeeO7I06dCD == k!1,
- dDGemAeeO7I06dCD == k!1,
- dDGemAeeO7I06dCD == k!1,
- dDGemAeeO7I06dCD == k!1,
- dDGemAeeO7I06dCD == k!1]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': '3kb5Y7rjdz7Pa26G', 'RST': 'ZHcZwqyd7GKZeL7P', 'enable': 'olaYhq1nVbS5y3zS', 'value': 'n48OfirkZ3Ou62Hj', 'led': 'gr3w2HFWZMkQh6Xo', 'place_holder_out': '57zUc4FGX7q6vKr6'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': '3kb5Y7rjdz7Pa26G', 'RST': 'ZHcZwqyd7GKZeL7P', 'enable': 'olaYhq1nVbS5y3zS', 'value': 'n48OfirkZ3Ou62Hj', 'led': 'F3nTkl0HECkI6s65[23:16]', 'place_holder_out': '57zUc4FGX7q6vKr6', 'count': 'F3nTkl0HECkI6s65', 'state': 'TnYR41ZmAIoJWsiu', 'test_1_out': 'dOxGgMMpN0E0YC99', 'test_2_out': 'HzMQYMtogNwDaXAq', 'test_3_out': 'tMwA3Dgk5z8AitFE', 'test_4_out': 'dFRtmQ9el4zy9fBP'}, 'place_holder': {'CLK': '3kb5Y7rjdz7Pa26G', 'RST': 'ZHcZwqyd7GKZeL7P', 'out': 'dFRtmQ9el4zy9fBP+1+m4z6ZKoztgd1K0TO', 'out_wire': 'm4z6ZKoztgd1K0TO'}, 'place_holder_2': {'CLK': '3kb5Y7rjdz7Pa26G', 'RST': 'ZHcZwqyd7GKZeL7P', 'out': 'm4z6ZKoztgd1K0TO+2'}}
-Final path condition:
-[ZHcZwqyd7GKZeL7P != k!1,
- TnYR41ZmAIoJWsiu == 0,
- olaYhq1nVbS5y3zS != k!1,
- ZHcZwqyd7GKZeL7P != k!1,
- ZHcZwqyd7GKZeL7P != k!1,
- ZHcZwqyd7GKZeL7P != k!1,
- ZHcZwqyd7GKZeL7P != k!1,
- ZHcZwqyd7GKZeL7P != k!1,
- ZHcZwqyd7GKZeL7P != k!1,
- ZHcZwqyd7GKZeL7P != k!1,
- ZHcZwqyd7GKZeL7P != k!1]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'oxrotPGH1TqstOI0', 'RST': 'YgCRKsk6m2PD9TA8', 'enable': 'nrZ7uJbGrUBZDM6A', 'value': 'YfFUUzrfzZ2XkAu5', 'led': 'UyFBEcG21MgO2alv', 'place_holder_out': '73l8lnxqsTIVUwvO'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'oxrotPGH1TqstOI0', 'RST': 'YgCRKsk6m2PD9TA8', 'enable': 'nrZ7uJbGrUBZDM6A', 'value': 'YfFUUzrfzZ2XkAu5', 'led': '0[23:16]', 'place_holder_out': '73l8lnxqsTIVUwvO', 'count': '0', 'state': '0', 'test_1_out': '9rjBFzVrH53fSxyJ', 'test_2_out': 'TkHLyRfiZlfDt6l9', 'test_3_out': 'hU1bR3wgxiOyA1lO', 'test_4_out': 'lr7iU5ZrVJvGUBMG'}, 'place_holder': {'CLK': 'oxrotPGH1TqstOI0', 'RST': 'YgCRKsk6m2PD9TA8', 'out': '0', 'out_wire': 'FUtMeuNLc1uhaHf7'}, 'place_holder_2': {'CLK': 'oxrotPGH1TqstOI0', 'RST': 'YgCRKsk6m2PD9TA8', 'out': '0'}}
-Final path condition:
-[YgCRKsk6m2PD9TA8 == k!1,
- YgCRKsk6m2PD9TA8 == k!1,
- YgCRKsk6m2PD9TA8 == k!1,
- YgCRKsk6m2PD9TA8 == k!1,
- YgCRKsk6m2PD9TA8 == k!1,
- YgCRKsk6m2PD9TA8 == k!1,
- YgCRKsk6m2PD9TA8 == k!1,
- YgCRKsk6m2PD9TA8 == k!1,
- YgCRKsk6m2PD9TA8 == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'MXvf4OoXSPQKeAQR', 'RST': '54IHUrj3N1KuaT45', 'enable': 'QJ7crEexaJukaAXk', 'value': 'tcTqybkwiTMJWClJ', 'led': '8O6DMMfOqSOIUn8h', 'place_holder_out': '8UKxxn0BX1ashj4N'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'MXvf4OoXSPQKeAQR', 'RST': '54IHUrj3N1KuaT45', 'enable': 'QJ7crEexaJukaAXk', 'value': 'tcTqybkwiTMJWClJ', 'led': 'GbI1LgBx0xe2WUKY[23:16]', 'place_holder_out': '8UKxxn0BX1ashj4N', 'count': 'GbI1LgBx0xe2WUKY', 'state': '2', 'test_1_out': '389y5T0W1QGIQgnY', 'test_2_out': 'dxeYmYbcZcsU9aqz', 'test_3_out': 'wsrR9kxLwZgYvFRI', 'test_4_out': '1yI8NGLZOKzkx8Y1'}, 'place_holder': {'CLK': 'MXvf4OoXSPQKeAQR', 'RST': '54IHUrj3N1KuaT45', 'out': '1yI8NGLZOKzkx8Y1+1+lXkuDNUa2at2ximN', 'out_wire': 'lXkuDNUa2at2ximN'}, 'place_holder_2': {'CLK': 'MXvf4OoXSPQKeAQR', 'RST': '54IHUrj3N1KuaT45', 'out': 'lXkuDNUa2at2ximN+2'}}
-Final path condition:
-[54IHUrj3N1KuaT45 != k!1,
- Kdlfygm7tqn1lKuE != 0,
- Kdlfygm7tqn1lKuE == 1,
- 54IHUrj3N1KuaT45 != k!1,
- 54IHUrj3N1KuaT45 != k!1,
- 54IHUrj3N1KuaT45 != k!1,
- 54IHUrj3N1KuaT45 != k!1,
- 54IHUrj3N1KuaT45 != k!1,
- 54IHUrj3N1KuaT45 != k!1,
- 54IHUrj3N1KuaT45 != k!1,
- 54IHUrj3N1KuaT45 != k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'ak0raLhamTPzHQXt', 'RST': 'vOmWvUSsN6V947B0', 'enable': '77ZbANikktrgqltE', 'value': '5guJDA9ok8vPSpn9', 'led': 'xA3ZaBaukPrue32R', 'place_holder_out': 'QTLrEZph9MMhVmfy'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'ak0raLhamTPzHQXt', 'RST': 'vOmWvUSsN6V947B0', 'enable': '77ZbANikktrgqltE', 'value': '5guJDA9ok8vPSpn9', 'led': '0[23:16]', 'place_holder_out': 'QTLrEZph9MMhVmfy', 'count': '0', 'state': '0', 'test_1_out': 'VblvlWJcDzjIVkWw', 'test_2_out': 'Ctq7TiXZdBAfpClC', 'test_3_out': 'rz5T5XSTLqOpU7xL', 'test_4_out': '8zLGUlhARpQw4u27'}, 'place_holder': {'CLK': 'ak0raLhamTPzHQXt', 'RST': 'vOmWvUSsN6V947B0', 'out': '0', 'out_wire': 'ht3FzOexDA9lDQgk'}, 'place_holder_2': {'CLK': 'ak0raLhamTPzHQXt', 'RST': 'vOmWvUSsN6V947B0', 'out': '0'}}
-Final path condition:
-[vOmWvUSsN6V947B0 == k!1,
- vOmWvUSsN6V947B0 == k!1,
- vOmWvUSsN6V947B0 == k!1,
- vOmWvUSsN6V947B0 == k!1,
- vOmWvUSsN6V947B0 == k!1,
- vOmWvUSsN6V947B0 == k!1,
- vOmWvUSsN6V947B0 == k!1,
- vOmWvUSsN6V947B0 == k!1,
- vOmWvUSsN6V947B0 == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'BgcTapkVjSEcKPkY', 'RST': 'LgDXKETezWyHfvh7', 'enable': 'zfwiKIhuuPExntac', 'value': '0D3oLuzAiRWGkJ0n', 'led': 't2e0qdpTFJrodWJR', 'place_holder_out': '4AYmdGDQDvts3Qh9'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'BgcTapkVjSEcKPkY', 'RST': 'LgDXKETezWyHfvh7', 'enable': 'zfwiKIhuuPExntac', 'value': '0D3oLuzAiRWGkJ0n', 'led': 'QpDv6d9CkeldwI0N[23:16]', 'place_holder_out': '4AYmdGDQDvts3Qh9', 'count': 'QpDv6d9CkeldwI0N', 'state': '1', 'test_1_out': 'VavMmWBZazVQ9Ko1', 'test_2_out': 'EBY3uM9xqodArPIn', 'test_3_out': 'A8dWeQSRn0y35BwB', 'test_4_out': '3k6pmt7szWPxKCGo'}, 'place_holder': {'CLK': 'BgcTapkVjSEcKPkY', 'RST': 'LgDXKETezWyHfvh7', 'out': '3k6pmt7szWPxKCGo+1+9vJoIIWI7Q2k8IFY', 'out_wire': '9vJoIIWI7Q2k8IFY'}, 'place_holder_2': {'CLK': 'BgcTapkVjSEcKPkY', 'RST': 'LgDXKETezWyHfvh7', 'out': '9vJoIIWI7Q2k8IFY+2'}}
-Final path condition:
-[LgDXKETezWyHfvh7 != k!1,
- 2In45GOWqoGc33WW == 0,
- zfwiKIhuuPExntac == k!1,
- LgDXKETezWyHfvh7 != k!1,
- LgDXKETezWyHfvh7 != k!1,
- LgDXKETezWyHfvh7 != k!1,
- LgDXKETezWyHfvh7 != k!1,
- LgDXKETezWyHfvh7 != k!1,
- LgDXKETezWyHfvh7 != k!1,
- LgDXKETezWyHfvh7 != k!1,
- LgDXKETezWyHfvh7 != k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'uLB6jTxroWORODk2', 'RST': 'mfaYTQp67AzfQfiZ', 'enable': 'sb5ulsvcp4ggVU3C', 'value': 'X3foK84oylxfEDkq', 'led': 'nu7hEnlfFeaG5TgF', 'place_holder_out': 'CxVYLPtizHXk3Ofb'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'uLB6jTxroWORODk2', 'RST': 'mfaYTQp67AzfQfiZ', 'enable': 'sb5ulsvcp4ggVU3C', 'value': 'X3foK84oylxfEDkq', 'led': '0[23:16]', 'place_holder_out': 'CxVYLPtizHXk3Ofb', 'count': '0', 'state': '0', 'test_1_out': 'bnJCO1gj5bg4RlBs', 'test_2_out': 'h0gkPtraMCF4reXp', 'test_3_out': 'M6q86Ic2aB0Ivva3', 'test_4_out': 'x4msI9Sf2HE6IIUp'}, 'place_holder': {'CLK': 'uLB6jTxroWORODk2', 'RST': 'mfaYTQp67AzfQfiZ', 'out': '0', 'out_wire': 'FTbwmwcDEyps0yhH'}, 'place_holder_2': {'CLK': 'uLB6jTxroWORODk2', 'RST': 'mfaYTQp67AzfQfiZ', 'out': '0'}}
-Final path condition:
-[mfaYTQp67AzfQfiZ == k!1,
- mfaYTQp67AzfQfiZ == k!1,
- mfaYTQp67AzfQfiZ == k!1,
- mfaYTQp67AzfQfiZ == k!1,
- mfaYTQp67AzfQfiZ == k!1,
- mfaYTQp67AzfQfiZ == k!1,
- mfaYTQp67AzfQfiZ == k!1,
- mfaYTQp67AzfQfiZ == k!1,
- mfaYTQp67AzfQfiZ == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'EIwlNW6Ud7CP7tpK', 'RST': '7pLazZ4MMsmHoUim', 'enable': 'DAS4q6oDvHrvSlua', 'value': '0EsPITJ97BP8nQaQ', 'led': 'tzY1ZPT1nCswQhT4', 'place_holder_out': 'U0KbQXLlZzkQVLid'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'EIwlNW6Ud7CP7tpK', 'RST': '7pLazZ4MMsmHoUim', 'enable': 'DAS4q6oDvHrvSlua', 'value': '0EsPITJ97BP8nQaQ', 'led': 'gwJABbYvgEb6SwB2+0EsPITJ97BP8nQaQ+0EsPITJ97BP8nQaQ+0EsPITJ97BP8nQaQ+0EsPITJ97BP8nQaQ+0EsPITJ97BP8nQaQ+0EsPITJ97BP8nQaQ+0EsPITJ97BP8nQaQ+0EsPITJ97BP8nQaQ+0EsPITJ97BP8nQaQ[23:16]', 'place_holder_out': 'U0KbQXLlZzkQVLid', 'count': 'gwJABbYvgEb6SwB2+0EsPITJ97BP8nQaQ', 'state': '0', 'test_1_out': 'DREvREaSLq1e1m2D', 'test_2_out': 'e8BPJTm2VXe9MJ6h', 'test_3_out': 'zKdo7XoOdzTabHm5', 'test_4_out': 't8OKpwkWe030mMXj'}, 'place_holder': {'CLK': 'EIwlNW6Ud7CP7tpK', 'RST': '7pLazZ4MMsmHoUim', 'out': 't8OKpwkWe030mMXj+1+PRlzbV6oVGav3bQ6', 'out_wire': 'PRlzbV6oVGav3bQ6'}, 'place_holder_2': {'CLK': 'EIwlNW6Ud7CP7tpK', 'RST': '7pLazZ4MMsmHoUim', 'out': 'PRlzbV6oVGav3bQ6+2'}}
-Final path condition:
-[7pLazZ4MMsmHoUim != k!1,
- JSqiaP18C7Wewlvw != 0,
- JSqiaP18C7Wewlvw != 1,
- JSqiaP18C7Wewlvw == 2,
- 7pLazZ4MMsmHoUim != k!1,
- 7pLazZ4MMsmHoUim != k!1,
- 7pLazZ4MMsmHoUim != k!1,
- 7pLazZ4MMsmHoUim != k!1,
- 7pLazZ4MMsmHoUim != k!1,
- 7pLazZ4MMsmHoUim != k!1,
- 7pLazZ4MMsmHoUim != k!1,
- 7pLazZ4MMsmHoUim != k!1]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'WCZt4ITa9P76qHQ3', 'RST': '8dP7fQr5twZbX9vW', 'enable': 'SUXgZ1HkGe5hZNKn', 'value': 's5rGcBwfXNsX9V5A', 'led': 'PCP0kRV2GfZSLb2k', 'place_holder_out': 'HHjTS2ph3oD3cX2F'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'WCZt4ITa9P76qHQ3', 'RST': '8dP7fQr5twZbX9vW', 'enable': 'SUXgZ1HkGe5hZNKn', 'value': 's5rGcBwfXNsX9V5A', 'led': '0[23:16]', 'place_holder_out': 'HHjTS2ph3oD3cX2F', 'count': '0', 'state': '0', 'test_1_out': 'x3yIJMf9r6FoEser', 'test_2_out': 'HU39u7pUfG1Z0N6E', 'test_3_out': 'BDumMjD6oqAymt6I', 'test_4_out': 'Tc4Lyv3EA8VuhxXA'}, 'place_holder': {'CLK': 'WCZt4ITa9P76qHQ3', 'RST': '8dP7fQr5twZbX9vW', 'out': '0', 'out_wire': '39vpK5TkMJNW3J4v'}, 'place_holder_2': {'CLK': 'WCZt4ITa9P76qHQ3', 'RST': '8dP7fQr5twZbX9vW', 'out': '0'}}
-Final path condition:
-[8dP7fQr5twZbX9vW == k!1,
- 8dP7fQr5twZbX9vW == k!1,
- 8dP7fQr5twZbX9vW == k!1,
- 8dP7fQr5twZbX9vW == k!1,
- 8dP7fQr5twZbX9vW == k!1,
- 8dP7fQr5twZbX9vW == k!1,
- 8dP7fQr5twZbX9vW == k!1,
- 8dP7fQr5twZbX9vW == k!1,
- 8dP7fQr5twZbX9vW == k!1]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': '5DEyUDO5kaBchYzQ', 'RST': 'WKxd6B8gE0e1wepM', 'enable': 'aMfMdayDd7sEDff9', 'value': 'yfHAT9L9jNgOA0zo', 'led': 'f9PSrXw6xcoGUtQM', 'place_holder_out': '9CtCl4Tzy7ygrHio'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': '5DEyUDO5kaBchYzQ', 'RST': 'WKxd6B8gE0e1wepM', 'enable': 'aMfMdayDd7sEDff9', 'value': 'yfHAT9L9jNgOA0zo', 'led': '3SYZhvDtVh4rbKAh[23:16]', 'place_holder_out': '9CtCl4Tzy7ygrHio', 'count': '3SYZhvDtVh4rbKAh', 'state': 'aBTqizB7WiNy9ooj', 'test_1_out': 'TN7aqAsSPwsktCbd', 'test_2_out': 'zJEXVrOeG08UMHrJ', 'test_3_out': 'XDKTcKEfsxbws9Jz', 'test_4_out': 'VjM5coj55KfQlvEp'}, 'place_holder': {'CLK': '5DEyUDO5kaBchYzQ', 'RST': 'WKxd6B8gE0e1wepM', 'out': 'VjM5coj55KfQlvEp+1+wmfuVQauv9DkLQH5', 'out_wire': 'wmfuVQauv9DkLQH5'}, 'place_holder_2': {'CLK': '5DEyUDO5kaBchYzQ', 'RST': 'WKxd6B8gE0e1wepM', 'out': 'wmfuVQauv9DkLQH5+2'}}
-Final path condition:
-[WKxd6B8gE0e1wepM != k!1,
- aBTqizB7WiNy9ooj == 0,
- aMfMdayDd7sEDff9 != k!1,
- WKxd6B8gE0e1wepM != k!1,
- WKxd6B8gE0e1wepM != k!1,
- WKxd6B8gE0e1wepM != k!1,
- WKxd6B8gE0e1wepM != k!1,
- WKxd6B8gE0e1wepM != k!1,
- WKxd6B8gE0e1wepM != k!1,
- WKxd6B8gE0e1wepM != k!1,
- WKxd6B8gE0e1wepM != k!1]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'DmKhClM8MkmajGnk', 'RST': 'y0GfugP1eqbnQzGN', 'enable': 'SAeUEo45RZcfAZnC', 'value': 'rN66VEGYAM2O71qY', 'led': 'sG08vIjeLoaZGNEL', 'place_holder_out': 'JMtulJXVNpIbOAJQ'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'DmKhClM8MkmajGnk', 'RST': 'y0GfugP1eqbnQzGN', 'enable': 'SAeUEo45RZcfAZnC', 'value': 'rN66VEGYAM2O71qY', 'led': '0[23:16]', 'place_holder_out': 'JMtulJXVNpIbOAJQ', 'count': '0', 'state': '0', 'test_1_out': 'Zj8nzFdAxEU6Qf7a', 'test_2_out': 'xODULIEGti8dftEn', 'test_3_out': 'MfvnZCUtYd8OOz81', 'test_4_out': 'tKp9G3sKvR1RdcNY'}, 'place_holder': {'CLK': 'DmKhClM8MkmajGnk', 'RST': 'y0GfugP1eqbnQzGN', 'out': '0', 'out_wire': 'dlKHNnr9I6QWLV2K'}, 'place_holder_2': {'CLK': 'DmKhClM8MkmajGnk', 'RST': 'y0GfugP1eqbnQzGN', 'out': '0'}}
-Final path condition:
-[y0GfugP1eqbnQzGN == k!1,
- y0GfugP1eqbnQzGN == k!1,
- y0GfugP1eqbnQzGN == k!1,
- y0GfugP1eqbnQzGN == k!1,
- y0GfugP1eqbnQzGN == k!1,
- y0GfugP1eqbnQzGN == k!1,
- y0GfugP1eqbnQzGN == k!1,
- y0GfugP1eqbnQzGN == k!1,
- y0GfugP1eqbnQzGN == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': '3bojyuJb7WUcRsIg', 'RST': 'S0tG9YoRWmnqMdVj', 'enable': 'UVqgHEne2IQFq0fp', 'value': 'ZhdWeaXUR5V7pqhe', 'led': 'Q599nuKhYlKctQl5', 'place_holder_out': 'atzgVDf3BmLpdzir'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': '3bojyuJb7WUcRsIg', 'RST': 'S0tG9YoRWmnqMdVj', 'enable': 'UVqgHEne2IQFq0fp', 'value': 'ZhdWeaXUR5V7pqhe', 'led': 'sQuyenNV2UebgXRR[23:16]', 'place_holder_out': 'atzgVDf3BmLpdzir', 'count': 'sQuyenNV2UebgXRR', 'state': '2', 'test_1_out': 'JF5y3fBypIaKrP2m', 'test_2_out': 'xEPiFnFr3s95oYNg', 'test_3_out': 'mxuDMLuewa8OrcAa', 'test_4_out': 'Ofkozk0VuTbKDOKC'}, 'place_holder': {'CLK': '3bojyuJb7WUcRsIg', 'RST': 'S0tG9YoRWmnqMdVj', 'out': 'Ofkozk0VuTbKDOKC+1+0Ys642T1rGTPajCl', 'out_wire': '0Ys642T1rGTPajCl'}, 'place_holder_2': {'CLK': '3bojyuJb7WUcRsIg', 'RST': 'S0tG9YoRWmnqMdVj', 'out': '0Ys642T1rGTPajCl+2'}}
-Final path condition:
-[S0tG9YoRWmnqMdVj != k!1,
- YpQnbIR8XiYhbdm0 != 0,
- YpQnbIR8XiYhbdm0 == 1,
- S0tG9YoRWmnqMdVj != k!1,
- S0tG9YoRWmnqMdVj != k!1,
- S0tG9YoRWmnqMdVj != k!1,
- S0tG9YoRWmnqMdVj != k!1,
- S0tG9YoRWmnqMdVj != k!1,
- S0tG9YoRWmnqMdVj != k!1,
- S0tG9YoRWmnqMdVj != k!1,
- S0tG9YoRWmnqMdVj != k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': '7mH3buoaLbBESeQN', 'RST': 'avC6ZfbVzdxyF76X', 'enable': 'awKftBgEweWOTWem', 'value': '8oWVY8yUVqe73ACK', 'led': 'UeycPmqw96goWrzF', 'place_holder_out': 'or72rrlEo9qWmKHg'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': '7mH3buoaLbBESeQN', 'RST': 'avC6ZfbVzdxyF76X', 'enable': 'awKftBgEweWOTWem', 'value': '8oWVY8yUVqe73ACK', 'led': '0[23:16]', 'place_holder_out': 'or72rrlEo9qWmKHg', 'count': '0', 'state': '0', 'test_1_out': 'ZjhIHNyP4Qpt4Dt1', 'test_2_out': 'NvgHuejde1QM7ODl', 'test_3_out': '1VsQVpbWuJcO5ovS', 'test_4_out': '2DZWm9cfrQbX1LE8'}, 'place_holder': {'CLK': '7mH3buoaLbBESeQN', 'RST': 'avC6ZfbVzdxyF76X', 'out': '0', 'out_wire': 'd7VfqdU1t8IJvZBb'}, 'place_holder_2': {'CLK': '7mH3buoaLbBESeQN', 'RST': 'avC6ZfbVzdxyF76X', 'out': '0'}}
-Final path condition:
-[avC6ZfbVzdxyF76X == k!1,
- avC6ZfbVzdxyF76X == k!1,
- avC6ZfbVzdxyF76X == k!1,
- avC6ZfbVzdxyF76X == k!1,
- avC6ZfbVzdxyF76X == k!1,
- avC6ZfbVzdxyF76X == k!1,
- avC6ZfbVzdxyF76X == k!1,
- avC6ZfbVzdxyF76X == k!1,
- avC6ZfbVzdxyF76X == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'Rt4DpZ4JX6a5KvDG', 'RST': 'uUqF4d9l8BaSBL2y', 'enable': 'cjTYrPZB6wvfB298', 'value': 't7OAHjsagl4JE4XE', 'led': 'XLt3N6KWBvNtJKul', 'place_holder_out': 'fOwP4T2LsvvJxlQq'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'Rt4DpZ4JX6a5KvDG', 'RST': 'uUqF4d9l8BaSBL2y', 'enable': 'cjTYrPZB6wvfB298', 'value': 't7OAHjsagl4JE4XE', 'led': 'dFugHUetYwtcrpP4[23:16]', 'place_holder_out': 'fOwP4T2LsvvJxlQq', 'count': 'dFugHUetYwtcrpP4', 'state': '1', 'test_1_out': 'taR8AbZUQSeFpicY', 'test_2_out': 'lJKBTfLQvftB4ebg', 'test_3_out': 'u7PmTsH7GPxXZDAx', 'test_4_out': 'kY0zsb84lm65NSQY'}, 'place_holder': {'CLK': 'Rt4DpZ4JX6a5KvDG', 'RST': 'uUqF4d9l8BaSBL2y', 'out': 'kY0zsb84lm65NSQY+1+C0DBwlOFP1QE9IWX', 'out_wire': 'C0DBwlOFP1QE9IWX'}, 'place_holder_2': {'CLK': 'Rt4DpZ4JX6a5KvDG', 'RST': 'uUqF4d9l8BaSBL2y', 'out': 'C0DBwlOFP1QE9IWX+2'}}
-Final path condition:
-[uUqF4d9l8BaSBL2y != k!1,
- o7uf11Cz3hxzfg5S == 0,
- cjTYrPZB6wvfB298 == k!1,
- uUqF4d9l8BaSBL2y != k!1,
- uUqF4d9l8BaSBL2y != k!1,
- uUqF4d9l8BaSBL2y != k!1,
- uUqF4d9l8BaSBL2y != k!1,
- uUqF4d9l8BaSBL2y != k!1,
- uUqF4d9l8BaSBL2y != k!1,
- uUqF4d9l8BaSBL2y != k!1,
- uUqF4d9l8BaSBL2y != k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'NFIQOQWLnL6ZonOR', 'RST': 'KWKn1rdDTJneZGge', 'enable': '3eLmREmBQo4hfOyz', 'value': 'c9FSNbCcMzQqcmsx', 'led': '04lKeozy6Ul9xDpX', 'place_holder_out': 'a35aNEV6u9H8VUl6'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'NFIQOQWLnL6ZonOR', 'RST': 'KWKn1rdDTJneZGge', 'enable': '3eLmREmBQo4hfOyz', 'value': 'c9FSNbCcMzQqcmsx', 'led': '0[23:16]', 'place_holder_out': 'a35aNEV6u9H8VUl6', 'count': '0', 'state': '0', 'test_1_out': 'CRVcLCWsy6hQhsF6', 'test_2_out': 'Lg7L0DS5Q9kT32Dj', 'test_3_out': 'MTqhrDvewzX5ejEx', 'test_4_out': 'BJ4xWz8kb8oOl72j'}, 'place_holder': {'CLK': 'NFIQOQWLnL6ZonOR', 'RST': 'KWKn1rdDTJneZGge', 'out': '0', 'out_wire': 'Q0xEYFC1rEgzDSi2'}, 'place_holder_2': {'CLK': 'NFIQOQWLnL6ZonOR', 'RST': 'KWKn1rdDTJneZGge', 'out': '0'}}
-Final path condition:
-[KWKn1rdDTJneZGge == k!1,
- KWKn1rdDTJneZGge == k!1,
- KWKn1rdDTJneZGge == k!1,
- KWKn1rdDTJneZGge == k!1,
- KWKn1rdDTJneZGge == k!1,
- KWKn1rdDTJneZGge == k!1,
- KWKn1rdDTJneZGge == k!1,
- KWKn1rdDTJneZGge == k!1,
- KWKn1rdDTJneZGge == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'FkfnWFUCCq7mR7tl', 'RST': 'rxOy17sC4rXYEJeJ', 'enable': 'nejyVTzg3LSLwPtA', 'value': 'jE5D0ZY9cB89mT7F', 'led': 'EH5MJ8iV2ugZLmyJ', 'place_holder_out': 'gINKzzwiccDHZv3R'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'FkfnWFUCCq7mR7tl', 'RST': 'rxOy17sC4rXYEJeJ', 'enable': 'nejyVTzg3LSLwPtA', 'value': 'jE5D0ZY9cB89mT7F', 'led': 'ylFl9XRizuigkILr[23:16]', 'place_holder_out': 'gINKzzwiccDHZv3R', 'count': 'ylFl9XRizuigkILr', 'state': 'CkeilBOhOSVcU6He', 'test_1_out': 'wFIpkMLpcJ8EnJFX', 'test_2_out': 'r5IenM996fC83ikB', 'test_3_out': '8h2eYGEfpMRVbgvt', 'test_4_out': 'P5OOGU9N0eQk021b'}, 'place_holder': {'CLK': 'FkfnWFUCCq7mR7tl', 'RST': 'rxOy17sC4rXYEJeJ', 'out': 'P5OOGU9N0eQk021b+1+InUepR8oBu4jR4Bq', 'out_wire': 'InUepR8oBu4jR4Bq'}, 'place_holder_2': {'CLK': 'FkfnWFUCCq7mR7tl', 'RST': 'rxOy17sC4rXYEJeJ', 'out': 'InUepR8oBu4jR4Bq+2'}}
-Final path condition:
-[rxOy17sC4rXYEJeJ != k!1,
- CkeilBOhOSVcU6He != 0,
- CkeilBOhOSVcU6He != 1,
- CkeilBOhOSVcU6He != 2,
- rxOy17sC4rXYEJeJ != k!1,
- rxOy17sC4rXYEJeJ != k!1,
- rxOy17sC4rXYEJeJ != k!1,
- rxOy17sC4rXYEJeJ != k!1,
- rxOy17sC4rXYEJeJ != k!1,
- rxOy17sC4rXYEJeJ != k!1,
- rxOy17sC4rXYEJeJ != k!1,
- rxOy17sC4rXYEJeJ != k!1]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': '4Gld03ilLzAyOG5j', 'RST': 'gVtwLTvMmx7wQyDI', 'enable': 'MPg22iyyWpWgocaJ', 'value': '3GXjsexBrOqxp3ko', 'led': 'rIrmjTvTuG6SJtSo', 'place_holder_out': 'A5qUCKZ2KJQaDpSj'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': '4Gld03ilLzAyOG5j', 'RST': 'gVtwLTvMmx7wQyDI', 'enable': 'MPg22iyyWpWgocaJ', 'value': '3GXjsexBrOqxp3ko', 'led': '0[23:16]', 'place_holder_out': 'A5qUCKZ2KJQaDpSj', 'count': '0', 'state': '0', 'test_1_out': '6q2ohz3v88rMfo8P', 'test_2_out': 'Jct6LHWgS5QvE4zM', 'test_3_out': '37254dOuWRq923Wx', 'test_4_out': '2FtJNWbEyASDURIR'}, 'place_holder': {'CLK': '4Gld03ilLzAyOG5j', 'RST': 'gVtwLTvMmx7wQyDI', 'out': '0', 'out_wire': 'HyG0hozo8Unrc1DW'}, 'place_holder_2': {'CLK': '4Gld03ilLzAyOG5j', 'RST': 'gVtwLTvMmx7wQyDI', 'out': '0'}}
-Final path condition:
-[gVtwLTvMmx7wQyDI == k!1,
- gVtwLTvMmx7wQyDI == k!1,
- gVtwLTvMmx7wQyDI == k!1,
- gVtwLTvMmx7wQyDI == k!1,
- gVtwLTvMmx7wQyDI == k!1,
- gVtwLTvMmx7wQyDI == k!1,
- gVtwLTvMmx7wQyDI == k!1,
- gVtwLTvMmx7wQyDI == k!1,
- gVtwLTvMmx7wQyDI == k!1]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'aO4xOpXc1twvAbVF', 'RST': '9133QGUN4805IYr5', 'enable': 'oeL3MdY0MFydmOYS', 'value': 'Y5kEXFVDeH98QUFp', 'led': 'ZNnt5UJtVuJFjsiB', 'place_holder_out': 'HDcC09AXxZYSTu0g'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'aO4xOpXc1twvAbVF', 'RST': '9133QGUN4805IYr5', 'enable': 'oeL3MdY0MFydmOYS', 'value': 'Y5kEXFVDeH98QUFp', 'led': 'ZKPGrE0BwPmhdQOw[23:16]', 'place_holder_out': 'HDcC09AXxZYSTu0g', 'count': 'ZKPGrE0BwPmhdQOw', 'state': 'kd4tBIwt5m0ApQea', 'test_1_out': 'x15gP6PwweslfCOq', 'test_2_out': 'TzxW2R7lJFZdgEGB', 'test_3_out': 'PlyEE0NR4LDTDuGG', 'test_4_out': 'TINOsopEDVsc26Tm'}, 'place_holder': {'CLK': 'aO4xOpXc1twvAbVF', 'RST': '9133QGUN4805IYr5', 'out': 'TINOsopEDVsc26Tm+1+PdYXLd8UvJ9BZPOf', 'out_wire': 'PdYXLd8UvJ9BZPOf'}, 'place_holder_2': {'CLK': 'aO4xOpXc1twvAbVF', 'RST': '9133QGUN4805IYr5', 'out': 'PdYXLd8UvJ9BZPOf+2'}}
-Final path condition:
-[9133QGUN4805IYr5 != k!1,
- kd4tBIwt5m0ApQea == 0,
- oeL3MdY0MFydmOYS != k!1,
- 9133QGUN4805IYr5 != k!1,
- 9133QGUN4805IYr5 != k!1,
- 9133QGUN4805IYr5 != k!1,
- 9133QGUN4805IYr5 != k!1,
- 9133QGUN4805IYr5 != k!1,
- 9133QGUN4805IYr5 != k!1,
- 9133QGUN4805IYr5 != k!1,
- 9133QGUN4805IYr5 != k!1]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'LxBvO9qXgr1YCMO0', 'RST': 'fdEsqihGlUGlTMf6', 'enable': 'FDf0fyzmbmxXok25', 'value': 'mWUCKJAUt5aA2Wos', 'led': '7qomBFALnK66gWst', 'place_holder_out': 'BnylfrYd4iDWR4g3'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'LxBvO9qXgr1YCMO0', 'RST': 'fdEsqihGlUGlTMf6', 'enable': 'FDf0fyzmbmxXok25', 'value': 'mWUCKJAUt5aA2Wos', 'led': '0[23:16]', 'place_holder_out': 'BnylfrYd4iDWR4g3', 'count': '0', 'state': '0', 'test_1_out': 'RvO1mFpC8zpoFDFR', 'test_2_out': 'g1iRrpqK7G7iDQpj', 'test_3_out': 'DwzxjEvoYdwpGjZE', 'test_4_out': 'ePAIpgvWS35Yqpp2'}, 'place_holder': {'CLK': 'LxBvO9qXgr1YCMO0', 'RST': 'fdEsqihGlUGlTMf6', 'out': '0', 'out_wire': 'ncdTn0LEU7GgfpuV'}, 'place_holder_2': {'CLK': 'LxBvO9qXgr1YCMO0', 'RST': 'fdEsqihGlUGlTMf6', 'out': '0'}}
-Final path condition:
-[fdEsqihGlUGlTMf6 == k!1,
- fdEsqihGlUGlTMf6 == k!1,
- fdEsqihGlUGlTMf6 == k!1,
- fdEsqihGlUGlTMf6 == k!1,
- fdEsqihGlUGlTMf6 == k!1,
- fdEsqihGlUGlTMf6 == k!1,
- fdEsqihGlUGlTMf6 == k!1,
- fdEsqihGlUGlTMf6 == k!1,
- fdEsqihGlUGlTMf6 == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'f8rjzf3DBemTvu8V', 'RST': 'gbLnfP0GMxR8OdoW', 'enable': 'bBFuXL0oZu9Wo0cA', 'value': 'K42kVHTVriCqE2Nb', 'led': 'ybwtHoYcFIkatIFJ', 'place_holder_out': 'JwSJsEp4qzMQzUwx'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'f8rjzf3DBemTvu8V', 'RST': 'gbLnfP0GMxR8OdoW', 'enable': 'bBFuXL0oZu9Wo0cA', 'value': 'K42kVHTVriCqE2Nb', 'led': 'TonSmMcOV6adFr2R[23:16]', 'place_holder_out': 'JwSJsEp4qzMQzUwx', 'count': 'TonSmMcOV6adFr2R', 'state': '2', 'test_1_out': 'GtphyME7u5JgrbYM', 'test_2_out': 'DktxQdqUk6IPJcbs', 'test_3_out': 'BB8DoaFALiGjsLdh', 'test_4_out': 'LOos3xGC3AmGjS8m'}, 'place_holder': {'CLK': 'f8rjzf3DBemTvu8V', 'RST': 'gbLnfP0GMxR8OdoW', 'out': 'LOos3xGC3AmGjS8m+1+SVXyWsJ26aLufu5j', 'out_wire': 'SVXyWsJ26aLufu5j'}, 'place_holder_2': {'CLK': 'f8rjzf3DBemTvu8V', 'RST': 'gbLnfP0GMxR8OdoW', 'out': 'SVXyWsJ26aLufu5j+2'}}
-Final path condition:
-[gbLnfP0GMxR8OdoW != k!1,
- HcczSMuyiV9NN7SZ != 0,
- HcczSMuyiV9NN7SZ == 1,
- gbLnfP0GMxR8OdoW != k!1,
- gbLnfP0GMxR8OdoW != k!1,
- gbLnfP0GMxR8OdoW != k!1,
- gbLnfP0GMxR8OdoW != k!1,
- gbLnfP0GMxR8OdoW != k!1,
- gbLnfP0GMxR8OdoW != k!1,
- gbLnfP0GMxR8OdoW != k!1,
- gbLnfP0GMxR8OdoW != k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'eC4Ya8Ohi0IjxflO', 'RST': 'fQvDLkz3Vj295KcO', 'enable': 'o4O7LkAq4SkeTyhr', 'value': 'n8xt87hJyg9cMjOS', 'led': 'I5sJ2X20lCvoBIGs', 'place_holder_out': 'tOQbDbcc0sXQGpRB'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'eC4Ya8Ohi0IjxflO', 'RST': 'fQvDLkz3Vj295KcO', 'enable': 'o4O7LkAq4SkeTyhr', 'value': 'n8xt87hJyg9cMjOS', 'led': '0[23:16]', 'place_holder_out': 'tOQbDbcc0sXQGpRB', 'count': '0', 'state': '0', 'test_1_out': 'MUuZSrHS9pAsWCYw', 'test_2_out': 'W3uulNtVVGOn1VCz', 'test_3_out': '6eE5cH3WxJczrgBe', 'test_4_out': 'lccuWPAgx7CIDgML'}, 'place_holder': {'CLK': 'eC4Ya8Ohi0IjxflO', 'RST': 'fQvDLkz3Vj295KcO', 'out': '0', 'out_wire': 'LAfKpZR7uW1f7di7'}, 'place_holder_2': {'CLK': 'eC4Ya8Ohi0IjxflO', 'RST': 'fQvDLkz3Vj295KcO', 'out': '0'}}
-Final path condition:
-[fQvDLkz3Vj295KcO == k!1,
- fQvDLkz3Vj295KcO == k!1,
- fQvDLkz3Vj295KcO == k!1,
- fQvDLkz3Vj295KcO == k!1,
- fQvDLkz3Vj295KcO == k!1,
- fQvDLkz3Vj295KcO == k!1,
- fQvDLkz3Vj295KcO == k!1,
- fQvDLkz3Vj295KcO == k!1,
- fQvDLkz3Vj295KcO == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'TPTvxUOjRQOf55wN', 'RST': 'yeyC0C1OQBJXqIgx', 'enable': 'YzVmcOJi82Z4Uf0s', 'value': 'trSQ9rjb5zpMkGQL', 'led': 'UWyex8cdBqmJLUVE', 'place_holder_out': 'w4NEJ9VgKe413geX'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'TPTvxUOjRQOf55wN', 'RST': 'yeyC0C1OQBJXqIgx', 'enable': 'YzVmcOJi82Z4Uf0s', 'value': 'trSQ9rjb5zpMkGQL', 'led': 'HGiV5InuV2wpuqcL[23:16]', 'place_holder_out': 'w4NEJ9VgKe413geX', 'count': 'HGiV5InuV2wpuqcL', 'state': '1', 'test_1_out': 'aYkdyfj8wzCmB5MO', 'test_2_out': 'HvG3IY8i4SoCf7UP', 'test_3_out': 'vAC7DIxmL9SK1KVX', 'test_4_out': '1pwe9ORQuDMLxTLW'}, 'place_holder': {'CLK': 'TPTvxUOjRQOf55wN', 'RST': 'yeyC0C1OQBJXqIgx', 'out': '1pwe9ORQuDMLxTLW+1+UR954TOqqjiCkQAv', 'out_wire': 'UR954TOqqjiCkQAv'}, 'place_holder_2': {'CLK': 'TPTvxUOjRQOf55wN', 'RST': 'yeyC0C1OQBJXqIgx', 'out': 'UR954TOqqjiCkQAv+2'}}
-Final path condition:
-[yeyC0C1OQBJXqIgx != k!1,
- uoeqnvXe346smPUp == 0,
- YzVmcOJi82Z4Uf0s == k!1,
- yeyC0C1OQBJXqIgx != k!1,
- yeyC0C1OQBJXqIgx != k!1,
- yeyC0C1OQBJXqIgx != k!1,
- yeyC0C1OQBJXqIgx != k!1,
- yeyC0C1OQBJXqIgx != k!1,
- yeyC0C1OQBJXqIgx != k!1,
- yeyC0C1OQBJXqIgx != k!1,
- yeyC0C1OQBJXqIgx != k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'hrgNxXJtDTovVgt2', 'RST': 'h6yghCKIQc5DanxK', 'enable': 'EmYfDEZdix9VWTBy', 'value': 'V1IMcWHO4C2pYB0k', 'led': 'mhhnccd8a75d7fWr', 'place_holder_out': 'Wbm6C4YnsUcRzvYS'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'hrgNxXJtDTovVgt2', 'RST': 'h6yghCKIQc5DanxK', 'enable': 'EmYfDEZdix9VWTBy', 'value': 'V1IMcWHO4C2pYB0k', 'led': '0[23:16]', 'place_holder_out': 'Wbm6C4YnsUcRzvYS', 'count': '0', 'state': '0', 'test_1_out': 'zBFhxoQQczY87onR', 'test_2_out': 'RXYiijrl5aDgMTPw', 'test_3_out': '0N9axfsAkvxvne1q', 'test_4_out': 'ZGjXAEIrU8GyLPgq'}, 'place_holder': {'CLK': 'hrgNxXJtDTovVgt2', 'RST': 'h6yghCKIQc5DanxK', 'out': '0', 'out_wire': 'xyzJicyHDixr0Thm'}, 'place_holder_2': {'CLK': 'hrgNxXJtDTovVgt2', 'RST': 'h6yghCKIQc5DanxK', 'out': '0'}}
-Final path condition:
-[h6yghCKIQc5DanxK == k!1,
- h6yghCKIQc5DanxK == k!1,
- h6yghCKIQc5DanxK == k!1,
- h6yghCKIQc5DanxK == k!1,
- h6yghCKIQc5DanxK == k!1,
- h6yghCKIQc5DanxK == k!1,
- h6yghCKIQc5DanxK == k!1,
- h6yghCKIQc5DanxK == k!1,
- h6yghCKIQc5DanxK == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'L5obQ6nsjWK2W3UZ', 'RST': 'JjDIhox7ZLkk1SsB', 'enable': 'XKqwrxdRvvBfnb1w', 'value': 'oNdItQNFuTmS4epz', 'led': 'hPfj1CZMNQ6Z9n1Z', 'place_holder_out': 'qYIC1DZ0oxzkniql'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'L5obQ6nsjWK2W3UZ', 'RST': 'JjDIhox7ZLkk1SsB', 'enable': 'XKqwrxdRvvBfnb1w', 'value': 'oNdItQNFuTmS4epz', 'led': 'tt7kT0ETKDRXekDa+oNdItQNFuTmS4epz+oNdItQNFuTmS4epz+oNdItQNFuTmS4epz+oNdItQNFuTmS4epz+oNdItQNFuTmS4epz+oNdItQNFuTmS4epz+oNdItQNFuTmS4epz+oNdItQNFuTmS4epz+oNdItQNFuTmS4epz[23:16]', 'place_holder_out': 'qYIC1DZ0oxzkniql', 'count': 'tt7kT0ETKDRXekDa+oNdItQNFuTmS4epz', 'state': '0', 'test_1_out': 'Xf8Sg8g44tPMUhC4', 'test_2_out': 'F3lR5EprwChEn5NO', 'test_3_out': 'kyFjJMBSyPNvdXk4', 'test_4_out': 'gA2LIXG2BXC1upE6'}, 'place_holder': {'CLK': 'L5obQ6nsjWK2W3UZ', 'RST': 'JjDIhox7ZLkk1SsB', 'out': 'gA2LIXG2BXC1upE6+1+GEbzKDjGiNKxySSN', 'out_wire': 'GEbzKDjGiNKxySSN'}, 'place_holder_2': {'CLK': 'L5obQ6nsjWK2W3UZ', 'RST': 'JjDIhox7ZLkk1SsB', 'out': 'GEbzKDjGiNKxySSN+2'}}
-Final path condition:
-[JjDIhox7ZLkk1SsB != k!1,
- fCZatzMrzF9zJI5X != 0,
- fCZatzMrzF9zJI5X != 1,
- fCZatzMrzF9zJI5X == 2,
- JjDIhox7ZLkk1SsB != k!1,
- JjDIhox7ZLkk1SsB != k!1,
- JjDIhox7ZLkk1SsB != k!1,
- JjDIhox7ZLkk1SsB != k!1,
- JjDIhox7ZLkk1SsB != k!1,
- JjDIhox7ZLkk1SsB != k!1,
- JjDIhox7ZLkk1SsB != k!1,
- JjDIhox7ZLkk1SsB != k!1]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': '4Pu6zxKSsP1HVzj3', 'RST': 'GQ84Nbohie8GNPNk', 'enable': 'Oo6MgrG7SIbuaci1', 'value': '5fILIgI5PMDzg25p', 'led': 'ZCDXnOVeiQJ0d1i7', 'place_holder_out': 'Wa6gUqcehK8BjVBD'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': '4Pu6zxKSsP1HVzj3', 'RST': 'GQ84Nbohie8GNPNk', 'enable': 'Oo6MgrG7SIbuaci1', 'value': '5fILIgI5PMDzg25p', 'led': '0[23:16]', 'place_holder_out': 'Wa6gUqcehK8BjVBD', 'count': '0', 'state': '0', 'test_1_out': 'gRCpAGsGRuLWhkxT', 'test_2_out': '0AGPTnDtefNZRrVA', 'test_3_out': 'Rc4mTb0c8tayrXAa', 'test_4_out': 'WFiurjwTFEituYF8'}, 'place_holder': {'CLK': '4Pu6zxKSsP1HVzj3', 'RST': 'GQ84Nbohie8GNPNk', 'out': '0', 'out_wire': '0yA9S9Sw89EP2uqk'}, 'place_holder_2': {'CLK': '4Pu6zxKSsP1HVzj3', 'RST': 'GQ84Nbohie8GNPNk', 'out': '0'}}
-Final path condition:
-[GQ84Nbohie8GNPNk == k!1,
- GQ84Nbohie8GNPNk == k!1,
- GQ84Nbohie8GNPNk == k!1,
- GQ84Nbohie8GNPNk == k!1,
- GQ84Nbohie8GNPNk == k!1,
- GQ84Nbohie8GNPNk == k!1,
- GQ84Nbohie8GNPNk == k!1,
- GQ84Nbohie8GNPNk == k!1,
- GQ84Nbohie8GNPNk == k!1]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'pTsg0QmvmueWLCFH', 'RST': 'jhBc8Fd0vcOqrNgK', 'enable': 'yvZMLHsBUNypbFAF', 'value': '9djCxcX6kCVejRpj', 'led': 'qxbLqWcajpvMG7Zv', 'place_holder_out': 'qDTPEO3T8cyI6bkn'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'pTsg0QmvmueWLCFH', 'RST': 'jhBc8Fd0vcOqrNgK', 'enable': 'yvZMLHsBUNypbFAF', 'value': '9djCxcX6kCVejRpj', 'led': 'ZRQmJvZFj6wi8KEf[23:16]', 'place_holder_out': 'qDTPEO3T8cyI6bkn', 'count': 'ZRQmJvZFj6wi8KEf', 'state': '7880jyTPOQIOsFV0', 'test_1_out': 'Iw3GfiUiCHPuZqBl', 'test_2_out': '8Ws3neYluizeV9F1', 'test_3_out': 'oqP8KrRGu2kNakzL', 'test_4_out': 'SrR0xKodpi63mlfi'}, 'place_holder': {'CLK': 'pTsg0QmvmueWLCFH', 'RST': 'jhBc8Fd0vcOqrNgK', 'out': 'SrR0xKodpi63mlfi+1+mbQ3L5ck0zdafoeT', 'out_wire': 'mbQ3L5ck0zdafoeT'}, 'place_holder_2': {'CLK': 'pTsg0QmvmueWLCFH', 'RST': 'jhBc8Fd0vcOqrNgK', 'out': 'mbQ3L5ck0zdafoeT+2'}}
-Final path condition:
-[jhBc8Fd0vcOqrNgK != k!1,
- 7880jyTPOQIOsFV0 == 0,
- yvZMLHsBUNypbFAF != k!1,
- jhBc8Fd0vcOqrNgK != k!1,
- jhBc8Fd0vcOqrNgK != k!1,
- jhBc8Fd0vcOqrNgK != k!1,
- jhBc8Fd0vcOqrNgK != k!1,
- jhBc8Fd0vcOqrNgK != k!1,
- jhBc8Fd0vcOqrNgK != k!1,
- jhBc8Fd0vcOqrNgK != k!1,
- jhBc8Fd0vcOqrNgK != k!1]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'OHY1T4tnVHDETy6U', 'RST': 'YiZj8hYOijruySgv', 'enable': 'QdGZa4X3yWiqPUQN', 'value': 'Yv0MuvRnC9KxoSPg', 'led': 'V396o0SGgudH5MHN', 'place_holder_out': 'UAhxbTuLuPbqj9fz'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'OHY1T4tnVHDETy6U', 'RST': 'YiZj8hYOijruySgv', 'enable': 'QdGZa4X3yWiqPUQN', 'value': 'Yv0MuvRnC9KxoSPg', 'led': '0[23:16]', 'place_holder_out': 'UAhxbTuLuPbqj9fz', 'count': '0', 'state': '0', 'test_1_out': 'QPuD1VyckE1kpuFX', 'test_2_out': 'cENDP16du0yT5y05', 'test_3_out': 'Kgyq7McUFy3rQLbB', 'test_4_out': 'yh0mPdCJ6zNVr7Cn'}, 'place_holder': {'CLK': 'OHY1T4tnVHDETy6U', 'RST': 'YiZj8hYOijruySgv', 'out': '0', 'out_wire': 'xaBWUL1NzbhzsNAZ'}, 'place_holder_2': {'CLK': 'OHY1T4tnVHDETy6U', 'RST': 'YiZj8hYOijruySgv', 'out': '0'}}
-Final path condition:
-[YiZj8hYOijruySgv == k!1,
- YiZj8hYOijruySgv == k!1,
- YiZj8hYOijruySgv == k!1,
- YiZj8hYOijruySgv == k!1,
- YiZj8hYOijruySgv == k!1,
- YiZj8hYOijruySgv == k!1,
- YiZj8hYOijruySgv == k!1,
- YiZj8hYOijruySgv == k!1,
- YiZj8hYOijruySgv == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': '9Us8M33MeidN7R2x', 'RST': 'AVOFQN9eAIyBv5Eq', 'enable': 'O8m21brWzCSTW031', 'value': 'UL5BzDp8EeOFs3an', 'led': 'kfPPRCsh7V95KG1w', 'place_holder_out': 'L0L0PUU2PodLtXyQ'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': '9Us8M33MeidN7R2x', 'RST': 'AVOFQN9eAIyBv5Eq', 'enable': 'O8m21brWzCSTW031', 'value': 'UL5BzDp8EeOFs3an', 'led': 'e8xH5F2swGzqmXqr[23:16]', 'place_holder_out': 'L0L0PUU2PodLtXyQ', 'count': 'e8xH5F2swGzqmXqr', 'state': '2', 'test_1_out': '98s6j0xQcOSu6Ylu', 'test_2_out': 'B9LllOcuiEOJ8fM2', 'test_3_out': 'ytN1A0qCxFkBoht3', 'test_4_out': 'BpvizU4ybIikYdsO'}, 'place_holder': {'CLK': '9Us8M33MeidN7R2x', 'RST': 'AVOFQN9eAIyBv5Eq', 'out': 'BpvizU4ybIikYdsO+1+RgFmAN7PpERgS87t', 'out_wire': 'RgFmAN7PpERgS87t'}, 'place_holder_2': {'CLK': '9Us8M33MeidN7R2x', 'RST': 'AVOFQN9eAIyBv5Eq', 'out': 'RgFmAN7PpERgS87t+2'}}
-Final path condition:
-[AVOFQN9eAIyBv5Eq != k!1,
- wHz0teqE9nzJ4sgI != 0,
- wHz0teqE9nzJ4sgI == 1,
- AVOFQN9eAIyBv5Eq != k!1,
- AVOFQN9eAIyBv5Eq != k!1,
- AVOFQN9eAIyBv5Eq != k!1,
- AVOFQN9eAIyBv5Eq != k!1,
- AVOFQN9eAIyBv5Eq != k!1,
- AVOFQN9eAIyBv5Eq != k!1,
- AVOFQN9eAIyBv5Eq != k!1,
- AVOFQN9eAIyBv5Eq != k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'hatYN43tQnE2F2D2', 'RST': 'XPygnMjNm70089L6', 'enable': 'jL6DnFAMKD8ACXiG', 'value': 'ZKkKSQEryn9fPDfm', 'led': 'PpJlp732qPtnJU6N', 'place_holder_out': 'f0LRybMLsn5pvCts'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'hatYN43tQnE2F2D2', 'RST': 'XPygnMjNm70089L6', 'enable': 'jL6DnFAMKD8ACXiG', 'value': 'ZKkKSQEryn9fPDfm', 'led': '0[23:16]', 'place_holder_out': 'f0LRybMLsn5pvCts', 'count': '0', 'state': '0', 'test_1_out': 'aDtNr7fhriDdnOkq', 'test_2_out': 'Qn10h2OTaoO8ZlUF', 'test_3_out': 'qoBeYvx8o6iaCkOc', 'test_4_out': '5Z8dhAVi4jtxRlUb'}, 'place_holder': {'CLK': 'hatYN43tQnE2F2D2', 'RST': 'XPygnMjNm70089L6', 'out': '0', 'out_wire': 'LHlWs81e5PicMDnb'}, 'place_holder_2': {'CLK': 'hatYN43tQnE2F2D2', 'RST': 'XPygnMjNm70089L6', 'out': '0'}}
-Final path condition:
-[XPygnMjNm70089L6 == k!1,
- XPygnMjNm70089L6 == k!1,
- XPygnMjNm70089L6 == k!1,
- XPygnMjNm70089L6 == k!1,
- XPygnMjNm70089L6 == k!1,
- XPygnMjNm70089L6 == k!1,
- XPygnMjNm70089L6 == k!1,
- XPygnMjNm70089L6 == k!1,
- XPygnMjNm70089L6 == k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'hNI7dn6ZB2Y3d5JX', 'RST': 'jtCYjBU0ry7TUsVD', 'enable': 'K1YLSWrq2LHDHhJS', 'value': 'a2DFnmXXzpw71QVu', 'led': 'CqNO6hHaA0hIsQW4', 'place_holder_out': 'FTxbu8uZUQtjRGTd'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'hNI7dn6ZB2Y3d5JX', 'RST': 'jtCYjBU0ry7TUsVD', 'enable': 'K1YLSWrq2LHDHhJS', 'value': 'a2DFnmXXzpw71QVu', 'led': 'IFCGPgxdHmVlMjMl[23:16]', 'place_holder_out': 'FTxbu8uZUQtjRGTd', 'count': 'IFCGPgxdHmVlMjMl', 'state': '1', 'test_1_out': '3uqwSCKpjehFCbGy', 'test_2_out': 'RJj7iOOg7Xv0vEMz', 'test_3_out': '2ax9uwg3WxuJtjil', 'test_4_out': 'Z1KtAoFgfmJWUtqc'}, 'place_holder': {'CLK': 'hNI7dn6ZB2Y3d5JX', 'RST': 'jtCYjBU0ry7TUsVD', 'out': 'Z1KtAoFgfmJWUtqc+1+mpouNswD9yqHygyF', 'out_wire': 'mpouNswD9yqHygyF'}, 'place_holder_2': {'CLK': 'hNI7dn6ZB2Y3d5JX', 'RST': 'jtCYjBU0ry7TUsVD', 'out': 'mpouNswD9yqHygyF+2'}}
-Final path condition:
-[jtCYjBU0ry7TUsVD != k!1,
- lIlSAvHFJu7LQ6nT == 0,
- K1YLSWrq2LHDHhJS == k!1,
- jtCYjBU0ry7TUsVD != k!1,
- jtCYjBU0ry7TUsVD != k!1,
- jtCYjBU0ry7TUsVD != k!1,
- jtCYjBU0ry7TUsVD != k!1,
- jtCYjBU0ry7TUsVD != k!1,
- jtCYjBU0ry7TUsVD != k!1,
- jtCYjBU0ry7TUsVD != k!1,
- jtCYjBU0ry7TUsVD != k!1]
 ------------------------
-Inital state:
-{'sanity_test': {'CLK': 'tWoflCYDA4RrWCjS', 'RST': 'EUOuC0XiGZVslHxf', 'enable': 'MJo9HndcFM1DCirU', 'value': 'DE1hqycwXAJsiltx', 'led': 'oqfsOWnjB0qOaRdZ', 'place_holder_out': '4iZi7hrI4ut765jP'}, 'place_holder': {}, 'place_holder_2': {}}
-Final state:
-{'sanity_test': {'CLK': 'tWoflCYDA4RrWCjS', 'RST': 'EUOuC0XiGZVslHxf', 'enable': 'MJo9HndcFM1DCirU', 'value': 'DE1hqycwXAJsiltx', 'led': '0[23:16]', 'place_holder_out': '4iZi7hrI4ut765jP', 'count': '0', 'state': '0', 'test_1_out': '5nM24TiFf4FEoY9t', 'test_2_out': 'Az8bV4puqprjGdiP', 'test_3_out': '2HB3Xm0xiGeSoR0Z', 'test_4_out': 'QP63r21cN7PT91BU'}, 'place_holder': {'CLK': 'tWoflCYDA4RrWCjS', 'RST': 'EUOuC0XiGZVslHxf', 'out': '0', 'out_wire': 'hLsyuviUhoRTpdLw'}, 'place_holder_2': {'CLK': 'tWoflCYDA4RrWCjS', 'RST': 'EUOuC0XiGZVslHxf', 'out': '0'}}
-Final path condition:
-[EUOuC0XiGZVslHxf == k!1,
- EUOuC0XiGZVslHxf == k!1,
- EUOuC0XiGZVslHxf == k!1,
- EUOuC0XiGZVslHxf == k!1,
- EUOuC0XiGZVslHxf == k!1,
- EUOuC0XiGZVslHxf == k!1,
- EUOuC0XiGZVslHxf == k!1,
- EUOuC0XiGZVslHxf == k!1,
- EUOuC0XiGZVslHxf == k!1]
+------------------------
+(Plus count value)
+['(', 'Plus', 'count', 'value', ')']
+[('Plus', 'count', 'value')]
+[('Plus', 'count', 'value')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus count value)
+['(', 'Plus', 'count', 'value', ')']
+[('Plus', 'count', 'value')]
+[('Plus', 'count', 'value')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus count value)
+['(', 'Plus', 'count', 'value', ')']
+[('Plus', 'count', 'value')]
+[('Plus', 'count', 'value')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus count value)
+['(', 'Plus', 'count', 'value', ')']
+[('Plus', 'count', 'value')]
+[('Plus', 'count', 'value')]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus count value)
+['(', 'Plus', 'count', 'value', ')']
+[('Plus', 'count', 'value')]
+[('Plus', 'count', 'value')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus count value)
+['(', 'Plus', 'count', 'value', ')']
+[('Plus', 'count', 'value')]
+[('Plus', 'count', 'value')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus count value)
+['(', 'Plus', 'count', 'value', ')']
+[('Plus', 'count', 'value')]
+[('Plus', 'count', 'value')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus count value)
+['(', 'Plus', 'count', 'value', ')']
+[('Plus', 'count', 'value')]
+[('Plus', 'count', 'value')]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+(Plus (Plus out 1) out_wire)
+['(', 'Plus', '(', 'Plus', 'out', '1', ')', 'out_wire', ')']
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+[('Plus', ('Plus', 'out', 1), 'out_wire')]
+------------------------
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+(Plus out 2)
+['(', 'Plus', 'out', '2', ')']
+[('Plus', 'out', 2)]
+[('Plus', 'out', 2)]
+------------------------
+------------------------
+------------------------
+------------------------
+------------------------
+Elapsed time 1.3419289588928223
