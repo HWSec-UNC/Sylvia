@@ -9,8 +9,12 @@ from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 
 # Mapping from PyVerilog Operands to Z3 approximations (for later)
-BINARY_OPS = ("Plus", "Minus")
-op_map = {"Plus": "+", "Minus": "-"}
+BINARY_OPS = ("Plus", "Minus", "Power", "Times", "Divide", "Mod", "Sll", "Srl", "Sla", "Sra", "LessThan",
+"GreaterThan", "LessEq", "GreaterEq", "Eq", "NotEq", "Eql", "NotEql", "And", "Xor",
+"Xnor", "Or", "Land", "Lor")
+op_map = {"Plus": "+", "Minus": "-", "Power": "**", "Times": "*", "Divide": "/", "Mod": "%", "Sll": "<<", "Srl": ">>>",
+"Sra": ">>", "LessThan": "<", "GreaterThan": ">", "LessEq": "<=", "GreaterEq": ">=", "Eq": "==", "NotEq": "!=", "Eql": "===", "NotEql": "!==",
+"And": "&", "Xor": "^"}
 
 def tokenize(rvalue):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
