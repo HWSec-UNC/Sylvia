@@ -1,1 +1,1 @@
-# verilog-se-engine
+# Sylvia - A Software-Style Symbolic Execution Engine for Verilog

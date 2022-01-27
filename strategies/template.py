@@ -2,8 +2,9 @@
 from abc import ABC, abstractmethod
 
 
-class BasicSearch:
-    """The base methods needed to implement a search strategy."""
+class Search:
+    """The base methods needed to implement a search strategy
+    Can add as many more as you need, of course."""
 
     @abstractmethod
     def visit_module(self):

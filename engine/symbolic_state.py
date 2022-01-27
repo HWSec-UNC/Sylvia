@@ -1,3 +1,6 @@
+"""The Symbolic State is comprised of the path condition and the symbolic store. There 
+are some other methods here that may be helpful, too."""
+
 import z3
 from z3 import Solver, Int, BitVec, BitVecSort
 
