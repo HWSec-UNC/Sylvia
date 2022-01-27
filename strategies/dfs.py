@@ -34,10 +34,10 @@ class DepthFirst(Search):
                 if port.name not in s.store[m.curr_module]:
                     s.store[m.curr_module][port.name] = init_symbol()
 
-        if not m.is_child and not m.init_run and not m.ignore:
+        if not m.is_child and not m.init_run_flag and not m.ignore:
             # print("Inital state:")
-            # print(s.store)
-            ...
+            print(s.store)
+            
 
         for item in module.items:
             if isinstance(item, Value):
@@ -49,14 +49,14 @@ class DepthFirst(Search):
             # print("infeasible path...")
             ...
         
-        if not m.is_child and not m.init_run and not m.ignore:
+        if not m.is_child and not m.init_run_flag and not m.ignore:
         #if not m.is_child and m.assertion_violation:
             # print("Final state:")
-            #print(s.store)
+            print(s.store)
        
             # print("Final path condition:")
             # print(s.pc)
-            ...
+            
         elif m.ignore:
             #print("Path abandoned")
             m.abandon = False
@@ -198,7 +198,7 @@ class DepthFirst(Search):
                 diff = 32 - bit_index
                 # m.curr_level == (32 - bit_index) this is always true
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
-                if e.seen_all_cases(m, bit_index, nested_ifs):
+                if m.seen_all_cases(m, bit_index, nested_ifs):
                      m.completed.append(bit_index)
                 self.visit_stmt(m, s, stmt.true_statement,  modules)
             else:
@@ -225,8 +225,7 @@ class DepthFirst(Search):
                 if m.opt_1:
                     if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
                         #print("hello")
-                        print(m)
-                        m.execute_child(modules[stmt.module], s, m)
+                        self.execute_child(modules[stmt.module], s, m)
                     else:
                         #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
                         #print("ho")
@@ -239,8 +238,7 @@ class DepthFirst(Search):
                     #print("hey")
                     for port in stmt.instances[0].portlist:
                         s.store[m.curr_module][str(port.argname)] = s.store[stmt.module][str(port.portname)]
-                    print(m)
-                    m.execute_child(modules[stmt.module], s, m)
+                    self.execute_child(modules[stmt.module], s, m)
         elif isinstance(stmt, CaseStatement):
             m.curr_level += 1
             self.cond = True
@@ -338,3 +336,44 @@ class DepthFirst(Search):
         elif isinstance(expr, Land):
             parse_expr_to_Z3(expr, s.pc, self.branch)
         return None
+
+    def execute_child(self, ast: ModuleDef, state: SymbolicState, parent_manager: Optional[ExecutionManager]) -> None:
+        """Drives symbolic execution of child modules."""
+        # different manager
+        # same state
+        # dont call pc solve
+        manager_sub = ExecutionManager()
+        manager_sub.is_child = True
+        manager_sub.curr_module = ast.name
+        parent_manager.init_run(manager_sub, ast)
+        #print(f"Num paths: {manager.num_paths}")
+        #print(f"Num paths {manager_sub.num_paths}")
+        manager_sub.path_code = parent_manager.config[ast.name]
+        manager_sub.seen = parent_manager.seen
+
+        # mark this exploration of the submodule as seen and store the state so we don't have to explore it again.
+        if parent_manager.seen_mod[ast.name][manager_sub.path_code] == {}:
+            parent_manager.seen_mod[ast.name][manager_sub.path_code] = state.store
+        else:
+            ...
+            #print("already seen this")
+        # i'm pretty sure we only ever want to do 1 loop here
+        for i in range(1):
+        #for i in range(manager_sub.num_paths):
+            manager_sub.path_code = parent_manager.config[ast.name]
+            #print("------------------------")
+            #print(f"{ast.name} Path {i}")
+            self.visit_module(manager_sub, state, ast, parent_manager.modules)
+            if (parent_manager.assertion_violation):
+                print("Assertion violation")
+                parent_manager.assertion_violation = False
+                solve_pc(state.pc)
+            parent_manager.curr_level = 0
+            #state.pc.reset()
+        #manager.path_code = to_binary(0)
+        #print(f" finishing {ast.name}")
+        if manager_sub.ignore:
+            parent_manager.ignore = True
+
+        #manager.is_child = False
+        ## print(state.store)

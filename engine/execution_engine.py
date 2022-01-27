@@ -405,7 +405,6 @@ class ExecutionEngine:
         state: SymbolicState = SymbolicState()
         if manager is None:
             manager: ExecutionManager = ExecutionManager()
-            manager.engine_instance = self
             manager.debugging = False
             modules_dict = {}
             for module in modules:

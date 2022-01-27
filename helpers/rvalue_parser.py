@@ -14,7 +14,6 @@ op_map = {"Plus": "+", "Minus": "-"}
 
 def tokenize(rvalue):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
-    print(rvalue)
     str_rvalue = str(rvalue)
     tokens = []
     str_rvalue = str_rvalue.replace("(","( ").replace(")"," )").replace("  "," ")
@@ -22,7 +21,6 @@ def tokenize(rvalue):
     return tokens
 
 def parse_tokens(tokens):
-    print(tokens)
     l = []
     iterat = iter(tokens)
     next(iterat) 
@@ -30,7 +28,6 @@ def parse_tokens(tokens):
 	    l += (parser_helper(iterat),)
 	    if (next(iterat, None) == None):
 		    break
-    print(l)
     return l
 
 def parser_helper(iterat):
@@ -46,7 +43,6 @@ def parser_helper(iterat):
 			tup += (i,)
 
 def evaluate(parsedList, s: SymbolicState, m: ExecutionManager):
-    print(parsedList)
     for i in parsedList:
 	    res = eval_rvalue(i, s, m)
     return res

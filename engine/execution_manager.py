@@ -10,6 +10,7 @@ from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, Strin
 from typing import Optional
 from helpers.rvalue_to_z3 import solve_pc
 
+
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
 
 class ExecutionManager:
@@ -47,51 +48,56 @@ class ExecutionManager:
     opt_3: bool = False
     assertions = []
     blocks_of_interest = []
-    init_run: bool = False
+    init_run_flag: bool = False
     ignore = False
     inital_state = {}
-    engine_instance = None
 
-    def execute_child(self, ast: ModuleDef, state: SymbolicState, parent_manager: Optional[ExecutionManager]) -> None:
-        """Drives symbolic execution of child modules."""
-        # different manager
-        # same state
-        # dont call pc solve
-        manager_sub = ExecutionManager()
-        manager_sub.is_child = True
-        manager_sub.curr_module = ast.name
-        self.init_run(manager_sub, ast)
-        #print(f"Num paths: {manager.num_paths}")
-        #print(f"Num paths {manager_sub.num_paths}")
-        manager_sub.path_code = parent_manager.config[ast.name]
-        manager_sub.seen = parent_manager.seen
 
-        # mark this exploration of the submodule as seen and store the state so we don't have to explore it again.
-        if parent_manager.seen_mod[ast.name][manager_sub.path_code] == {}:
-            parent_manager.seen_mod[ast.name][manager_sub.path_code] = state.store
-        else:
-            ...
-            #print("already seen this")
-        # i'm pretty sure we only ever want to do 1 loop here
-        for i in range(1):
-        #for i in range(manager_sub.num_paths):
-            manager_sub.path_code = parent_manager.config[ast.name]
-            #print("------------------------")
-            #print(f"{ast.name} Path {i}")
-            self.visit_module(manager_sub, state, ast, parent_manager.modules)
-            if (parent_manager.assertion_violation):
-                print("Assertion violation")
-                parent_manager.assertion_violation = False
-                solve_pc(state.pc)
-            parent_manager.curr_level = 0
-            #state.pc.reset()
-        #manager.path_code = to_binary(0)
-        #print(f" finishing {ast.name}")
-        if manager_sub.ignore:
-            parent_manager.ignore = True
-        parent_manager.engine_instance.module_depth -= 1
-        #manager.is_child = False
-        ## print(state.store)
+    def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
+        """Initalize run."""
+        m.init_run_flag = True
+        self.count_conditionals(m, module.items)
+        # these are for the COI opt
+        #self.lhs_signals(m, module.items)
+        #self.get_assertions(m, module.items)
+        m.init_run_flag = False
+
+    def count_conditionals(self, m: ExecutionManager, items):
+        """Identify control flow structures to count total number of paths."""
+        stmts = items
+        if isinstance(items, Block):
+            stmts = items.statements
+            items.cname = "Block"
+        if hasattr(stmts, '__iter__'):
+            for item in stmts:
+                if isinstance(item, CONDITIONALS):
+                    if isinstance(item, IfStatement) or isinstance(item, CaseStatement):
+                        if isinstance(item, IfStatement):
+                            m.num_paths *= 2
+                            self.count_conditionals(m, item.true_statement)
+                            self.count_conditionals(m, item.false_statement)
+                        if isinstance(item, CaseStatement):
+                            for case in item.caselist:
+                                m.num_paths *= 2
+                                self.count_conditionals(m, case.statement)
+                if isinstance(item, Block):
+                    self.count_conditionals(m, item.items)
+                elif isinstance(item, Always):
+                    self.count_conditionals(m, item.statement)             
+                elif isinstance(item, Initial):
+                    self.count_conditionals(m, item.statement)
+                elif isinstance(item, Case):
+                    self.count_conditionals(m, item.statement)
+        elif items != None:
+            if isinstance(items, IfStatement):
+                m.num_paths *= 2
+                self.count_conditionals(m, items.true_statement)
+                self.count_conditionals(m, items.false_statement)
+            if isinstance(items, CaseStatement):
+                for case in items.caselist:
+                    m.num_paths *= 2
+                    self.count_conditionals(m, case.statement)
+
 
     def merge_states(self, manager: ExecutionManager, state: SymbolicState, store):
         """Merges two states."""
