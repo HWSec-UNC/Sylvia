@@ -51,11 +51,11 @@ class DepthFirst(Search):
         
         if not m.is_child and not m.init_run_flag and not m.ignore:
         #if not m.is_child and m.assertion_violation:
-            # print("Final state:")
+            print("Final state:")
             print(s.store)
        
-            # print("Final path condition:")
-            # print(s.pc)
+            print("Final path condition:")
+            print(s.pc)
             
         elif m.ignore:
             #print("Path abandoned")
