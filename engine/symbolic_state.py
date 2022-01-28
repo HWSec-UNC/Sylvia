@@ -21,3 +21,18 @@ class SymbolicState:
         """Just looks up a symbolic expression associated with a specific variable name
         in that particular module."""
         return self.store[module_name][var_name]
+
+    def get_symbols(self):
+        """Returns a list of all the symbols present in the symbolic state.
+        This is useful in the parsing to z3 phase because we need to know what symbols to declare as constants."""
+        print(self.store)
+        symbols_list = []
+        for module in self.store:
+            for signal in self.store[module]:
+                symbolic_expression = self.store[module][signal]
+                symbols_list += symbolic_expression.split(" ")
+        res = []
+        for sym in symbols_list:
+            if sym.isalnum():
+                res.append(sym)
+        return res

@@ -8,7 +8,6 @@ from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, B
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg
 from typing import Optional
-from helpers.rvalue_to_z3 import solve_pc
 
 
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
@@ -51,6 +50,7 @@ class ExecutionManager:
     init_run_flag: bool = False
     ignore = False
     inital_state = {}
+    branch: bool = False
 
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:

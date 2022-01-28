@@ -275,6 +275,8 @@ class DepthFirst(Search):
             s.store[m.curr_module][expr.name] = init_symbol()
         elif isinstance(expr, Eq):
             # assume left is identifier
+            print(f" expr! {expr}")
+            parse_expr_to_Z3(expr, s, m)
             x = BitVec(s.store[m.curr_module][expr.left.name], 32)
             
             if isinstance(expr.right, IntConst):
@@ -326,7 +328,7 @@ class DepthFirst(Search):
 
         # Handling Assertions
         elif isinstance(expr, NotEql):
-            parse_expr_to_Z3(expr, s.pc, self.branch)
+            parse_expr_to_Z3(expr, s, m)
             # x = BitVec(expr.left.name, 32)
             # y = BitVec(int(expr.right.value), 32)
             # if self.branch:
@@ -334,7 +336,7 @@ class DepthFirst(Search):
             # else: 
             #     s.pc.add(x == y)
         elif isinstance(expr, Land):
-            parse_expr_to_Z3(expr, s.pc, self.branch)
+            parse_expr_to_Z3(expr, s, m)
         return None
 
     def execute_child(self, ast: ModuleDef, state: SymbolicState, parent_manager: Optional[ExecutionManager]) -> None:

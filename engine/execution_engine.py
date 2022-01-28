@@ -22,7 +22,6 @@ import sys
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
 
 class ExecutionEngine:
-    branch: bool = True
     module_depth: int = 0
     search_strategy = DepthFirst()
 
