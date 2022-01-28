@@ -186,8 +186,6 @@ class DepthFirst(Search):
             if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
                 self.branch = True
 
-                # check if i am the final thing/no more conditionals after me
-                # basically, we never want me to be true again after this bc we are wasting time reexploring this
 
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
@@ -228,7 +226,7 @@ class DepthFirst(Search):
                         self.execute_child(modules[stmt.module], s, m)
                     else:
                         #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
-                        #print("ho")
+                       
                         m.merge_states(m, s, m.seen_mod[stmt.module][m.config[stmt.module]])
                         # this loop updates all the signals in the top level module
                         # so that the param connections seem like cont. assigns
@@ -246,9 +244,6 @@ class DepthFirst(Search):
 
             if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
                 self.branch = True
-
-                # check if i am the final thing/no more conditionals after me
-                # basically, we never want me to be true again after this bc we are wasting time reexploring this
 
                 self.visit_expr(m, s, stmt.comp)
                 if (m.abandon):
@@ -275,7 +270,6 @@ class DepthFirst(Search):
             s.store[m.curr_module][expr.name] = init_symbol()
         elif isinstance(expr, Eq):
             # assume left is identifier
-            print(f" expr! {expr}")
             parse_expr_to_Z3(expr, s, m)
             x = BitVec(s.store[m.curr_module][expr.left.name], 32)
             

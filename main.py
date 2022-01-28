@@ -33,7 +33,7 @@ logging.debug("Starting over")
 
 INFO = "Verilog Symbolic Execution Engine"
 VERSION = pyverilog.__version__
-USAGE = "Usage: python3 -m engine <num_cycles> <verilog_file>.v > out.txt"
+USAGE = "Usage: python3 -m main <num_cycles> <verilog_file>.v > out.txt"
     
 
 def showVersion():
@@ -76,7 +76,7 @@ def main():
                             preprocess_define=options.define)
 
     #ast.show()
-    print(ast.children()[0].definitions)
+    #print(ast.children()[0].definitions)
 
     description: Description = ast.children()[0]
     top_level_module: ModuleDef = description.children()[0]
