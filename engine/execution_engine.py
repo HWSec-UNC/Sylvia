@@ -391,6 +391,7 @@ class ExecutionEngine:
                 manager.curr_level = 0
                 manager.dependencies = {}
                 state.pc.reset()
+
             #manager.path_code = to_binary(0)
             #print(f" finishing {ast.name}")
             self.module_depth -= 1
@@ -470,12 +471,15 @@ class ExecutionEngine:
                 manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
                     print("Assertion violation")
+                    print(state.pc.model())
                     manager.assertion_violation = False
                     self.solve_pc(state.pc)
                 manager.curr_level = 0
                 for module in manager.dependencies:
                     module = {}
                 state.pc.reset()
+                manager.ignore = False
+                manager.abandon = False
             for name in manager.names_list:
                 state.store[name] = {}
 

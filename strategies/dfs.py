@@ -49,22 +49,19 @@ class DepthFirst(Search):
             # print("infeasible path...")
             ...
         
-        if not m.is_child and not m.init_run_flag and not m.ignore:
+        if not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
         #if not m.is_child and m.assertion_violation:
             print("Final state:")
             print(s.store)
        
             print("Final path condition:")
             print(s.pc)
-            
-        elif m.ignore:
-            #print("Path abandoned")
-            m.abandon = False
-            m.ignore = False
-            return
+    
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
         "Traverse the statements in a hardware design"
+        if m.ignore:
+            return
         if isinstance(stmt, Decl):
             for item in stmt.list:
                 if isinstance(item, Value):
@@ -279,7 +276,7 @@ class DepthFirst(Search):
             
             if isinstance(expr.right, IntConst):
                 int_val = IntVal(expr.right.value)
-                y = Int2BV(int_val, 1)
+                y = Int2BV(int_val, 32)
             else:
                 y = BitVec(expr.right.name, 32)
             if self.branch:
@@ -287,7 +284,6 @@ class DepthFirst(Search):
                 s.pc.add(x==y)
                 if not solve_pc(s.pc):
                     s.pc.pop()
-                    print("Abandoning infeasible path")
                     m.abandon = True
                     m.ignore  = True
                     return
@@ -296,7 +292,6 @@ class DepthFirst(Search):
                 s.pc.add(x != y)
                 if not solve_pc(s.pc):
                     s.pc.pop()
-                    print("Abandoning infeasible path")
                     m.abandon = True
                     m.ignore = True
                     return

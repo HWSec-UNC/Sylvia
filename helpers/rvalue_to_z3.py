@@ -97,8 +97,12 @@ def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
                 #print("a")
                 s.pc.add(c == rhs)
             else:
-                #print("b")
+                s.pc.push()
                 s.pc.add(lhs == rhs)
+                if not solve_pc(s.pc):
+                    s.pc.pop()
+                    m.abandon = True
+                    m.ignore = True
     elif isinstance(e, Land):
         lhs = parse_expr_to_Z3(e.left, s, m)
         rhs = parse_expr_to_Z3(e.right, s, m)
