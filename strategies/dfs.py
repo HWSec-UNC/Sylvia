@@ -1,6 +1,6 @@
 """Depth First Traversal of the AST."""
 from .template import Search
-from z3 import Solver, Int, BitVec
+from z3 import Solver, Int, BitVec, Int2BV, IntVal
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
@@ -190,7 +190,7 @@ class DepthFirst(Search):
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
 
-                    #print("Abandoning this path!")
+                    print("Abandoning this path!")
                     return
                 nested_ifs = m.count_conditionals_2(m, stmt.true_statement)
                 diff = 32 - bit_index
@@ -203,7 +203,7 @@ class DepthFirst(Search):
                 self.branch = False
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
-                    #print("Abandoning this path!")
+                    print("Abandoning this path!")
 
                     return
                 self.visit_stmt(m, s, stmt.false_statement,  modules)
@@ -248,7 +248,7 @@ class DepthFirst(Search):
                 self.visit_expr(m, s, stmt.comp)
                 if (m.abandon):
  
-                    #print("Abandoning this path!")
+                    print("Abandoning this path!")
                     return
                 # m.curr_level == (32 - bit_index) this is always true
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
@@ -257,7 +257,7 @@ class DepthFirst(Search):
                 self.branch = False
                 self.visit_expr(m, s, stmt.comp)
                 if (m.abandon):
-                    #print("Abandoning this path!")
+                    print("Abandoning this path!")
 
                     return
                 self.visit_stmt(m, s, stmt.caselist, modules)
@@ -271,10 +271,15 @@ class DepthFirst(Search):
         elif isinstance(expr, Eq):
             # assume left is identifier
             parse_expr_to_Z3(expr, s, m)
-            x = BitVec(s.store[m.curr_module][expr.left.name], 32)
+            if (s.store[m.curr_module][expr.left.name]).isdigit():
+                int_val = IntVal(int(s.store[m.curr_module][expr.left.name]))
+                x = Int2BV(int_val, 32)
+            else: 
+                x = BitVec(s.store[m.curr_module][expr.left.name], 32)
             
             if isinstance(expr.right, IntConst):
-                y = BitVec(expr.right.value, 32)
+                int_val = IntVal(expr.right.value)
+                y = Int2BV(int_val, 1)
             else:
                 y = BitVec(expr.right.name, 32)
             if self.branch:
@@ -282,7 +287,7 @@ class DepthFirst(Search):
                 s.pc.add(x==y)
                 if not solve_pc(s.pc):
                     s.pc.pop()
-                    #print("Abandoning infeasible path")
+                    print("Abandoning infeasible path")
                     m.abandon = True
                     m.ignore  = True
                     return
@@ -291,7 +296,7 @@ class DepthFirst(Search):
                 s.pc.add(x != y)
                 if not solve_pc(s.pc):
                     s.pc.pop()
-                    #print("Abandoning infeasible path")
+                    print("Abandoning infeasible path")
                     m.abandon = True
                     m.ignore = True
                     return
@@ -301,9 +306,13 @@ class DepthFirst(Search):
             # and the identifier class actually doesn't have a width param
             x = BitVec(s.store[m.curr_module][expr.name], 1)
             y = BitVec(1, 1)
+            one = IntVal(1)
+            zero = IntVal(0)
+            one_bv = Int2BV(one, 1)
+            zero_bv = Int2BV(zero, 1)
             if self.branch:
                 s.pc.push()
-                s.pc.add(x==y)
+                s.pc.add(x==one_bv)
                 if not solve_pc(s.pc):
                     s.pc.pop()
                     #print("Abandoning infeasible path")
@@ -312,7 +321,7 @@ class DepthFirst(Search):
                     return
             else: 
                 s.pc.push()
-                s.pc.add(x != y)
+                s.pc.add(x != one_bv)
                 if not solve_pc(s.pc):
                     s.pc.pop()
                     #print("Abandoning infeasible path")
@@ -322,6 +331,7 @@ class DepthFirst(Search):
 
         # Handling Assertions
         elif isinstance(expr, NotEql):
+            print("assertion")
             parse_expr_to_Z3(expr, s, m)
             # x = BitVec(expr.left.name, 32)
             # y = BitVec(int(expr.right.value), 32)

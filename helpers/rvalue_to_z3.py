@@ -2,7 +2,7 @@
 Z3 expressions and solving for assertion violations."""
 
 import z3
-from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef, If, BitVecVal, And
+from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef, If, BitVecVal, And, IntVal, Int2BV
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
@@ -64,9 +64,14 @@ def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
         rhs = parse_expr_to_Z3(e.right, s, m)
         return s.pc.add(lhs.assertions() and rhs.assertions())
     elif isinstance(e, Identifier):
-        return BitVec(e.name + "_0", 32)
+        if s.store[m.curr_module][e.name].isdigit():
+            int_val = IntVal(int(s.store[m.curr_module][e.name]))
+            return Int2BV(int_val, 32)
+        else:
+            return BitVec(s.store[m.curr_module][e.name], 32)
     elif isinstance(e, Constant):
-        return BitVec(int(e.value), 32)
+        int_val = IntVal(e.value)
+        return Int2BV(int_val, 32)
     elif isinstance(e, Eq):
         lhs = parse_expr_to_Z3(e.left, s, m)
         rhs = parse_expr_to_Z3(e.right, s, m)
@@ -89,8 +94,10 @@ def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
             # only RHS is bitVEC 
             if isinstance(rhs, z3.z3.BitVecRef) and not isinstance(lhs, z3.z3.BitVecRef):
                 c = If(lhs, BitVecVal(1, 32), BitVecVal(0, 32))
+                #print("a")
                 s.pc.add(c == rhs)
             else:
+                #print("b")
                 s.pc.add(lhs == rhs)
     elif isinstance(e, Land):
         lhs = parse_expr_to_Z3(e.left, s, m)
