@@ -75,7 +75,21 @@ def evaluate_binary_op(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> s
         else: 
             return f"{str(lhs)} {op} {str(rhs)}"
 
-def eval_rvalue(i, s: SymbolicState, m: ExecutionManager) -> str:
+def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: ExecutionManager) -> str:
+    """Helper function to resolve conditional symbolic expressions.
+    The format is intentionally meant to match z3 to make parsing easier later."""
+    if (isinstance(true_expr,tuple) and isinstance(false_expr,tuple)):
+        return f"If({cond}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
+    elif (isinstance(true_expr,tuple)):
+        return f"If({cond}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {false_expr})"
+    elif (isinstance(false_expr,tuple)):
+        return f"If({cond}, {true_expr}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)} )"
+    else:
+        return f"If({cond}, {true_expr}, {false_expr})"
+
+def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     """Takes in an AST and should return the new symbolic expression for the symbolic state."""
-    if i[0] in BINARY_OPS:
-        return evaluate_binary_op(i[1], i[2], op_map[i[0]], s, m)
+    if rvalue[0] in BINARY_OPS:
+        return evaluate_binary_op(rvalue[1], rvalue[2], op_map[rvalue[0]], s, m)
+    elif rvalue[0] == "Cond":
+        return evaluate_cond_expr(rvalue[1], rvalue[2], rvalue[3], s, m)

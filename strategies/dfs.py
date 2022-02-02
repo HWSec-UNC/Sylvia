@@ -142,6 +142,8 @@ class DepthFirst(Search):
                     s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, StringConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+            elif isinstance(stmt.right.var, Partselect):
+                s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
             else:
                 new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
                 if new_r_value != None:
