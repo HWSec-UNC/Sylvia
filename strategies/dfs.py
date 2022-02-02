@@ -6,7 +6,7 @@ from engine.symbolic_state import SymbolicState
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
-from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg
+from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond
 from helpers.utils import init_symbol
 from typing import Optional
 from helpers.rvalue_parser import tokenize, parse_tokens, evaluate
@@ -90,8 +90,19 @@ class DepthFirst(Search):
                         if m.dependencies[m.curr_module][signal] in m.updates:
                             if m.updates[m.dependencies[m.curr_module][signal]][0] == 1:
                                 prev_symbol = m.updates[m.dependencies[m.curr_module][signal]][1]
-                                new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
-                                s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
+                                if '[' in s.store[m.curr_module][signal]:
+                                    
+                                    parts = s.store[m.curr_module][signal].partition("[")
+
+                                    new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
+                                    first_part = parts[0].replace(parts[0], new_symbol)
+                                    for i in range(1, len(parts)):
+                                        new_symbol += parts[i]
+
+                                    s.store[m.curr_module][signal] = new_symbol
+                                else:
+                                    new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
+                                    s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
             else: 
                 # print(sens_list.list[0].sig) # clock
                 # print(sens_list.list[0].type) # posedge
@@ -103,8 +114,21 @@ class DepthFirst(Search):
                         if m.dependencies[module][signal] in m.updates:
                             if m.updates[m.dependencies[module][signal]][0] == 1:
                                 prev_symbol = m.updates[m.dependencies[module][signal]][1]
-                                new_symbol = s.store[module][m.dependencies[module][signal]]
-                                s.store[module][signal] = s.store[module][signal].replace(prev_symbol, new_symbol)
+
+                                if '[' in s.store[module][signal]:
+                                    
+                                    parts = s.store[module][signal].partition("[")
+
+                                    new_symbol = s.store[module][m.dependencies[module][signal]]
+                                    first_part = parts[0].replace(parts[0], new_symbol)
+                                    for i in range(1, len(parts)):
+                                        new_symbol += parts[i]
+
+                                    s.store[module][signal] = new_symbol
+                                else:
+                                    new_symbol = s.store[module][m.dependencies[module][signal]]
+                                    s.store[module][signal] = s.store[module][signal].replace(prev_symbol, new_symbol)
+                                    
         elif isinstance(stmt, Assign):
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
@@ -124,6 +148,11 @@ class DepthFirst(Search):
                 s.store[m.curr_module][stmt.left.var.name] = {}
                 for item in stmt.right.var.list:
                     s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
+            elif isinstance(stmt.right.var, Cond):
+                # TODO this is bad / doesn't handle every case
+                m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.cond.name
+                new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
+                s.store[m.curr_module][stmt.left.var.name] = new_r_value
             else:
                 new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
                 if new_r_value != None:
