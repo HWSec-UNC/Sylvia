@@ -7,6 +7,7 @@ import sys
 from pyverilog.vparser.ast import Rvalue
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
+from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
 
 # Mapping from PyVerilog Operands to Z3 approximations (for later)
 BINARY_OPS = ("Plus", "Minus", "Power", "Times", "Divide", "Mod", "Sll", "Srl", "Sla", "Sra", "LessThan",
@@ -75,7 +76,39 @@ def evaluate_binary_op(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> s
         else: 
             return f"{str(lhs)} {op} {str(rhs)}"
 
-def eval_rvalue(i, s: SymbolicState, m: ExecutionManager) -> str:
+def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: ExecutionManager) -> str:
+    """Helper function to resolve conditional symbolic expressions.
+    The format is intentionally meant to match z3 to make parsing easier later."""
+    if (isinstance(true_expr,tuple) and isinstance(false_expr,tuple)):
+        return f"If({cond}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
+    elif (isinstance(true_expr,tuple)):
+        return f"If({cond}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {false_expr})"
+    elif (isinstance(false_expr,tuple)):
+        return f"If({cond}, {true_expr}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)} )"
+    else:
+        return f"If({cond}, {true_expr}, {false_expr})"
+
+def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     """Takes in an AST and should return the new symbolic expression for the symbolic state."""
-    if i[0] in BINARY_OPS:
-        return evaluate_binary_op(i[1], i[2], op_map[i[0]], s, m)
+    if rvalue[0] in BINARY_OPS:
+        return evaluate_binary_op(rvalue[1], rvalue[2], op_map[rvalue[0]], s, m)
+    elif rvalue[0] == "Cond":
+        # TODO this is not good  need to handle in z3 parser
+        result = evaluate_cond_expr(rvalue[1], rvalue[2], rvalue[3], s, m)
+        cond = BitVec(rvalue[1], 1)
+        one = IntVal(1)
+        one_bv = Int2BV(one, 1)
+        if not rvalue[2].isdigit():
+            true_expr = BitVec(s.store[m.curr_module][rvalue[2]], 32)
+        else:
+            true_expr_int = IntVal(rvalue[2], 32)
+            true_expr = Int2BV(true_expr_int, 32)
+        if not str(rvalue[3]).isdigit():
+            false_expr = BitVec(s.store[m.curr_module][rvalue[3]], 32)
+        else:
+            false_expr_int = IntVal(rvalue[3])
+            false_expr = Int2BV(false_expr_int, 32)
+        # TODO: i cant add it to the pc bc this a bool sort ... not a bitvec one and it will throw an error
+        #s.pc.add(If((cond == one_bv), true_expr, false_expr))
+        
+        return result
