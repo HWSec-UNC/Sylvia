@@ -80,13 +80,26 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
     """Helper function to resolve conditional symbolic expressions.
     The format is intentionally meant to match z3 to make parsing easier later."""
     if (isinstance(true_expr,tuple) and isinstance(false_expr,tuple)):
-        return f"If({cond}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
+        return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
     elif (isinstance(true_expr,tuple)):
-        return f"If({cond}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {false_expr})"
+        if false_expr.isdigit():
+            return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {false_expr})"
+        else:
+            return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {s.store[m.curr_module][false_expr]})"
     elif (isinstance(false_expr,tuple)):
-        return f"If({cond}, {true_expr}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)} )"
+        if true_expr.isdigit():
+            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)} )"
+        else:
+            return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)} )"
     else:
-        return f"If({cond}, {true_expr}, {false_expr})"
+        if str(true_expr).isdigit() and str(false_expr).isdigit():
+            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {false_expr})"
+        elif str(true_expr).isdigit():
+            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {s.store[m.curr_module][false_expr]} )"
+        elif str(false_expr).isdigit():
+            return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
+        else:
+            return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {s.store[m.curr_module][false_expr]})"
 
 def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     """Takes in an AST and should return the new symbolic expression for the symbolic state."""
