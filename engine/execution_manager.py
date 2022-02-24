@@ -51,6 +51,8 @@ class ExecutionManager:
     ignore = False
     inital_state = {}
     branch: bool = False
+    cond_assigns = {}
+    cond_updates = []
 
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:

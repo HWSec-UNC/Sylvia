@@ -9,8 +9,10 @@ from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial, 
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond
 from helpers.utils import init_symbol
 from typing import Optional
-from helpers.rvalue_parser import tokenize, parse_tokens, evaluate
+from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options
 from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc
+from helpers.utils import to_binary
+import os
 
 
 class DepthFirst(Search):
@@ -90,6 +92,7 @@ class DepthFirst(Search):
                         if m.dependencies[m.curr_module][signal] in m.updates:
                             if m.updates[m.dependencies[m.curr_module][signal]][0] == 1:
                                 prev_symbol = m.updates[m.dependencies[m.curr_module][signal]][1]
+                            
                                 if '[' in s.store[m.curr_module][signal]:
                                     
                                     parts = s.store[m.curr_module][signal].partition("[")
@@ -128,7 +131,26 @@ class DepthFirst(Search):
                                 else:
                                     new_symbol = s.store[module][m.dependencies[module][signal]]
                                     s.store[module][signal] = s.store[module][signal].replace(prev_symbol, new_symbol)
+                        for lhs in m.cond_assigns[module]:
+                            if lhs in m.dependencies[module] and isinstance(m.updates[lhs], tuple) and m.updates[lhs][0] == 1:
+                                prev_symbol = str(m.updates[lhs][1])
+                                if not prev_symbol.isdigit(): 
+                                    prev_symbol = s.store[m.curr_module][prev_symbol]
+
+                                if '[' in s.store[module][lhs]:
                                     
+                                    parts = s.store[module][lhs].partition("[")
+
+                                    new_symbol = s.store[module][m.dependencies[module][lhs]]
+                                    first_part = parts[0].replace(parts[0], new_symbol)
+                                    for i in range(1, len(parts)):
+                                        new_symbol += parts[i]
+
+                                    s.store[module][lhs] = new_symbol
+                                else:
+                                    s.store[module][lhs] = prev_symbol
+                                m.updates[lhs] = 0 
+                          
         elif isinstance(stmt, Assign):
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
@@ -149,8 +171,12 @@ class DepthFirst(Search):
                 for item in stmt.right.var.list:
                     s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, Cond):
-                # TODO this is bad / doesn't handle every case
-                m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.cond.name
+                m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
+                opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
+                m.cond_assigns[m.curr_module][stmt.left.var.name] = opts
+                # complexity is how many nested conditonals we have on the rhs
+                complexity = count_nested_cond(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
+                #print(complexity)
                 new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
                 s.store[m.curr_module][stmt.left.var.name] = new_r_value
             else:
@@ -214,6 +240,9 @@ class DepthFirst(Search):
             if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
                 self.branch = True
 
+                for lhs in m.cond_assigns[m.curr_module]:
+                    if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
+                        m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
 
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
@@ -229,6 +258,11 @@ class DepthFirst(Search):
                 self.visit_stmt(m, s, stmt.true_statement,  modules)
             else:
                 self.branch = False
+
+                for lhs in m.cond_assigns[m.curr_module]:
+                    if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
+                        m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
+                        
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
                     print("Abandoning this path!")
@@ -272,6 +306,9 @@ class DepthFirst(Search):
 
             if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
                 self.branch = True
+                for lhs in m.cond_assigns[m.curr_module]:
+                    if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
+                        m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
 
                 self.visit_expr(m, s, stmt.comp)
                 if (m.abandon):
@@ -283,6 +320,9 @@ class DepthFirst(Search):
                 self.visit_stmt(m, s, stmt.caselist, modules)
             else:
                 self.branch = False
+                for lhs in m.cond_assigns[m.curr_module]:
+                    if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
+                        m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
                 self.visit_expr(m, s, stmt.comp)
                 if (m.abandon):
                     print("Abandoning this path!")

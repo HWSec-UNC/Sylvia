@@ -1,31 +1,10 @@
 `timescale 1ns / 1ps
 `default_nettype none
-`define assert(signal, value) \
-        if (signal !== value) begin \
+`define assert(property, expression) \
+        if (expression !== 1) begin \
             $display("ASSERTION FAILED"); \
             $finish; \
         end       
-    
-//////////////////////////////////////////////////////////////////////////////////
-// Company: UNC Hardware Security Group
-// Engineer: Martin Meng
-// 
-// Create Date: 03/26/2020 10:09:36 PM
-// Design Name: 
-// Module Name: updowncounter
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module updowncounter(
     input wire clock,
@@ -53,7 +32,7 @@ module updowncounter(
     assign value = internalvalue;
 
     initial begin
-    `assert(value, 1)
+    `assert (property, value == 1)
     end
     
     

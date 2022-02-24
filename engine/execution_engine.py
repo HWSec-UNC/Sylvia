@@ -420,7 +420,7 @@ class ExecutionEngine:
                 state.store[module.name] = {}
             
                 manager.dependencies[module.name] = {}
-
+                manager.cond_assigns[module.name] = {}
             total_paths = 1
             for x in manager.child_num_paths.values():
                 total_paths *= x

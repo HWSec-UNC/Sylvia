@@ -4,7 +4,7 @@ cases in the designs we evaluate. Please open a Github issue if you run into a d
 rvalue not handled by this."""
 
 import sys
-from pyverilog.vparser.ast import Rvalue
+from pyverilog.vparser.ast import Rvalue, Eq, Cond
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
@@ -125,3 +125,35 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
         #s.pc.add(If((cond == one_bv), true_expr, false_expr))
         
         return result
+
+def resolve_dependency(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager) -> str:
+    if isinstance(cond, Eq):
+        print(true_value)
+        return true_value
+    else:
+        return cond.name
+
+def cond_options(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager, res):
+    """Returns a mapping from conditionals and their resultant values."""
+    if isinstance(false_value, Cond):
+        res[cond.name] = true_value
+        return cond_options(false_value, false_value.true_value, false_value.false_value, s, m, res)
+    else: 
+        res[cond.name] = true_value
+        res["default"] = false_value
+    return res
+
+def count_nested_cond(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager) -> str:
+    """Calculating the number of branches represented within a conditoinal expression."""
+    if isinstance(true_value, Cond):
+        return 1 + count_nested_cond(true_value, true_value.true_value, true_value.false_value, s, m)
+
+    elif isinstance(false_value, Cond):
+        return 1 + count_nested_cond(false_value, false_value.true_value, false_value.false_value, s, m)
+
+    else:
+         return 1
+    
+
+
+        
