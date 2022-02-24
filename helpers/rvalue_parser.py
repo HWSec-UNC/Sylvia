@@ -103,6 +103,7 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
 
 def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     """Takes in an AST and should return the new symbolic expression for the symbolic state."""
+    
     if rvalue[0] in BINARY_OPS:
         return evaluate_binary_op(rvalue[1], rvalue[2], op_map[rvalue[0]], s, m)
     elif rvalue[0] == "Cond":

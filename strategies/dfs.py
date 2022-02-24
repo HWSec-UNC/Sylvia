@@ -6,7 +6,7 @@ from engine.symbolic_state import SymbolicState
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
-from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond
+from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer
 from helpers.utils import init_symbol
 from typing import Optional
 from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options
@@ -179,7 +179,13 @@ class DepthFirst(Search):
                 #print(complexity)
                 new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
                 s.store[m.curr_module][stmt.left.var.name] = new_r_value
+            elif isinstance(stmt.right.var, Pointer):
+                s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
+                m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
+                m.updates[stmt.left.var.name] = 0
             else:
+                print(str(stmt.right.var.var))
+                print(type(stmt.right.var.ptr))
                 new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
                 if new_r_value != None:
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
