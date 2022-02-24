@@ -184,9 +184,8 @@ class DepthFirst(Search):
                 m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
                 m.updates[stmt.left.var.name] = 0
             else:
-                print(str(stmt.right.var.var))
-                print(type(stmt.right.var.ptr))
-                new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
+                print(stmt.right.var) 
+                new_r_value = evaluate(parse_tokens(tokenize((stmt.right.var))), s, m)
                 if new_r_value != None:
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:

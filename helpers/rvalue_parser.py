@@ -4,7 +4,7 @@ cases in the designs we evaluate. Please open a Github issue if you run into a d
 rvalue not handled by this."""
 
 import sys
-from pyverilog.vparser.ast import Rvalue, Eq, Cond
+from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
@@ -17,9 +17,21 @@ op_map = {"Plus": "+", "Minus": "-", "Power": "**", "Times": "*", "Divide": "/",
 "Sra": ">>", "LessThan": "<", "GreaterThan": ">", "LessEq": "<=", "GreaterEq": ">=", "Eq": "==", "NotEq": "!=", "Eql": "===", "NotEql": "!==",
 "And": "&", "Xor": "^"}
 
+def conjunction_with_pointers(rvalue) -> str: 
+    """Convert the compound rvalue into proper string representation with pointers taken into account."""
+    if isinstance(rvalue, UnaryOperator):
+        if isinstance(rvalue.right, Pointer):
+            new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
+            return new_right
+        return rvalue
+    elif isinstance(rvalue.left, Pointer):
+        new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
+        return f"(And {new_left} {conjunction_with_pointers(rvalue.right)})"
+
 def tokenize(rvalue):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
-    str_rvalue = str(rvalue)
+    rvalue_converted = conjunction_with_pointers(rvalue)
+    str_rvalue = str(rvalue_converted)
     tokens = []
     str_rvalue = str_rvalue.replace("(","( ").replace(")"," )").replace("  "," ")
     tokens = str_rvalue.split(" ")
@@ -35,19 +47,23 @@ def parse_tokens(tokens):
 		    break
     return l
 
-def parser_helper(iterat):
-	tup = ()
-	for i in iterat:
-		if (i == '('):
-			tup += ( parser_helper(iterat), )
-		elif (i.isdigit()): 
-			tup += (int(i),)
-		elif ( i == ')'): 
-			return tup
-		else:
-			tup += (i,)
+def parser_helper(token):
+    tup = ()
+    for char in token:
+        print(char)
+        if char == "(":
+            tup += ( parser_helper(token), )
+        elif char.isdigit():
+            tup += (int(char),)
+        elif char == ")":
+            return tup
+        elif char == "<":
+            print("HELP")
+        else:
+            tup += (char,)
 
 def evaluate(parsedList, s: SymbolicState, m: ExecutionManager):
+    print(parsedList)
     for i in parsedList:
 	    res = eval_rvalue(i, s, m)
     return res
