@@ -4,7 +4,7 @@ cases in the designs we evaluate. Please open a Github issue if you run into a d
 rvalue not handled by this."""
 
 import sys
-from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator
+from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
@@ -15,7 +15,7 @@ BINARY_OPS = ("Plus", "Minus", "Power", "Times", "Divide", "Mod", "Sll", "Srl", 
 "Xnor", "Or", "Land", "Lor")
 op_map = {"Plus": "+", "Minus": "-", "Power": "**", "Times": "*", "Divide": "/", "Mod": "%", "Sll": "<<", "Srl": ">>>",
 "Sra": ">>", "LessThan": "<", "GreaterThan": ">", "LessEq": "<=", "GreaterEq": ">=", "Eq": "==", "NotEq": "!=", "Eql": "===", "NotEql": "!==",
-"And": "&", "Xor": "^"}
+"And": "&", "Xor": "^", "Or": "||"}
 
 def conjunction_with_pointers(rvalue) -> str: 
     """Convert the compound rvalue into proper string representation with pointers taken into account."""
@@ -24,9 +24,11 @@ def conjunction_with_pointers(rvalue) -> str:
             new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
             return new_right
         return rvalue
-    elif isinstance(rvalue.left, Pointer):
-        new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
-        return f"(And {new_left} {conjunction_with_pointers(rvalue.right)})"
+    elif isinstance(rvalue, Operator):
+        if isinstance(rvalue.left, Pointer):
+            new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
+            return f"(And {new_left} {conjunction_with_pointers(rvalue.right)})"
+    return rvalue
 
 def tokenize(rvalue):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
@@ -169,7 +171,7 @@ def count_nested_cond(cond, true_value, false_value, s: SymbolicState, m: Execut
         return 1 + count_nested_cond(false_value, false_value.true_value, false_value.false_value, s, m)
 
     else:
-         return 1
+        return 1
     
 
 

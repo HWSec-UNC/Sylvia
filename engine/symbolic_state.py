@@ -21,6 +21,9 @@ class SymbolicState:
     def get_symbolic_expr(self, module_name: str, var_name: str) -> str:
         """Just looks up a symbolic expression associated with a specific variable name
         in that particular module."""
+        if '[' in var_name:
+            name = var_name.split("[")[0]
+            return self.store[module_name][name]
         return self.store[module_name][var_name]
 
     def get_symbols(self):
