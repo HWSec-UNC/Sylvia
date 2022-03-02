@@ -4,7 +4,7 @@ cases in the designs we evaluate. Please open a Github issue if you run into a d
 rvalue not handled by this."""
 
 import sys
-from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator
+from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator, IdentifierScope, Identifier
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
@@ -25,10 +25,23 @@ def conjunction_with_pointers(rvalue) -> str:
             return new_right
         return rvalue
     elif isinstance(rvalue, Operator):
+        operator = str(rvalue).split(" ")[0][1:]
         if isinstance(rvalue.left, Pointer):
             new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
             return f"(And {new_left} {conjunction_with_pointers(rvalue.right)})"
-    return rvalue
+        elif isinstance(rvalue.left, Identifier):
+            module_name = ""
+            if not rvalue.left.scope is None:
+                module_name = rvalue.left.scope.labellist[0].name
+            new_left = f"{rvalue.left.name}"
+            if module_name != "":
+                return f"({operator} {module_name}.{new_left} {conjunction_with_pointers(rvalue.right)})"
+            else: 
+                return f"({operator} {new_left} {conjunction_with_pointers(rvalue.right)})"
+        else: 
+            return f"({operator} {conjunction_with_pointers(rvalue.left)} {conjunction_with_pointers(rvalue.right)})"
+    else:
+        return rvalue
 
 def tokenize(rvalue):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
@@ -52,7 +65,7 @@ def parse_tokens(tokens):
 def parser_helper(token):
     tup = ()
     for char in token:
-        print(char)
+        #print(char)
         if char == "(":
             tup += ( parser_helper(token), )
         elif char.isdigit():
@@ -65,7 +78,7 @@ def parser_helper(token):
             tup += (char,)
 
 def evaluate(parsedList, s: SymbolicState, m: ExecutionManager):
-    print(parsedList)
+    #print(parsedList)
     for i in parsedList:
 	    res = eval_rvalue(i, s, m)
     return res
@@ -147,7 +160,6 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
 
 def resolve_dependency(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager) -> str:
     if isinstance(cond, Eq):
-        print(true_value)
         return true_value
     else:
         return cond.name

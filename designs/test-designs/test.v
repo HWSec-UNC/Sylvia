@@ -1,3 +1,10 @@
+`timescale 1ns / 1ps
+`default_nettype none
+`define assert(expression) \
+        if (expression !== 1) begin \
+            $display("ASSERTION FAILED"); \
+            $finish; \
+        end   
 module sanity_test
   (
    input CLK, 
@@ -49,6 +56,10 @@ module sanity_test
     .RST (RST),
     .out (test_4_out)
   );
+
+  initial begin
+    `assert (place_holder.out == 1)
+  end
   
 endmodule
 

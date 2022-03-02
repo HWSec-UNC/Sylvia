@@ -24,6 +24,11 @@ class SymbolicState:
         if '[' in var_name:
             name = var_name.split("[")[0]
             return self.store[module_name][name]
+        elif '.' in var_name:
+            real_module_name = var_name.split(".")[0]
+            real_var_name = var_name.split(".")[1]
+            print(self.store)
+            return self.store[real_module_name][real_var_name]
         return self.store[module_name][var_name]
 
     def get_symbols(self):

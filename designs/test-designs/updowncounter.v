@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `default_nettype none
-`define assert(property, expression) \
+`define assert(expression) \
         if (expression !== 1) begin \
             $display("ASSERTION FAILED"); \
             $finish; \
@@ -32,7 +32,7 @@ module updowncounter(
     assign value = internalvalue;
 
     initial begin
-    `assert (property, value == 1)
+    `assert (value == 1)
     end
     
     
