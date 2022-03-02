@@ -470,7 +470,7 @@ class ExecutionEngine:
                 else:
                     print("------------------------")
                     #print(f"{ast.name} Path {i}")
-                
+
                 self.search_strategy.visit_module(manager, state, ast, modules_dict)
                 manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
@@ -482,8 +482,10 @@ class ExecutionEngine:
                 for module in manager.dependencies:
                     module = {}
                 state.pc.reset()
+                
                 manager.ignore = False
                 manager.abandon = False
+            manager.reg_writes.clear()
             for name in manager.names_list:
                 state.store[name] = {}
 

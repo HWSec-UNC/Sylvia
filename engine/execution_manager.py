@@ -53,6 +53,7 @@ class ExecutionManager:
     branch: bool = False
     cond_assigns = {}
     cond_updates = []
+    reg_writes = set()
 
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:

@@ -341,7 +341,12 @@ class DepthFirst(Search):
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         """Traverse the expressions in a hardware design."""
         if isinstance(expr, Reg):
-            s.store[m.curr_module][expr.name] = init_symbol()
+            if not expr.name in m.reg_writes:
+                s.store[m.curr_module][expr.name] = init_symbol()
+                m.reg_writes.add(expr.name)
+            else: 
+                # do nothing because we don't want to overwrite the previous state of the register
+                ...
         elif isinstance(expr, Wire):
             s.store[m.curr_module][expr.name] = init_symbol()
         elif isinstance(expr, Eq):
