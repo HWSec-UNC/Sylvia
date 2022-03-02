@@ -222,8 +222,10 @@ class ExecutionEngine:
         """Map the assertions to a list of relevant signals."""
         signals = []
         for assertion in m.assertions:
-            if isinstance(assertion.left, Identifier):
-                signals.append(assertion.left.name)
+            # TODO write function to exhaustively get all the signals from assertions
+            # this is just grabbing the left most
+            if isinstance(assertion.right.left, Identifier):
+                signals.append(assertion.right.left.name)
         return signals
 
     def assertions_always_intersect(self, m: ExecutionManager):
@@ -452,10 +454,10 @@ class ExecutionEngine:
             manager.seen[name] = []
         manager.curr_module = manager.names_list[0]
 
-        for i in range(1):
-            for j in range(1):
-        #for i in range(len(paths)):
-            #for j in range(len(paths[i])):
+        # for i in range(1):
+        #     for j in range(1):
+        for i in range(len(paths)):
+            for j in range(len(paths[i])):
                 manager.config[manager.names_list[j]] = paths[i][j]
             manager.path_code = manager.config[manager.names_list[0]]
 
