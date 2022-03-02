@@ -31,7 +31,7 @@ def get_constants_list(new_constraint, s: SymbolicState, m: ExecutionManager):
 def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
     """Takes in a complex Verilog Expression and converts it to 
     a Z3 query."""
-    tokens_list = parse_tokens(tokenize((e)))
+    tokens_list = parse_tokens(tokenize(e, s, m))
     new_constraint = evaluate_expr(tokens_list, s, m)
     #print(f"new_constraint{new_constraint}")
     new_constants = []

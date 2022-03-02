@@ -169,7 +169,11 @@ class DepthFirst(Search):
             elif isinstance(stmt.right.var, Concat):
                 s.store[m.curr_module][stmt.left.var.name] = {}
                 for item in stmt.right.var.list:
-                    s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
+                    # TODO: concatenation is more nuanced potentially than this...
+                    # see line 237 of or1200_except
+                    str_item = evaluate(parse_tokens(tokenize(item, s, m)), s, m)
+                    s.store[m.curr_module][stmt.left.var.name][str_item] = str_item
+                    #s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, Cond):
                 m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
                 opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
@@ -184,7 +188,6 @@ class DepthFirst(Search):
                 m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
                 m.updates[stmt.left.var.name] = 0
             else:
-                print(stmt.right.var) 
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                 if new_r_value != None:
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
