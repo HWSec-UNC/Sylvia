@@ -17,35 +17,47 @@ op_map = {"Plus": "+", "Minus": "-", "Power": "**", "Times": "*", "Divide": "/",
 "Sra": ">>", "LessThan": "<", "GreaterThan": ">", "LessEq": "<=", "GreaterEq": ">=", "Eq": "==", "NotEq": "!=", "Eql": "===", "NotEql": "!==",
 "And": "&", "Xor": "^", "Or": "||"}
 
-def conjunction_with_pointers(rvalue) -> str: 
+def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> str: 
     """Convert the compound rvalue into proper string representation with pointers taken into account."""
     if isinstance(rvalue, UnaryOperator):
         if isinstance(rvalue.right, Pointer):
             new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
             return new_right
         return rvalue
+    elif isinstance(rvalue, Cond):
+        if isinstance(rvalue.false_value, Pointer):
+            ptr_access = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
+            s.store[m.curr_module][ptr_access] = s.store[m.curr_module][rvalue.false_value.var.name]
+            return f"(Cond {rvalue.cond} {rvalue.true_value} {ptr_access})"
     elif isinstance(rvalue, Operator):
         operator = str(rvalue).split(" ")[0][1:]
         if isinstance(rvalue.left, Pointer):
             new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
-            return f"(And {new_left} {conjunction_with_pointers(rvalue.right)})"
+            s.store[m.curr_module][new_left] = s.store[m.curr_module][rvalue.left.var]
+            # make a new value in store for the pointer
+            return f"(And {new_left} {conjunction_with_pointers(rvalue.righ, s, m)})"
+        elif isinstance(rvalue.right, Pointer):
+            new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
+            s.store[m.curr_module][new_right] = s.store[m.curr_module][rvalue.right.var]
+            # make a new value in the store for the pointer
+            return f"(And {conjunction_with_pointers(rvalue.left, s, m)} {new_right})"
         elif isinstance(rvalue.left, Identifier):
             module_name = ""
             if not rvalue.left.scope is None:
                 module_name = rvalue.left.scope.labellist[0].name
             new_left = f"{rvalue.left.name}"
             if module_name != "":
-                return f"({operator} {module_name}.{new_left} {conjunction_with_pointers(rvalue.right)})"
+                return f"({operator} {module_name}.{new_left} {conjunction_with_pointers(rvalue.right, s, m)})"
             else: 
-                return f"({operator} {new_left} {conjunction_with_pointers(rvalue.right)})"
+                return f"({operator} {new_left} {conjunction_with_pointers(rvalue.right, s, m)})"
         else: 
-            return f"({operator} {conjunction_with_pointers(rvalue.left)} {conjunction_with_pointers(rvalue.right)})"
+            return f"({operator} {conjunction_with_pointers(rvalue.left, s, m)} {conjunction_with_pointers(rvalue.right, s, m)})"
     else:
         return rvalue
 
-def tokenize(rvalue):
+def tokenize(rvalue, s: SymbolicState, m: ExecutionManager):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
-    rvalue_converted = conjunction_with_pointers(rvalue)
+    rvalue_converted = conjunction_with_pointers(rvalue, s, m)
     str_rvalue = str(rvalue_converted)
     tokens = []
     str_rvalue = str_rvalue.replace("(","( ").replace(")"," )").replace("  "," ")

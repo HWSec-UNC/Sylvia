@@ -177,7 +177,7 @@ class DepthFirst(Search):
                 # complexity is how many nested conditonals we have on the rhs
                 complexity = count_nested_cond(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
                 #print(complexity)
-                new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
+                new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                 s.store[m.curr_module][stmt.left.var.name] = new_r_value
             elif isinstance(stmt.right.var, Pointer):
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
@@ -185,7 +185,7 @@ class DepthFirst(Search):
                 m.updates[stmt.left.var.name] = 0
             else:
                 print(stmt.right.var) 
-                new_r_value = evaluate(parse_tokens(tokenize((stmt.right.var))), s, m)
+                new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                 if new_r_value != None:
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
@@ -205,7 +205,7 @@ class DepthFirst(Search):
             elif isinstance(stmt.right.var, Partselect):
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
             else:
-                new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
+                new_r_value = evaluate(parse_tokens(tokenize((stmt.right.var, s, m))), s, m)
                 if new_r_value != None:
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
@@ -227,7 +227,7 @@ class DepthFirst(Search):
             elif isinstance(stmt.right.var, StringConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             else:
-                new_r_value = evaluate(parse_tokens(tokenize(str(stmt.right.var))), s, m)
+                new_r_value = evaluate(parse_tokens(tokenize((stmt.right.var, s, m))), s, m)
                 if  new_r_value != None:
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:

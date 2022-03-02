@@ -452,8 +452,10 @@ class ExecutionEngine:
             manager.seen[name] = []
         manager.curr_module = manager.names_list[0]
 
-        for i in range(len(paths)):
-            for j in range(len(paths[i])):
+        for i in range(1):
+            for j in range(1):
+        #for i in range(len(paths)):
+            #for j in range(len(paths[i])):
                 manager.config[manager.names_list[j]] = paths[i][j]
             manager.path_code = manager.config[manager.names_list[0]]
 
