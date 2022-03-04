@@ -135,8 +135,8 @@ class DepthFirst(Search):
                             #print(m.updates)
                             if lhs in m.dependencies[module] and isinstance(m.updates[lhs], tuple) and m.updates[lhs][0] == 1:
                                 prev_symbol = str(m.updates[lhs][1])
-                                # if not prev_symbol.isdigit(): 
-                                #     prev_symbol = s.store[m.curr_module][prev_symbol]
+                                if not prev_symbol.isdigit() and prev_symbol in s.store[m.curr_module]: 
+                                    prev_symbol = s.store[m.curr_module][prev_symbol]
                                 if '[' in s.store[module][lhs]:
                                     
                                     parts = s.store[module][lhs].partition("[")

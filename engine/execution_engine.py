@@ -224,7 +224,9 @@ class ExecutionEngine:
         for assertion in m.assertions:
             # TODO write function to exhaustively get all the signals from assertions
             # this is just grabbing the left most
-            if isinstance(assertion.right.left, Identifier):
+            if isinstance(assertion.right, IntConst):
+                ...
+            elif isinstance(assertion.right.left, Identifier):
                 signals.append(assertion.right.left.name)
         return signals
 
