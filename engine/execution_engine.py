@@ -397,7 +397,21 @@ class ExecutionEngine:
             #manager.path_code = to_binary(0)
             #print(f" finishing {ast.name}")
             self.module_depth -= 1
-    
+
+    def multicycle_helper(self, ast: ModuleDef, modules_dict, paths,  s: SymbolicState, manager: ExecutionManager, num_cycles: int) -> None:
+        """Recursive Helper to resolve multi cycle execution."""
+        #TODO: Add in the merging state element to this helper function
+        if num_cycles <= 1:
+            return
+        else:
+            for i in range(len(paths)):
+                for j in range(len(paths[i])):
+                    manager.config[manager.names_list[j]] = paths[i][j]
+                manager.path_code = manager.config[manager.names_list[0]]
+                self.search_strategy.visit_module(manager, s, ast, modules_dict)
+                manager.seen[ast.name].append(manager.path_code)
+                return self.multicycle_helper(ast, modules_dict, paths, s, manager, num_cycles - 1)
+
     #@profile     
     def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager], directives, num_cycles: int) -> None:
         """Drives symbolic execution."""
@@ -460,8 +474,12 @@ class ExecutionEngine:
             for j in range(len(paths[i])):
                 manager.config[manager.names_list[j]] = paths[i][j]
             manager.path_code = manager.config[manager.names_list[0]]
+            #for cycle in range(int(num_cycles)):
+            if int(num_cycles) > 1: 
+                self.multicycle_helper(ast, modules, paths, state, manager, int(num_cycles))
+                print("------------------------")
 
-            for cycle in range(int(num_cycles)):
+            else:
                 #print(cycle)
                 if self.check_dup(manager):
                 #if False:
@@ -470,21 +488,21 @@ class ExecutionEngine:
                 else:
                     print("------------------------")
                     #print(f"{ast.name} Path {i}")
-
+    
                 self.search_strategy.visit_module(manager, state, ast, modules_dict)
-                manager.seen[ast.name].append(manager.path_code)
-                if (manager.assertion_violation):
-                    print("Assertion violation")
-                    print(state.pc.model())
-                    manager.assertion_violation = False
-                    self.solve_pc(state.pc)
-                manager.curr_level = 0
-                for module in manager.dependencies:
-                    module = {}
-                state.pc.reset()
-                
-                manager.ignore = False
-                manager.abandon = False
+            manager.seen[ast.name].append(manager.path_code)
+            if (manager.assertion_violation):
+                print("Assertion violation")
+                print(state.pc.model())
+                manager.assertion_violation = False
+                self.solve_pc(state.pc)
+            manager.curr_level = 0
+            for module in manager.dependencies:
+                module = {}
+            state.pc.reset()
+            
+            manager.ignore = False
+            manager.abandon = False
             manager.reg_writes.clear()
             for name in manager.names_list:
                 state.store[name] = {}

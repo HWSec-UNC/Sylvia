@@ -132,11 +132,11 @@ class DepthFirst(Search):
                                     new_symbol = s.store[module][m.dependencies[module][signal]]
                                     s.store[module][signal] = s.store[module][signal].replace(prev_symbol, new_symbol)
                         for lhs in m.cond_assigns[module]:
+                            #print(m.updates)
                             if lhs in m.dependencies[module] and isinstance(m.updates[lhs], tuple) and m.updates[lhs][0] == 1:
                                 prev_symbol = str(m.updates[lhs][1])
-                                if not prev_symbol.isdigit(): 
-                                    prev_symbol = s.store[m.curr_module][prev_symbol]
-
+                                # if not prev_symbol.isdigit(): 
+                                #     prev_symbol = s.store[m.curr_module][prev_symbol]
                                 if '[' in s.store[module][lhs]:
                                     
                                     parts = s.store[module][lhs].partition("[")
@@ -152,6 +152,7 @@ class DepthFirst(Search):
                                 m.updates[lhs] = 0 
                           
         elif isinstance(stmt, Assign):
+            prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):
@@ -182,6 +183,7 @@ class DepthFirst(Search):
                 complexity = count_nested_cond(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
                 #print(complexity)
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
+                #print(f"new r {new_r_value}")
                 s.store[m.curr_module][stmt.left.var.name] = new_r_value
             elif isinstance(stmt.right.var, Pointer):
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
@@ -193,6 +195,7 @@ class DepthFirst(Search):
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
+            m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, NonblockingSubstitution):
             prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):

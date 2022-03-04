@@ -29,6 +29,8 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
             ptr_access = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
             s.store[m.curr_module][ptr_access] = s.store[m.curr_module][rvalue.false_value.var.name]
             return f"(Cond {rvalue.cond} {rvalue.true_value} {ptr_access})"
+        else:
+            return f"(Cond {rvalue.cond} {rvalue.true_value} {rvalue.false_value})"
     elif isinstance(rvalue, Operator):
         operator = str(rvalue).split(" ")[0][1:]
         if isinstance(rvalue.left, Pointer):
@@ -151,7 +153,11 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
         elif str(true_expr).isdigit():
             return f"If({s.store[m.curr_module][cond]}, {true_expr}, {s.store[m.curr_module][false_expr]} )"
         elif str(false_expr).isdigit():
-            return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
+            #TODO: this a temporary fix need to exapnd for all cases
+            if isinstance(cond, tuple):
+                return f"If({s.store[m.curr_module][cond[1]]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
+            else:
+                return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
         else:
             return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {s.store[m.curr_module][false_expr]})"
 
@@ -164,7 +170,18 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
         elif rvalue[0] == "Cond":
             # TODO this is not good  need to handle in z3 parser
             result = evaluate_cond_expr(rvalue[1], rvalue[2], rvalue[3], s, m)
-            cond = BitVec(rvalue[1], 1)
+            # if rvalue[0] in op_map:
+            #     parsed_cond = evaluate_binary_op(rvalue[0], rvalue[1], rvalue[2], s, m)
+            # else:
+            #     parsed_cond = ""
+            # print(parsed_cond)
+            parsed_cond = ""
+            if isinstance(rvalue[1], tuple):
+                parsed_cond = str(rvalue[1][1]) +  " & " + str(rvalue[1][2])
+            if parsed_cond != "":
+                cond = BitVec(parsed_cond, 1)
+            else:
+                cond = BitVec(rvalue[1], 1)
             one = IntVal(1)
             one_bv = Int2BV(one, 1)
             if not rvalue[2].isdigit():
@@ -183,9 +200,10 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             return result
 
 def resolve_dependency(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager) -> str:
-    if isinstance(cond, Eq):
+    if isinstance(cond, Operator):
         return true_value
     else:
+        # TODO: make sure this works
         return cond.name
 
 def cond_options(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager, res):
@@ -193,6 +211,9 @@ def cond_options(cond, true_value, false_value, s: SymbolicState, m: ExecutionMa
     if isinstance(false_value, Cond):
         res[cond.name] = true_value
         return cond_options(false_value, false_value.true_value, false_value.false_value, s, m, res)
+    elif isinstance(cond, Operator):
+        res[str(cond)] = true_value
+        res["default"] = false_value
     else: 
         res[cond.name] = true_value
         res["default"] = false_value

@@ -1,0 +1,4 @@
+INCLUDE $SYSTEM_CDS_LIB_DIR/cds.lib
+DEFINE gpdk180 $CDS_SITE/GPDK180/libs.oa22/gpdk180
+DEFINE substrateLib $CDS_SITE/GPDK180/libs.oa22/substrateLib
+DEFINE gpdk045 $CDS_SITE/GPDK045/gpdk045
