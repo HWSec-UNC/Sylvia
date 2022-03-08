@@ -474,8 +474,12 @@ class ExecutionEngine:
             manager.cycle = 0
             # extract the single cycle path code for this iteration and execute, then merge the states
             for j in range(0, len(paths[i]), stride_length):
+                #print(f"Single cycle path {j} {paths[i][j]}")
                 manager.config[manager.names_list[j  % len(manager.names_list)]] = paths[i][j]
-            manager.path_code = manager.config[manager.names_list[0]]
+                manager.path_code = manager.config[manager.names_list[0]]
+                manager.prev_store = state.store
+                self.search_strategy.visit_module(manager, state, ast, modules_dict)
+                manager.cycle += 1
 
             if self.check_dup(manager):
             #if False:
@@ -484,10 +488,7 @@ class ExecutionEngine:
             else:
                 print("------------------------")
                 #print(f"{ast.name} Path {i}")
-
-            self.search_strategy.visit_module(manager, state, ast, modules_dict)
-            manager.cycle += 1
-            manager.prev_store = state.store
+                
             manager.seen[ast.name].append(manager.path_code)
             if (manager.assertion_violation):
                 print("Assertion violation")

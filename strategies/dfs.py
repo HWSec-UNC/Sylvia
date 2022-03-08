@@ -39,7 +39,7 @@ class DepthFirst(Search):
                         s.store[m.curr_module][port.name] = init_symbol()
         
         elif not m.is_child:
-            m.merge_states(s, m.prev_store)
+            m.merge_states(m, s, m.prev_store)
 
         if not m.is_child and not m.init_run_flag and not m.ignore:
             # print("Inital state:")
