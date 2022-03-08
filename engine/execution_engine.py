@@ -13,7 +13,7 @@ from typing import Optional
 import random, string
 import time
 import gc
-from itertools import product
+from itertools import product, permutations
 import logging
 from helpers.utils import to_binary
 from strategies.dfs import DepthFirst
@@ -403,16 +403,11 @@ class ExecutionEngine:
     def multicycle_helper(self, ast: ModuleDef, modules_dict, paths,  s: SymbolicState, manager: ExecutionManager, num_cycles: int) -> None:
         """Recursive Helper to resolve multi cycle execution."""
         #TODO: Add in the merging state element to this helper function
-        if num_cycles <= 1:
-            return
-        else:
+        for a in range(num_cycles):
             for i in range(len(paths)):
                 for j in range(len(paths[i])):
                     manager.config[manager.names_list[j]] = paths[i][j]
-                manager.path_code = manager.config[manager.names_list[0]]
-                self.search_strategy.visit_module(manager, s, ast, modules_dict)
-                manager.seen[ast.name].append(manager.path_code)
-                return self.multicycle_helper(ast, modules_dict, paths, s, manager, num_cycles - 1)
+
 
     #@profile     
     def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager], directives, num_cycles: int) -> None:
@@ -454,7 +449,9 @@ class ExecutionEngine:
             else:
                 manager.opt_1 = False
             manager.modules = modules_dict
-            paths = list(product(*manager.child_path_codes.values()))
+            paths = list(product(*manager.child_path_codes.values(), repeat=int(num_cycles)))
+            #paths = list(product(*manager.child_path_codes.values()))
+
             #print(f" Upper bound on num paths {len(paths)}")
         # print(manager.instance_count)
         # print(manager.always_writes)
@@ -470,28 +467,27 @@ class ExecutionEngine:
             manager.seen[name] = []
         manager.curr_module = manager.names_list[0]
 
-        # for i in range(1):
-        #     for j in range(1):
-        for i in range(len(paths)):
-            for j in range(len(paths[i])):
-                manager.config[manager.names_list[j]] = paths[i][j]
-            manager.path_code = manager.config[manager.names_list[0]]
-            #for cycle in range(int(num_cycles)):
-            if int(num_cycles) > 1: 
-                self.multicycle_helper(ast, modules, paths, state, manager, int(num_cycles))
-                print("------------------------")
 
+        stride_length = len(manager.names_list)
+        # for each combinatoin of multicycle paths
+        for i in range(len(paths)):
+            manager.cycle = 0
+            # extract the single cycle path code for this iteration and execute, then merge the states
+            for j in range(0, len(paths[i]), stride_length):
+                manager.config[manager.names_list[j  % len(manager.names_list)]] = paths[i][j]
+            manager.path_code = manager.config[manager.names_list[0]]
+
+            if self.check_dup(manager):
+            #if False:
+                print("------------------------")
+                #continue
             else:
-                #print(cycle)
-                if self.check_dup(manager):
-                #if False:
-                    print("------------------------")
-                    #continue
-                else:
-                    print("------------------------")
-                    #print(f"{ast.name} Path {i}")
-    
-                self.search_strategy.visit_module(manager, state, ast, modules_dict)
+                print("------------------------")
+                #print(f"{ast.name} Path {i}")
+
+            self.search_strategy.visit_module(manager, state, ast, modules_dict)
+            manager.cycle += 1
+            manager.prev_store = state.store
             manager.seen[ast.name].append(manager.path_code)
             if (manager.assertion_violation):
                 print("Assertion violation")
@@ -560,17 +556,3 @@ class ExecutionEngine:
         self.module_depth -= 1
         #manager.is_child = False
         ## print(state.store)
-
-def merge_states(self, manager: ExecutionManager, state: SymbolicState, store):
-    """Merges two states."""
-    for key, val in state.store.items():
-        if type(val) != dict:
-            continue
-        else:
-            for key2, var in val.items():
-                if var in store.values():
-                    prev_symbol = state.store[key][key2]
-                    new_symbol = store[key][key2]
-                    state.store[key][key2].replace(prev_symbol, new_symbol)
-                else:
-                    state.store[key][key2] = store[key][key2]

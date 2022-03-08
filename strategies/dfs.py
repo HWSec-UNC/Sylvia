@@ -23,18 +23,23 @@ class DepthFirst(Search):
         params = module.paramlist.params
         ports = module.portlist.ports
 
-        for param in params:
-            if isinstance(param.list[0], Parameter):
-                if param.list[0].name not in s.store[m.curr_module]:
-                    s.store[m.curr_module][param.list[0].name] = init_symbol()
+        if m.cycle == 0:
 
-        for port in ports:
-            if isinstance(port, Ioport):
-                if str(port.first.name) not in s.store[m.curr_module]:
-                    s.store[m.curr_module][str(port.first.name)] = init_symbol()
-            else:
-                if port.name not in s.store[m.curr_module]:
-                    s.store[m.curr_module][port.name] = init_symbol()
+            for param in params:
+                if isinstance(param.list[0], Parameter):
+                    if param.list[0].name not in s.store[m.curr_module]:
+                        s.store[m.curr_module][param.list[0].name] = init_symbol()
+
+            for port in ports:
+                if isinstance(port, Ioport):
+                    if str(port.first.name) not in s.store[m.curr_module]:
+                        s.store[m.curr_module][str(port.first.name)] = init_symbol()
+                else:
+                    if port.name not in s.store[m.curr_module]:
+                        s.store[m.curr_module][port.name] = init_symbol()
+        
+        elif not m.is_child:
+            m.merge_states(s, m.prev_store)
 
         if not m.is_child and not m.init_run_flag and not m.ignore:
             # print("Inital state:")
@@ -80,7 +85,8 @@ class DepthFirst(Search):
             elif isinstance(stmt.value.var, Identifier):
                 s.store[m.curr_module][stmt.name] = s.store[m.curr_module][stmt.value.var]
             else:
-                s.store[m.curr_module][stmt.name] = init_symbol()
+                if m.cycle == 0:
+                    s.store[m.curr_module][stmt.name] = init_symbol()
         elif isinstance(stmt, Always):
             sens_list = stmt.sens_list
             if m.opt_3:
@@ -232,8 +238,17 @@ class DepthFirst(Search):
                         s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, StringConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+            elif isinstance(stmt.right.var, Partselect):
+                if isinstance(stmt.left.var, Partselect):
+                    s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+                    m.dependencies[m.curr_module][stmt.left.var.var.name] = stmt.right.var.var.name
+                    m.updates[stmt.left.var.var.name] = 0
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+                    m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
+                    m.updates[stmt.left.var.name] = 0
             else:
-                new_r_value = evaluate(parse_tokens(tokenize((stmt.right.var, s, m))), s, m)
+                new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                 if  new_r_value != None:
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
@@ -288,8 +303,9 @@ class DepthFirst(Search):
             if stmt.module in modules:
                 for port in stmt.instances[0].portlist:
                     if str(port.argname) not in s.store[m.curr_module]:
-                        s.store[m.curr_module][str(port.argname)] = init_symbol()
-                        s.store[stmt.module][str(port.portname)] = s.store[m.curr_module][str(port.argname)]
+                        if m.cycle == 0:
+                            s.store[m.curr_module][str(port.argname)] = init_symbol()
+                            s.store[stmt.module][str(port.portname)] = s.store[m.curr_module][str(port.argname)]
                     else:
                         s.store[stmt.module][str(port.portname)] = s.store[m.curr_module][str(port.argname)]
                 m.opt_1 = False
@@ -345,13 +361,15 @@ class DepthFirst(Search):
         """Traverse the expressions in a hardware design."""
         if isinstance(expr, Reg):
             if not expr.name in m.reg_writes:
-                s.store[m.curr_module][expr.name] = init_symbol()
+                if m.cycle == 0: 
+                    s.store[m.curr_module][expr.name] = init_symbol()
                 m.reg_writes.add(expr.name)
             else: 
                 # do nothing because we don't want to overwrite the previous state of the register
                 ...
         elif isinstance(expr, Wire):
-            s.store[m.curr_module][expr.name] = init_symbol()
+            if m.cycle == 0:
+                s.store[m.curr_module][expr.name] = init_symbol()
         elif isinstance(expr, Eq):
             # assume left is identifier
             parse_expr_to_Z3(expr, s, m)

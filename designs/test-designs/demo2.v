@@ -2,7 +2,7 @@ module demo (
     input clk, 
     input enable, out1_visible,
     input [31:0] secret,
-    output [31:0] out1, out2
+    output [31:0] out2
 );
 
     /* The single-cycle composite flow
@@ -10,8 +10,8 @@ module demo (
        is possible, since
        (enable & out1_visible & enable) is satisfiable.
     */
-    wire [31:0] temp1 = (enable) ? secret : 0;
-    assign out1 = (out1_visible & enable) ? temp1 : 0;
+    // wire [31:0] temp1 = (enable) ? secret : 0;
+    // assign out1 = (out1_visible & enable) ? temp1 : 0;
 
     /* The composite flow
         secret -> guard -> out2
@@ -27,10 +27,10 @@ module demo (
     reg [31:0] guard = 0;
 
     always @(posedge clk) begin
-        if (enable) begin
-            state <= state + 1;
-            prev <= prev + 1;
-        end
+        // if (enable) begin
+        //     state <= state + 1;
+        //     prev <= prev + 1;
+        // end
 
         if (state == 3)
             guard <= secret;

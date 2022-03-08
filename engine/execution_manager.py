@@ -54,6 +54,23 @@ class ExecutionManager:
     cond_assigns = {}
     cond_updates = []
     reg_writes = set()
+    path = []
+    cycle = 0
+    prev_store = {}
+
+    def merge_states(self, state: SymbolicState, store):
+        """Merges two states."""
+        for key, val in state.store.items():
+            if type(val) != dict:
+                continue
+            else:
+                for key2, var in val.items():
+                    if var in store.values():
+                        prev_symbol = state.store[key][key2]
+                        new_symbol = store[key][key2]
+                        state.store[key][key2].replace(prev_symbol, new_symbol)
+                    else:
+                        state.store[key][key2] = store[key][key2]
 
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
