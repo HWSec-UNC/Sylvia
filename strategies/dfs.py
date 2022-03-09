@@ -273,7 +273,6 @@ class DepthFirst(Search):
 
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
-                    print(s.pc)
                     print("Abandoning this path!")
                     return
                 nested_ifs = m.count_conditionals_2(m, stmt.true_statement)
@@ -292,7 +291,6 @@ class DepthFirst(Search):
                         
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
-                    print(s.pc)
                     print("Abandoning this path!")
 
                     return
