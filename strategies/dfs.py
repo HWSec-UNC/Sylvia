@@ -6,7 +6,7 @@ from engine.symbolic_state import SymbolicState
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
-from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer, IdentifierScope
+from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer, IdentifierScope, Operator
 from helpers.utils import init_symbol
 from typing import Optional
 from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int, str_to_bool
@@ -335,15 +335,14 @@ class DepthFirst(Search):
                             s.store[stmt.module][str(port.portname)] = s.store[m.curr_module][str(port.argname)]
                     else:
                         s.store[stmt.module][str(port.portname)] = s.store[m.curr_module][str(port.argname)]
-                m.opt_1 = False
                 if m.opt_1:
                     if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
                         #print("hello")
                         self.execute_child(modules[stmt.module], s, m)
                     else:
                         #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
-                       
-                        m.merge_states(m, s, m.seen_mod[stmt.module][m.config[stmt.module]])
+                        print("already seen")
+                        m.merge_states(s, s.store[stmt.module])
                         # this loop updates all the signals in the top level module
                         # so that the param connections seem like cont. assigns
                         for port in stmt.instances[0].portlist:
@@ -392,7 +391,12 @@ class DepthFirst(Search):
                     s.store[m.curr_module][expr.name] = init_symbol()
                 m.reg_writes.add(expr.name)
                 m.reg_decls.add(expr.name)
-                m.reg_widths[expr.name] = 2 ** (int(expr.width.msb.value) + 1)
+                if not expr.width is None: 
+                    if isinstance(expr.width.msb, Operator):
+                        val = str_to_int(evaluate(parse_tokens(tokenize(expr.width.msb, s, m)), s, m), s, m)
+                        m.reg_widths[expr.name] = 2 ** (val + 1)
+                    else:
+                        m.reg_widths[expr.name] = 2 ** (int(expr.width.msb.value) + 1)
             else: 
                 # do nothing because we don't want to overwrite the previous state of the register
                 ...
@@ -411,6 +415,7 @@ class DepthFirst(Search):
                 x = BitVec(s.store[m.curr_module][expr.left.name], 32)
             
             if isinstance(expr.right, IntConst):
+                #print(expr.right.value)
                 int_val = IntVal(expr.right.value)
                 y = Int2BV(int_val, 32)
             else:
