@@ -204,6 +204,10 @@ class DepthFirst(Search):
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, NonblockingSubstitution):
+            reg_width = 0
+            if isinstance(stmt.left.var, Identifier):
+                if stmt.left.var.name in m.reg_decls:
+                    reg_width = m.reg_widths[stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):
@@ -219,7 +223,14 @@ class DepthFirst(Search):
             else:
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                 if new_r_value != None:
-                    s.store[m.curr_module][stmt.left.var.name] = new_r_value
+                    if new_r_value.split(" ")[0].isdigit():
+                        int_r_value = str_to_int(new_r_value, s, m, reg_width)
+                        if not int_r_value is None:
+                            s.store[m.curr_module][stmt.left.var.name] = str(int_r_value)
+                        else:
+                            s.store[m.curr_module][stmt.left.var.name] = new_r_value
+                    else:
+                        s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             #print(s.store)
@@ -365,7 +376,7 @@ class DepthFirst(Search):
                     s.store[m.curr_module][expr.name] = init_symbol()
                 m.reg_writes.add(expr.name)
                 m.reg_decls.add(expr.name)
-                m.reg_widths[expr.name] = expr.width
+                m.reg_widths[expr.name] = 2 ** (int(expr.width.msb.value) + 1)
             else: 
                 # do nothing because we don't want to overwrite the previous state of the register
                 ...

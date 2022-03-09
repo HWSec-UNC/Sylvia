@@ -204,16 +204,19 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             
             return result
 
-def str_to_int(symbolic_exp: str, s: SymbolicState, m: ExecutionManager) -> int:
+def str_to_int(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_width=4294967296) -> int:
     """Takes in a symbolic expression as a string that is only ints and evaluates it down to a single int.
     This is a special case."""
     tokens = symbolic_exp.split(" ")
     result: int = int(tokens[0])
-    for i in range(1, len(tokens)):
-        #TODO: apply operator using HOF or something
-        if tokens[i] == "+":
-            result += int(tokens[i + 1])
-    return result
+    try: 
+        for i in range(1, len(tokens)):
+            #TODO: apply operator using HOF or something
+            if tokens[i] == "+":
+                result += int(tokens[i + 1]) % reg_width
+        return result % reg_width
+    except Exception:
+        return None
 
 def resolve_dependency(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager) -> str:
     if isinstance(cond, Operator):
