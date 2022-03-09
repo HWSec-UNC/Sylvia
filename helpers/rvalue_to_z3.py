@@ -64,6 +64,7 @@ def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
         return s.pc.add(lhs.assertions() and rhs.assertions())
     elif isinstance(e, Identifier):
         module_name = m.curr_module
+        is_reg = e.name in m.reg_decls
         if not e.scope is None:
             module_name = e.scope.labellist[0].name
         if s.store[module_name][e.name].isdigit():

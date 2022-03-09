@@ -470,17 +470,19 @@ class ExecutionEngine:
 
         stride_length = len(manager.names_list)
         # for each combinatoin of multicycle paths
+        print(paths)
         for i in range(len(paths)):
             manager.cycle = 0
             # extract the single cycle path code for this iteration and execute, then merge the states
             for j in range(0, len(paths[i]), stride_length):
                 #print(f"Single cycle path {j} {paths[i][j]}")
                 manager.config[manager.names_list[j  % len(manager.names_list)]] = paths[i][j]
-                manager.path_code = manager.config[manager.names_list[0]]
+                manager.path_code = paths[i][j]
                 manager.prev_store = state.store
                 manager.init_state(state, manager.prev_store, ast)
                 self.search_strategy.visit_module(manager, state, ast, modules_dict)
                 manager.cycle += 1
+                manager.curr_level = 0
 
             if self.check_dup(manager):
             #if False:
@@ -496,7 +498,6 @@ class ExecutionEngine:
                 print(state.pc.model())
                 manager.assertion_violation = False
                 self.solve_pc(state.pc)
-            manager.curr_level = 0
             for module in manager.dependencies:
                 module = {}
             state.pc.reset()
