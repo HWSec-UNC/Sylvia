@@ -470,7 +470,6 @@ class ExecutionEngine:
 
         stride_length = len(manager.names_list)
         # for each combinatoin of multicycle paths
-        print(paths)
         for i in range(len(paths)):
             manager.cycle = 0
             # extract the single cycle path code for this iteration and execute, then merge the states
