@@ -218,6 +218,29 @@ def str_to_int(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wid
     except Exception:
         return None
 
+def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_width=4294967296) -> int:
+    """Takes in a symbolic expression as a string that is only ints and evaluates it down to a single int.
+    This is a special case."""
+    tokens = symbolic_exp.split(" ")
+    lhs: int = int(tokens[0])
+    rhs: int = 1
+    flag = 0
+    try: 
+        for i in range(1, len(tokens)):
+            #TODO: apply operator using HOF or something
+            if tokens[i] == "+" and flag == 0:
+                lhs += int(tokens[i + 1]) % reg_width
+            elif tokens[i] == "==":
+                op = "eq"
+                flag = 1
+            elif tokens[i] == "+" and flag == 1: 
+                rhs += int(tokens[i + 1]) % reg_width
+        if op == "eq":
+            return lhs == rhs
+        return lhs == rhs
+    except Exception:
+        return None
+
 def resolve_dependency(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager) -> str:
     if isinstance(cond, Operator):
         return true_value

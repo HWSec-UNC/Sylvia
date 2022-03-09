@@ -9,7 +9,7 @@ from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial, 
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer, IdentifierScope
 from helpers.utils import init_symbol
 from typing import Optional
-from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int
+from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int, str_to_bool
 from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc
 from helpers.utils import to_binary
 import os
@@ -50,6 +50,17 @@ class DepthFirst(Search):
             else:
                 self.visit_stmt(m, s, item, modules)
 
+        # simpl / collapsing step
+        for module in m.cond_assigns:
+            for signal in m.cond_assigns[module]:
+                res = m.cond_assigns[module][signal]
+                if s.store[m.curr_module][str(signal)].startswith("If("):
+                    cond = s.store[m.curr_module][str(signal)][3:].split(",")[0][:-1]
+                    if str_to_bool(cond, s, m):
+                        s.store[m.curr_module][str(signal)] = m.cond_assigns[m.curr_module][signal][cond]
+                    else:
+                        s.store[m.curr_module][str(signal)] = m.cond_assigns[m.curr_module][signal]["default"]
+
         if m.ignore:
             # print("infeasible path...")
             ...
@@ -86,6 +97,7 @@ class DepthFirst(Search):
                 if m.cycle == 0:
                     s.store[m.curr_module][stmt.name] = init_symbol()
         elif isinstance(stmt, Always):
+            m.in_always = True
             sens_list = stmt.sens_list
             if m.opt_3:
                 if stmt in m.blocks_of_interest:
@@ -137,7 +149,6 @@ class DepthFirst(Search):
                                     new_symbol = s.store[module][m.dependencies[module][signal]]
                                     s.store[module][signal] = s.store[module][signal].replace(prev_symbol, new_symbol)
                         for lhs in m.cond_assigns[module]:
-                            #print(m.updates)
                             if lhs in m.dependencies[module] and isinstance(m.updates[lhs], tuple) and m.updates[lhs][0] == 1:
                                 prev_symbol = str(m.updates[lhs][1])
                                 if not prev_symbol.isdigit() and prev_symbol in s.store[m.curr_module]: 
@@ -155,7 +166,8 @@ class DepthFirst(Search):
                                 else:
                                     s.store[module][lhs] = prev_symbol
                                 m.updates[lhs] = 0 
-                          
+                        # simplificiation / collapsing step
+            m.in_always = False               
         elif isinstance(stmt, Assign):
             prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.left.var, Identifier) and stmt.left.var.name in m.reg_decls and m.cycle > 0:
@@ -190,7 +202,11 @@ class DepthFirst(Search):
                 complexity = count_nested_cond(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
                 #print(complexity)
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
-                #print(f"new r {new_r_value}")
+                if str(stmt.right.var.cond) in opts:
+                    new_cond = new_r_value[3:].split(",")[0][:-1]
+                    #print(f"new r {new_r_value}")
+
+                    opts[new_cond] = opts.pop(str(stmt.right.var.cond))
                 s.store[m.curr_module][stmt.left.var.name] = new_r_value
             elif isinstance(stmt.right.var, Pointer):
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
