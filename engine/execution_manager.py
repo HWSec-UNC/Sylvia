@@ -7,6 +7,7 @@ from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, Sin
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg
+from helpers.utils import init_symbol
 from typing import Optional
 
 
@@ -57,6 +58,7 @@ class ExecutionManager:
     path = []
     cycle = 0
     prev_store = {}
+    reg_decls = set()
 
     def merge_states(self, state: SymbolicState, store):
         """Merges two states."""
@@ -65,7 +67,7 @@ class ExecutionManager:
                 continue
             else:
                 for key2, var in val.items():
-                    if var in store.values():
+                    if var in store.values() and (key2 in self.reg_decls or key2 == "clk" or key2 == "rst"):
                         prev_symbol = state.store[key][key2]
                         new_symbol = store[key][key2]
                         state.store[key][key2].replace(prev_symbol, new_symbol)
@@ -118,20 +120,25 @@ class ExecutionManager:
                     m.num_paths *= 2
                     self.count_conditionals(m, case.statement)
 
+    def init_state(self, s: SymbolicState, prev_store, ast):
+        """give fresh symbols and merge register values in."""
+        params = ast.paramlist.params
+        ports = ast.portlist.ports
 
-    def merge_states(self, manager: ExecutionManager, state: SymbolicState, store):
-        """Merges two states."""
-        for key, val in state.store.items():
-            if type(val) != dict:
-                continue
+        for param in params:
+            if isinstance(param.list[0], Parameter):
+                if param.list[0].name != "clk" and param.list[0].name != "rst":
+                    s.store[self.curr_module][param.list[0].name] = init_symbol()
+
+        for port in ports:
+            if isinstance(port, Ioport):
+                if str(port.first.name) != "clk" and str(port.first.name) != "rst":
+                    s.store[self.curr_module][str(port.first.name)] = init_symbol()
             else:
-                for key2, var in val.items():
-                    if var in store.values():
-                        prev_symbol = state.store[key][key2]
-                        new_symbol = store[key][key2]
-                        state.store[key][key2].replace(prev_symbol, new_symbol)
-                    else:
-                        state.store[key][key2] = store[key][key2]
+                if port.name not in s.store[self.curr_module]:
+                    s.store[self.curr_module][port.name] = init_symbol()
+
+        self.merge_states(s, prev_store)
 
     def count_conditionals_2(self, m:ExecutionManager, items) -> int:
         """Rewrite to actually return an int."""

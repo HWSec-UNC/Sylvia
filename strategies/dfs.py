@@ -23,23 +23,21 @@ class DepthFirst(Search):
         params = module.paramlist.params
         ports = module.portlist.ports
 
-        if m.cycle == 0:
 
-            for param in params:
-                if isinstance(param.list[0], Parameter):
-                    if param.list[0].name not in s.store[m.curr_module]:
-                        s.store[m.curr_module][param.list[0].name] = init_symbol()
 
-            for port in ports:
-                if isinstance(port, Ioport):
-                    if str(port.first.name) not in s.store[m.curr_module]:
-                        s.store[m.curr_module][str(port.first.name)] = init_symbol()
-                else:
-                    if port.name not in s.store[m.curr_module]:
-                        s.store[m.curr_module][port.name] = init_symbol()
-        
-        elif not m.is_child:
-            m.merge_states(m, s, m.prev_store)
+        for param in params:
+            if isinstance(param.list[0], Parameter):
+                if param.list[0].name not in s.store[m.curr_module]:
+                    s.store[m.curr_module][param.list[0].name] = init_symbol()
+
+        for port in ports:
+            if isinstance(port, Ioport):
+                if str(port.first.name) not in s.store[m.curr_module]:
+                    s.store[m.curr_module][str(port.first.name)] = init_symbol()
+            else:
+                if port.name not in s.store[m.curr_module]:
+                    s.store[m.curr_module][port.name] = init_symbol()
+
 
         if not m.is_child and not m.init_run_flag and not m.ignore:
             # print("Inital state:")
@@ -58,15 +56,16 @@ class DepthFirst(Search):
         
         if not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
         #if not m.is_child and m.assertion_violation:
-            print("Final state:")
+            print(f"Cycle {m.cycle} final state:")
             print(s.store)
        
-            print("Final path condition:")
+            print(f"Cycle {m.cycle} final path condition:")
             print(s.pc)
     
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
         "Traverse the statements in a hardware design"
+        #print(type(stmt))
         if m.ignore:
             return
         if isinstance(stmt, Decl):
@@ -122,6 +121,7 @@ class DepthFirst(Search):
                     for signal in m.dependencies[module]:
                         if m.dependencies[module][signal] in m.updates:
                             if m.updates[m.dependencies[module][signal]][0] == 1:
+                                print(f"dirty {m.updates[m.dependencies[module][signal]][0]}")
                                 prev_symbol = m.updates[m.dependencies[module][signal]][1]
 
                                 if '[' in s.store[module][signal]:
@@ -159,6 +159,8 @@ class DepthFirst(Search):
                           
         elif isinstance(stmt, Assign):
             prev_symbol = s.store[m.curr_module][stmt.left.var.name]
+            if isinstance(stmt.left.var, Identifier) and stmt.left.var.name in m.reg_decls and m.cycle > 0:
+                return
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):
@@ -203,7 +205,10 @@ class DepthFirst(Search):
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, NonblockingSubstitution):
-            prev_symbol = s.store[m.curr_module][stmt.left.var.name]
+            #prev_symbol = s.store[m.curr_module][stmt.left.var.name]
+            # if isinstance(stmt.left.var, Identifier) and stmt.left.var.name in m.reg_decls:
+            #     print("hey")
+            #     print(f"{prev_symbol} pp")
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):
@@ -218,11 +223,12 @@ class DepthFirst(Search):
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
             else:
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
+                #print(f"new {new_r_value}")
                 if new_r_value != None:
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
-            m.updates[stmt.left.var.name] = (1, prev_symbol)
+            #m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, BlockingSubstitution):
             prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):
@@ -272,7 +278,7 @@ class DepthFirst(Search):
 
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
-
+                    #print(stmt.cond)
                     print("Abandoning this path!")
                     return
                 nested_ifs = m.count_conditionals_2(m, stmt.true_statement)
@@ -291,6 +297,7 @@ class DepthFirst(Search):
                         
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
+                    #print(stmt.cond)
                     print("Abandoning this path!")
 
                     return
@@ -364,6 +371,7 @@ class DepthFirst(Search):
                 if m.cycle == 0: 
                     s.store[m.curr_module][expr.name] = init_symbol()
                 m.reg_writes.add(expr.name)
+                m.reg_decls.add(expr.name)
             else: 
                 # do nothing because we don't want to overwrite the previous state of the register
                 ...

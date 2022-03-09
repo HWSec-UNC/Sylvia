@@ -478,6 +478,7 @@ class ExecutionEngine:
                 manager.config[manager.names_list[j  % len(manager.names_list)]] = paths[i][j]
                 manager.path_code = manager.config[manager.names_list[0]]
                 manager.prev_store = state.store
+                manager.init_state(state, manager.prev_store, ast)
                 self.search_strategy.visit_module(manager, state, ast, modules_dict)
                 manager.cycle += 1
 
