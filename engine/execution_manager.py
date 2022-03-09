@@ -59,6 +59,7 @@ class ExecutionManager:
     cycle = 0
     prev_store = {}
     reg_decls = set()
+    reg_widths = {}
 
     def merge_states(self, state: SymbolicState, store):
         """Merges two states."""

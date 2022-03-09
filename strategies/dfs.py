@@ -9,7 +9,7 @@ from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial, 
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer, IdentifierScope
 from helpers.utils import init_symbol
 from typing import Optional
-from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options
+from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int
 from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc
 from helpers.utils import to_binary
 import os
@@ -365,6 +365,7 @@ class DepthFirst(Search):
                     s.store[m.curr_module][expr.name] = init_symbol()
                 m.reg_writes.add(expr.name)
                 m.reg_decls.add(expr.name)
+                m.reg_widths[expr.name] = expr.width
             else: 
                 # do nothing because we don't want to overwrite the previous state of the register
                 ...
@@ -373,10 +374,12 @@ class DepthFirst(Search):
                 s.store[m.curr_module][expr.name] = init_symbol()
         elif isinstance(expr, Eq):
             # assume left is identifier
-            parse_expr_to_Z3(expr, s, m)
+            #parse_expr_to_Z3(expr, s, m)
             if (s.store[m.curr_module][expr.left.name]).isdigit():
                 int_val = IntVal(int(s.store[m.curr_module][expr.left.name]))
                 x = Int2BV(int_val, 32)
+            elif (s.store[m.curr_module][expr.left.name]).split(" ")[0].isdigit():
+                x = Int2BV(IntVal(str_to_int(s.store[m.curr_module][expr.left.name], s, m)), 32)
             else: 
                 x = BitVec(s.store[m.curr_module][expr.left.name], 32)
             
