@@ -38,6 +38,6 @@ module demo (
             guard <= 0;
     end
 
-    assign out2 = (prev == 1) ? guard : 0;
+    assign out2 = (prev == 2) ? guard : 0;
 
 endmodule

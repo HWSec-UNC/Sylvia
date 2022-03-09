@@ -235,6 +235,8 @@ def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wi
                 flag = 1
             elif tokens[i] == "+" and flag == 1: 
                 rhs += int(tokens[i + 1]) % reg_width
+            elif flag == 1:
+                rhs = int(tokens[i])
         if op == "eq":
             return lhs == rhs
         return lhs == rhs

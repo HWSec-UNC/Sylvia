@@ -57,7 +57,7 @@ class DepthFirst(Search):
                 if s.store[m.curr_module][str(signal)].startswith("If("):
                     cond = s.store[m.curr_module][str(signal)][3:].split(",")[0][:-1]
                     if str_to_bool(cond, s, m):
-                        s.store[m.curr_module][str(signal)] = m.cond_assigns[m.curr_module][signal][cond]
+                        s.store[m.curr_module][str(signal)] = s.store[m.curr_module][str(m.cond_assigns[m.curr_module][signal][cond])]
                     else:
                         s.store[m.curr_module][str(signal)] = m.cond_assigns[m.curr_module][signal]["default"]
 
