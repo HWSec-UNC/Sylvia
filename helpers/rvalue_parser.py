@@ -135,6 +135,7 @@ def evaluate_binary_op(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> s
 def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: ExecutionManager) -> str:
     """Helper function to resolve conditional symbolic expressions.
     The format is intentionally meant to match z3 to make parsing easier later."""
+    #print("evaluating cond expression")
     if (isinstance(true_expr,tuple) and isinstance(false_expr,tuple)):
         return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
     elif (isinstance(true_expr,tuple)):
@@ -155,7 +156,11 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
         elif str(false_expr).isdigit():
             #TODO: this a temporary fix need to exapnd for all cases
             if isinstance(cond, tuple):
-                return f"If({s.store[m.curr_module][cond[1]]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
+                new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+                if not new_cond is None:
+                    return f"If({new_cond}), {s.store[m.curr_module][true_expr]}, {false_expr})"
+                else:
+                    return f"If({s.store[m.curr_module][cond[1]]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
             else:
                 return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
         else:
