@@ -13,17 +13,22 @@ from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
 BINARY_OPS = ("Plus", "Minus", "Power", "Times", "Divide", "Mod", "Sll", "Srl", "Sla", "Sra", "LessThan",
 "GreaterThan", "LessEq", "GreaterEq", "Eq", "NotEq", "Eql", "NotEql", "And", "Xor",
 "Xnor", "Or", "Land", "Lor")
+
+UNARY_OPS = ("Unot", "Ulnot")
+
 op_map = {"Plus": "+", "Minus": "-", "Power": "**", "Times": "*", "Divide": "/", "Mod": "%", "Sll": "<<", "Srl": ">>>",
 "Sra": ">>", "LessThan": "<", "GreaterThan": ">", "LessEq": "<=", "GreaterEq": ">=", "Eq": "==", "NotEq": "!=", "Eql": "===", "NotEql": "!==",
-"And": "&", "Xor": "^", "Or": "|", "Land": "&&", "Lor": "||"}
+"And": "&", "Xor": "^", "Or": "|", "Land": "&&", "Lor": "||", "Unot": "!", "Ulnot": "!"}
 
 def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> str: 
     """Convert the compound rvalue into proper string representation with pointers taken into account."""
     if isinstance(rvalue, UnaryOperator):
+        operator = str(rvalue).split(" ")[0][1:]
         if isinstance(rvalue.right, Pointer):
-            new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
+            new_right = f"({operator} {rvalue.right.var}[{rvalue.right.ptr}])"
             return new_right
-        return rvalue
+        else: 
+            return f"({operator} {conjunction_with_pointers(rvalue.right, s, m)})"
     elif isinstance(rvalue, Cond):
         if isinstance(rvalue.false_value, Pointer):
             ptr_access = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
@@ -32,17 +37,18 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
         else:
             return f"(Cond {rvalue.cond} {rvalue.true_value} {rvalue.false_value})"
     elif isinstance(rvalue, Operator):
+        #(type(rvalue))
         operator = str(rvalue).split(" ")[0][1:]
         if isinstance(rvalue.left, Pointer):
             new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
             s.store[m.curr_module][new_left] = s.store[m.curr_module][rvalue.left.var.name]
             # make a new value in store for the pointer
-            return f"(And {new_left} {conjunction_with_pointers(rvalue.right, s, m)})"
+            return f"({operator} {new_left} {conjunction_with_pointers(rvalue.right, s, m)})"
         elif isinstance(rvalue.right, Pointer):
             new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
             s.store[m.curr_module][new_right] = s.store[m.curr_module][rvalue.right.var.name]
             # make a new value in the store for the pointer
-            return f"(And {conjunction_with_pointers(rvalue.left, s, m)} {new_right})"
+            return f"({operator} {conjunction_with_pointers(rvalue.left, s, m)} {new_right})"
         elif isinstance(rvalue.left, Identifier):
             module_name = ""
             if not rvalue.left.scope is None:
@@ -69,6 +75,8 @@ def tokenize(rvalue, s: SymbolicState, m: ExecutionManager):
     return tokens
 
 def parse_tokens(tokens):
+    if len(tokens) == 1 and tokens[0].isalpha():
+        return tokens
     l = []
     iterat = iter(tokens)
     next(iterat) 
@@ -98,6 +106,21 @@ def evaluate(parsedList, s: SymbolicState, m: ExecutionManager):
     for i in parsedList:
 	    res = eval_rvalue(i, s, m)
     return res
+
+def evaluate_unary_op(expr, op, s: SymbolicState, m: ExecutionManager) -> str:
+    """Helper function to resolve unary symbolic expression."""
+    # convert hex strings into ints
+    if isinstance(expr, str) and not expr.isdigit():
+        if "'h" in expr or "'b" in expr or "'d" in expr:
+            expr = int(expr[3:])
+
+    if (isinstance(expr,tuple)):
+        return f"{op} {eval_rvalue(expr, s, m)}"
+    else:
+        if (isinstance(expr ,str) and not expr.isdigit()):
+            return f" {op} {s.get_symbolic_expr(m.curr_module, expr)}"
+        else: 
+            return f"{op} {str(expr)}"
 
 def evaluate_binary_op(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> str: 
     """Helper function to resolve binary symbolic expressions."""
@@ -172,6 +195,8 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     if not rvalue is None:
         if rvalue[0] in BINARY_OPS:
             return evaluate_binary_op(rvalue[1], rvalue[2], op_map[rvalue[0]], s, m)
+        elif rvalue[0] in UNARY_OPS:
+            return evaluate_unary_op(rvalue[1], op_map[rvalue[0]], s, m)
         elif rvalue[0] == "Cond":
             # TODO this is not good  need to handle in z3 parser
             result = evaluate_cond_expr(rvalue[1], rvalue[2], rvalue[3], s, m)
@@ -203,6 +228,10 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             #s.pc.add(If((cond == one_bv), true_expr, false_expr))
             
             return result
+        else:
+            return str(rvalue)
+
+        
 
 def str_to_int(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_width=4294967296) -> int:
     """Takes in a symbolic expression as a string that is only ints and evaluates it down to a single int.

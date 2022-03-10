@@ -10,7 +10,7 @@ from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, Strin
 from helpers.utils import init_symbol
 from typing import Optional
 from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int, str_to_bool
-from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc
+from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc, parse_concat_to_Z3
 from helpers.utils import to_binary
 import os
 
@@ -169,13 +169,35 @@ class DepthFirst(Search):
                         # simplificiation / collapsing step
             m.in_always = False               
         elif isinstance(stmt, Assign):
-            prev_symbol = s.store[m.curr_module][stmt.left.var.name]
+            print(s.store)
+            if isinstance(stmt.left.var, Pointer):
+                if f"{stmt.left.var.var}[{stmt.left.var.ptr}]" in s.store[m.curr_module]:
+                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"]
+                else:
+                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var}"]
+            elif isinstance(stmt.left.var, Partselect):
+                if f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]" in s.store[m.curr_module]:
+                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"]
+                else:
+                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var.name}"]
+            else:
+                prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.left.var, Identifier) and stmt.left.var.name in m.reg_decls and m.cycle > 0:
                 ...
             elif isinstance(stmt.right.var, IntConst):
-                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+                if isinstance(stmt.left.var, Pointer):
+                    s.store[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"] = stmt.right.var.value
+                elif isinstance(stmt.left.var, Partselect):
+                    s.store[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = stmt.right.var.value
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):
-                s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
+                if isinstance(stmt.left.var, Pointer):
+                    s.store[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"] = s.store[m.curr_module][stmt.right.var.name]
+                elif isinstance(stmt.left.var, Partselect):
+                    s.store[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = s.store[m.curr_module][stmt.right.var.name]
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             elif isinstance(stmt.right.var, Partselect):
                 if isinstance(stmt.left.var, Partselect):
                     s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
@@ -187,12 +209,13 @@ class DepthFirst(Search):
                     m.updates[stmt.left.var.name] = 0
             
             elif isinstance(stmt.right.var, Concat):
+                print("IN CONCAT")
                 s.store[m.curr_module][stmt.left.var.name] = {}
                 for item in stmt.right.var.list:
                     # TODO: concatenation is more nuanced potentially than this...
                     # see line 237 of or1200_except
                     str_item = evaluate(parse_tokens(tokenize(item, s, m)), s, m)
-                    s.store[m.curr_module][stmt.left.var.name][str_item] = str_item
+                    s.store[m.curr_module][stmt.left.var.name][str_item] = s.store[m.curr_module][str_item]
                     #s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, Cond):
                 m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
@@ -218,11 +241,17 @@ class DepthFirst(Search):
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
-            m.updates[stmt.left.var.name] = (1, prev_symbol)
+            if isinstance(stmt.left.var, Pointer):
+                m.updates[f"{stmt.left.var.var}[{stmt.left.var.ptr}]"]= (1, prev_symbol)
+            elif isinstance(stmt.left.var, Partselect):
+                m.updates[f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = (1, prev_symbol)
+            else:
+                m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, NonblockingSubstitution):
             reg_width = 0
             if isinstance(stmt.left.var, Identifier):
                 if stmt.left.var.name in m.reg_decls:
+                    print(m.reg_widths)
                     reg_width = m.reg_widths[stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
@@ -364,6 +393,7 @@ class DepthFirst(Search):
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
 
                 self.visit_expr(m, s, stmt.comp)
+                print(f"case {stmt.comp}")
                 if (m.abandon):
  
                     print("Abandoning this path!")
@@ -376,6 +406,10 @@ class DepthFirst(Search):
                 for lhs in m.cond_assigns[m.curr_module]:
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
+
+                print(f"case {stmt.comp}")
+                print(stmt.caselist)
+
                 self.visit_expr(m, s, stmt.comp)
                 if (m.abandon):
                     print("Abandoning this path!")
@@ -397,6 +431,8 @@ class DepthFirst(Search):
                         m.reg_widths[expr.name] = 2 ** (val + 1)
                     else:
                         m.reg_widths[expr.name] = 2 ** (int(expr.width.msb.value) + 1)
+                else:
+                    m.reg_widths[expr.name] = 4294967296
             else: 
                 # do nothing because we don't want to overwrite the previous state of the register
                 ...
@@ -440,6 +476,12 @@ class DepthFirst(Search):
         elif isinstance(expr, Identifier):
             # change this to one since inst is supposed to just be 1 bit width
             # and the identifier class actually doesn't have a width param
+            symbol = s.store[m.curr_module][expr.name]
+            if isinstance(symbol, dict):
+                bit_vec_list = parse_concat_to_Z3(symbol, s, m)
+                #TODO: get the right widths
+                x = BitVec(Concat(bit_vec_list), 1)
+
             x = BitVec(s.store[m.curr_module][expr.name], 1)
             y = BitVec(1, 1)
             one = IntVal(1)

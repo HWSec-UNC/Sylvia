@@ -27,6 +27,14 @@ def get_constants_list(new_constraint, s: SymbolicState, m: ExecutionManager):
             res.append(word)
     return res
 
+def parse_concat_to_Z3(concat, s: SymbolicState, m: ExecutionManager):
+    """Takes a concatenation of symbolic symbols areturns the list of bitvectors"""
+    res = []
+    for key in concat:
+        x = BitVec(concat[key], 1)
+        res.append(x)
+    return res
+
 
 def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
     """Takes in a complex Verilog Expression and converts it to 

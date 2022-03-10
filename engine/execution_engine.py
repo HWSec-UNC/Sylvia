@@ -3,7 +3,7 @@ from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef, If,
 from pyverilog.vparser.parser import parse
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
-from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
+from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case, Pointer
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg
 from .execution_manager import ExecutionManager
 from .symbolic_state import SymbolicState
@@ -147,6 +147,8 @@ class ExecutionEngine:
                     if isinstance(item.left.var, Partselect):
                         if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
                             m.always_writes[m.curr_always].append(item.left.var.var.name)
+                    elif isinstance(item.left.var, Pointer):
+                        m.always_writes[m.curr_always].append(item.left.var.ptr)
                     elif m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
                         m.always_writes[m.curr_always].append(item.left.var.name)
                 elif isinstance(item, NonblockingSubstitution):
