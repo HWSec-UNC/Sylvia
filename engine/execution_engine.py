@@ -79,7 +79,7 @@ class ExecutionEngine:
                 return  ( self.count_conditionals_2(m, items.true_statement) + 
                 self.count_conditionals_2(m, items.false_statement)) + 1
             if isinstance(items, CaseStatement):
-                return self.count_conditionals_2(m, items.caselist) + 1
+                return self.count_conditionals_2(m, items.caselist) + len(items.caselist)
         return 0
 
     def count_conditionals(self, m: ExecutionManager, items):
@@ -378,25 +378,40 @@ class ExecutionEngine:
                 manager.seen[name] = []
             manager.curr_module = manager.names_list[0]
 
+            stride_length = len(manager.names_list)
+            # for each combinatoin of multicycle paths
             for i in range(len(paths)):
-                for j in range(len(paths[i])):
-                    manager.config[manager.names_list[j]] = paths[i][j]
-                manager.path_code = manager.config[manager.names_list[0]]
+                manager.cycle = 0
+                # extract the single cycle path code for this iteration and execute, then merge the states
+                for j in range(0, len(paths[i]), stride_length):
+                    #print(f"Single cycle path {j} {paths[i][j]}")
+                    manager.config[manager.names_list[j  % len(manager.names_list)]] = paths[i][j]
+                    manager.path_code = paths[i][j]
+                    manager.prev_store = state.store
+                    manager.init_state(state, manager.prev_store, ast)
+                    self.search_strategy.visit_module(manager, state, ast, modules_dict)
+                    manager.cycle += 1
+                    manager.curr_level = 0
                 if self.check_dup(manager):
                 # #if False:
-                    continue
+                    print("------------------------")
                 else:
                     print("------------------------")
                     #print(f"{ast.name} Path {i}")
-                self.search_strategy.visit_module(manager, state, ast, modules_dict)
                 manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
                     print("Assertion violation")
                     manager.assertion_violation = False
                     self.solve_pc(state.pc)
-                manager.curr_level = 0
-                manager.dependencies = {}
+                for module in manager.dependencies:
+                    module = {}
                 state.pc.reset()
+
+                manager.ignore = False
+                manager.abandon = False
+                manager.reg_writes.clear()
+                for name in manager.names_list:
+                    state.store[name] = {}
 
             #manager.path_code = to_binary(0)
             #print(f" finishing {ast.name}")

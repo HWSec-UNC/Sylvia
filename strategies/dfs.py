@@ -169,7 +169,6 @@ class DepthFirst(Search):
                         # simplificiation / collapsing step
             m.in_always = False               
         elif isinstance(stmt, Assign):
-            print(s.store)
             if isinstance(stmt.left.var, Pointer):
                 if f"{stmt.left.var.var}[{stmt.left.var.ptr}]" in s.store[m.curr_module]:
                     prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"]
@@ -381,7 +380,8 @@ class DepthFirst(Search):
                     for port in stmt.instances[0].portlist:
                         s.store[m.curr_module][str(port.argname)] = s.store[stmt.module][str(port.portname)]
                     self.execute_child(modules[stmt.module], s, m)
-        elif isinstance(stmt, CaseStatement):
+        elif isinstance(stmt, Case):
+            print("CAse")
             m.curr_level += 1
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
@@ -392,30 +392,32 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
 
-                self.visit_expr(m, s, stmt.comp)
-                print(f"case {stmt.comp}")
+                self.visit_expr(m, s, stmt.cond)
+                print(f"case {stmt.cond}")
                 if (m.abandon):
  
                     print("Abandoning this path!")
                     return
                 # m.curr_level == (32 - bit_index) this is always true
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
-                self.visit_stmt(m, s, stmt.caselist, modules)
             else:
                 self.branch = False
                 for lhs in m.cond_assigns[m.curr_module]:
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
 
-                print(f"case {stmt.comp}")
-                print(stmt.caselist)
+                print(f"case {stmt.cond}")
 
-                self.visit_expr(m, s, stmt.comp)
+                self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
                     print("Abandoning this path!")
 
                     return
-                self.visit_stmt(m, s, stmt.caselist, modules)
+
+        elif isinstance(stmt, CaseStatement):
+            print("Case statement")
+            for case in stmt.caselist:
+                self.visit_stmt(m, s, case, modules)
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         """Traverse the expressions in a hardware design."""
