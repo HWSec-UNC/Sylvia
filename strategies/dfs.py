@@ -208,13 +208,12 @@ class DepthFirst(Search):
                     m.updates[stmt.left.var.name] = 0
             
             elif isinstance(stmt.right.var, Concat):
-                print("IN CONCAT")
                 s.store[m.curr_module][stmt.left.var.name] = {}
                 for item in stmt.right.var.list:
                     # TODO: concatenation is more nuanced potentially than this...
                     # see line 237 of or1200_except
                     str_item = evaluate(parse_tokens(tokenize(item, s, m)), s, m)
-                    s.store[m.curr_module][stmt.left.var.name][str_item] = s.store[m.curr_module][str_item]
+                    s.store[m.curr_module][stmt.left.var.name][str_item] = str_item
                     #s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, Cond):
                 m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
@@ -250,7 +249,7 @@ class DepthFirst(Search):
             reg_width = 0
             if isinstance(stmt.left.var, Identifier):
                 if stmt.left.var.name in m.reg_decls:
-                    print(m.reg_widths)
+                    #print(m.reg_widths)
                     reg_width = m.reg_widths[stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
@@ -259,12 +258,18 @@ class DepthFirst(Search):
             elif isinstance(stmt.right.var, Concat):
                 s.store[m.curr_module][stmt.left.var.name] = {}
                 for item in stmt.right.var.list:
-                    s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
+                    if isinstance(item, Partselect):
+                        s.store[m.curr_module][stmt.left.var.name][item.var.name] = f"{s.store[m.curr_module][item.var.name]}[{item.msb}:{item.lsb}]"
+                    elif isinstance(item, IntConst):
+                        s.store[m.curr_module][stmt.left.var.name][item.value] = item.value
+                    else:
+                        s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, StringConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Partselect):
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
             else:
+                print(type(stmt))
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                 if new_r_value != None:
                     if new_r_value.split(" ")[0].isdigit():
@@ -381,7 +386,6 @@ class DepthFirst(Search):
                         s.store[m.curr_module][str(port.argname)] = s.store[stmt.module][str(port.portname)]
                     self.execute_child(modules[stmt.module], s, m)
         elif isinstance(stmt, Case):
-            print("CAse")
             m.curr_level += 1
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
@@ -393,7 +397,6 @@ class DepthFirst(Search):
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
 
                 self.visit_expr(m, s, stmt.cond)
-                print(f"case {stmt.cond}")
                 if (m.abandon):
  
                     print("Abandoning this path!")
@@ -406,8 +409,6 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
 
-                print(f"case {stmt.cond}")
-
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
                     print("Abandoning this path!")
@@ -415,7 +416,6 @@ class DepthFirst(Search):
                     return
 
         elif isinstance(stmt, CaseStatement):
-            print("Case statement")
             for case in stmt.caselist:
                 self.visit_stmt(m, s, case, modules)
 
@@ -453,8 +453,10 @@ class DepthFirst(Search):
                 x = BitVec(s.store[m.curr_module][expr.left.name], 32)
             
             if isinstance(expr.right, IntConst):
-                #print(expr.right.value)
-                int_val = IntVal(expr.right.value)
+                if "'h" in str(expr.right.value) or "'b" in str(expr.right.value) or "'d" in str(expr.right.value):
+                    int_val = IntVal(int(str(expr.right.value)[3:]))
+                else:
+                    int_val = IntVal(expr.right.value)
                 y = Int2BV(int_val, 32)
             else:
                 y = BitVec(expr.right.name, 32)

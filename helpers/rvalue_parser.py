@@ -14,11 +14,11 @@ BINARY_OPS = ("Plus", "Minus", "Power", "Times", "Divide", "Mod", "Sll", "Srl", 
 "GreaterThan", "LessEq", "GreaterEq", "Eq", "NotEq", "Eql", "NotEql", "And", "Xor",
 "Xnor", "Or", "Land", "Lor")
 
-UNARY_OPS = ("Unot", "Ulnot")
+UNARY_OPS = ("Unot", "Ulnot", "Unor", "Uor")
 
 op_map = {"Plus": "+", "Minus": "-", "Power": "**", "Times": "*", "Divide": "/", "Mod": "%", "Sll": "<<", "Srl": ">>>",
 "Sra": ">>", "LessThan": "<", "GreaterThan": ">", "LessEq": "<=", "GreaterEq": ">=", "Eq": "==", "NotEq": "!=", "Eql": "===", "NotEql": "!==",
-"And": "&", "Xor": "^", "Or": "|", "Land": "&&", "Lor": "||", "Unot": "!", "Ulnot": "!"}
+"And": "&", "Xor": "^", "Or": "|", "Land": "&&", "Lor": "||", "Unot": "!", "Ulnot": "!", "Unor": "!", "Uor": "|"}
 
 def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> str: 
     """Convert the compound rvalue into proper string representation with pointers taken into account."""
@@ -127,11 +127,11 @@ def evaluate_binary_op(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> s
     # convert hex strings into ints
     if isinstance(rhs, str) and not rhs.isdigit():
         if "'h" in rhs or "'b" in rhs or "'d" in rhs:
-            rhs = int(rhs[3:])
+            rhs = int(rhs.split("'")[1][2:])
 
     if isinstance(lhs, str) and not lhs.isdigit():
         if "'h" in lhs or "'b" in lhs or "'d" in lhs:
-            lhs = int(lhs[3:])
+            lhs = int(lhs.split("'")[1][2:])
 
     if (isinstance(lhs,tuple) and isinstance(rhs,tuple)):
         return f"{eval_rvalue(lhs, s, m)} {op} {eval_rvalue(rhs, s, m)}"
@@ -229,7 +229,7 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             
             return result
         else:
-            return str(rvalue)
+            return s.store[m.curr_module][str(rvalue)]
 
         
 
