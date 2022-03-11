@@ -347,11 +347,13 @@ module simple_spi ( // renamed by Julius
 
   assign tirq = ~|tcnt & rfwe;
 
-  initial begin
+ initial begin
     if (rst_i) begin
-      `assert((cyc_i || !stb_i))
+	    if (s_init_state) begin
+      `assert((s_init_state || s_mst_ready_state) || s_slv_ready_state)
     end
-  end
+	end
+end
 
 endmodule
 
