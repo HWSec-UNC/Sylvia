@@ -409,8 +409,9 @@ class ExecutionEngine:
                 manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
                     print("Assertion violation")
-                    manager.assertion_violation = False
+                    #manager.assertion_violation = False
                     self.solve_pc(state.pc)
+                    return 
                 for module in manager.dependencies:
                     module = {}
                 state.pc.reset()
@@ -522,8 +523,9 @@ class ExecutionEngine:
             if (manager.assertion_violation):
                 print("Assertion violation")
                 print(state.pc.model())
-                manager.assertion_violation = False
+                #manager.assertion_violation = False
                 self.solve_pc(state.pc)
+                return
             for module in manager.dependencies:
                 module = {}
             state.pc.reset()
