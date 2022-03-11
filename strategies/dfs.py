@@ -41,7 +41,8 @@ class DepthFirst(Search):
 
         if not m.is_child and not m.init_run_flag and not m.ignore:
             # print("Inital state:")
-            print(s.store)
+            #print(s.store)
+            ...
             
 
         for item in module.items:
@@ -65,8 +66,8 @@ class DepthFirst(Search):
             # print("infeasible path...")
             ...
         
-        if not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
-        #if not m.is_child and m.assertion_violation:
+        #if not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
+        if not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
             print(f"Cycle {m.cycle} final state:")
             print(s.store)
        
@@ -338,7 +339,7 @@ class DepthFirst(Search):
 
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
-                    print("Abandoning this path!")
+                    #print("Abandoning this path!")
                     return
                 nested_ifs = m.count_conditionals_2(m, stmt.true_statement)
                 diff = 32 - bit_index
@@ -356,7 +357,7 @@ class DepthFirst(Search):
                         
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
-                    print("Abandoning this path!")
+                    #print("Abandoning this path!")
 
                     return
                 self.visit_stmt(m, s, stmt.false_statement,  modules)
@@ -403,7 +404,7 @@ class DepthFirst(Search):
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
  
-                    print("Abandoning this path!")
+                    #print("Abandoning this path!")
                     return
                 # m.curr_level == (32 - bit_index) this is always true
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
@@ -415,7 +416,7 @@ class DepthFirst(Search):
 
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
-                    print("Abandoning this path!")
+                    #print("Abandoning this path!")
 
                     return
 

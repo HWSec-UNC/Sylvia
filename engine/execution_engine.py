@@ -197,9 +197,8 @@ class ExecutionEngine:
                                 if isinstance(item.true_statement.statements[0].statement, SystemCall) and "ASSERTION" in item.true_statement.statements[0].statement.args[0].value:
                                     m.assertions.append(item.cond)
                                     print("assertion found")
-                        else:     
-                            return 
-                            #self.get_assertions(m, item.true_statement)
+                            else:     
+                                self.get_assertions(m, item.true_statement)
                             #self.get_assertions(m, item.false_statement)
                     if isinstance(item, CaseStatement):
                         for case in item.caselist:
@@ -394,9 +393,11 @@ class ExecutionEngine:
                     manager.curr_level = 0
                 if self.check_dup(manager):
                 # #if False:
-                    print("------------------------")
+                    #----------------------")
+                    ...
                 else:
-                    print("------------------------")
+                    #print("------------------------")
+                    ...
                     #print(f"{ast.name} Path {i}")
                 manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
@@ -502,10 +503,12 @@ class ExecutionEngine:
 
             if self.check_dup(manager):
             #if False:
-                print("------------------------")
+                #print("------------------------")
+                ...
                 #continue
             else:
-                print("------------------------")
+                #print("------------------------")
+                ...
                 #print(f"{ast.name} Path {i}")
                 
             manager.seen[ast.name].append(manager.path_code)
