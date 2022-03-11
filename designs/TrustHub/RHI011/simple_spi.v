@@ -349,7 +349,7 @@ module simple_spi ( // renamed by Julius
 
  initial begin
     if (rst_i) begin
-	    if (!cyc_i && !stb_i)) begin
+	    if (!cyc_i && !stb_i) begin
       `assert((!cyc_i && !stb_i) || (cyc_i && !stb_i) || (cyc_i && stb_i))
     end
 	end
