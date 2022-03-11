@@ -40,8 +40,8 @@ class DepthFirst(Search):
 
 
         if not m.is_child and not m.init_run_flag and not m.ignore:
-            print("Inital state:")
-            print(s.store)
+            # print("Inital state:")
+            # print(s.store)
             ...
             
 
@@ -66,8 +66,8 @@ class DepthFirst(Search):
             # print("infeasible path...")
             ...
         
-        if not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
-        #if not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
+        #if not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
+        if not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
             print(f"Cycle {m.cycle} final state:")
             print(s.store)
        
