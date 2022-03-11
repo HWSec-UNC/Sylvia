@@ -1,6 +1,6 @@
 """Depth First Traversal of the AST."""
 from .template import Search
-from z3 import Solver, Int, BitVec, Int2BV, IntVal
+from z3 import Solver, Int, BitVec, Int2BV, IntVal, Concat
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
@@ -265,11 +265,13 @@ class DepthFirst(Search):
                     else:
                         s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, StringConst):
-                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+                if "'h" in stmt.right.var.value or "'b" in stmt.right.var.value or "'d" in stmt.right.var.value:
+                    s.store[m.curr_always][stmt.left.var.name] = stmt.right.var.value.split("'")[1][1:]
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Partselect):
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
             else:
-                print(type(stmt))
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                 if new_r_value != None:
                     if new_r_value.split(" ")[0].isdigit():
@@ -298,7 +300,10 @@ class DepthFirst(Search):
                     else:
                         s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, StringConst):
-                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+                if "'h" in stmt.right.var.value or "'b" in stmt.right.var.value or "'d" in stmt.right.var.value:
+                    s.store[m.curr_always][stmt.left.var.name] = stmt.right.var.value.split("'")[1][1:]
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Partselect):
                 if isinstance(stmt.left.var, Partselect):
                     s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
@@ -395,7 +400,6 @@ class DepthFirst(Search):
                 for lhs in m.cond_assigns[m.curr_module]:
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
-
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon):
  
@@ -416,6 +420,7 @@ class DepthFirst(Search):
                     return
 
         elif isinstance(stmt, CaseStatement):
+            m.curr_case = stmt.comp
             for case in stmt.caselist:
                 self.visit_stmt(m, s, case, modules)
 
@@ -454,7 +459,7 @@ class DepthFirst(Search):
             
             if isinstance(expr.right, IntConst):
                 if "'h" in str(expr.right.value) or "'b" in str(expr.right.value) or "'d" in str(expr.right.value):
-                    int_val = IntVal(int(str(expr.right.value)[3:]))
+                    int_val = IntVal(int(str(expr.right.value.split("'")[1][1:])))
                 else:
                     int_val = IntVal(expr.right.value)
                 y = Int2BV(int_val, 32)
@@ -480,13 +485,18 @@ class DepthFirst(Search):
         elif isinstance(expr, Identifier):
             # change this to one since inst is supposed to just be 1 bit width
             # and the identifier class actually doesn't have a width param
+
             symbol = s.store[m.curr_module][expr.name]
-            if isinstance(symbol, dict):
+            if "'h" in s.store[m.curr_module][expr.name] or "'b" in s.store[m.curr_module][expr.name] or "'d" in s.store[m.curr_module][expr.name]:
+                symbol = s.store[m.curr_module][expr.name].split("'")[1][1:]
+                s.store[m.curr_module][expr.name] = symbol
+                x = Int2BV(IntVal(int(symbol)), 1)
+            elif isinstance(symbol, dict):
                 bit_vec_list = parse_concat_to_Z3(symbol, s, m)
                 #TODO: get the right widths
                 x = BitVec(Concat(bit_vec_list), 1)
-
-            x = BitVec(s.store[m.curr_module][expr.name], 1)
+            else:
+                x = BitVec(s.store[m.curr_module][expr.name], 1)
             y = BitVec(1, 1)
             one = IntVal(1)
             zero = IntVal(0)
@@ -523,6 +533,55 @@ class DepthFirst(Search):
             #     s.pc.add(x == y)
         elif isinstance(expr, Land):
             parse_expr_to_Z3(expr, s, m)
+        elif isinstance(expr, tuple):
+            cond = expr[0]
+            base = (str(cond.value)[0:1])
+            if base == "b'":
+                value = (int(cond.value.split("'")[1], 2))
+            elif base == "h'":
+                value = (int(cond.value.split("'")[1], 16))
+            elif isinstance(cond, IntConst):
+                if "'b" in str(cond.value):
+                    width = int(cond.value.split("'")[0])
+                    value = (int(cond.value.split("'")[1][1:], 2))
+                elif base == "'h"  in str(cond.value):
+                    width = int(cond.value.split("'")[0])
+                    value = (int(cond.value.split("'")[1][1:], 16))
+                else:   
+                    value = int(cond.value)
+                y = Int2BV(IntVal(value), width)
+            else:
+                value = s.store[m.curr_module][cond]
+
+            symbol = s.store[m.curr_module][str(m.curr_case)]
+            if isinstance(symbol, dict):
+                bit_vec_list = parse_concat_to_Z3(symbol, s, m)
+                #TODO: get the right widths
+                if len(bit_vec_list) == 2:
+                    x = Concat(BitVec(str(bit_vec_list[0]), width // 2), BitVec(str(bit_vec_list[1]), width //2))
+                else:
+                    raise Exception
+            else:
+                x = BitVec(s.store[m.curr_module][str(m.curr_case)], width)
+
+            if self.branch:
+                s.pc.push()
+                s.pc.add(x==y)
+                if not solve_pc(s.pc):
+                    s.pc.pop()
+                    #print("Abandoning infeasible path")
+                    m.abandon = True
+                    m.ignore = True
+                    return
+            else: 
+                s.pc.push()
+                s.pc.add(x != y)
+                if not solve_pc(s.pc):
+                    s.pc.pop()
+                    #print("Abandoning infeasible path")
+                    m.abandon = True
+                    m.ignore = True
+                    return
         return None
 
     def execute_child(self, ast: ModuleDef, state: SymbolicState, parent_manager: Optional[ExecutionManager]) -> None:

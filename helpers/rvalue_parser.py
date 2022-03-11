@@ -4,7 +4,7 @@ cases in the designs we evaluate. Please open a Github issue if you run into a d
 rvalue not handled by this."""
 
 import sys
-from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator, IdentifierScope, Identifier
+from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator, IdentifierScope, Identifier, StringConst
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
@@ -112,7 +112,7 @@ def evaluate_unary_op(expr, op, s: SymbolicState, m: ExecutionManager) -> str:
     # convert hex strings into ints
     if isinstance(expr, str) and not expr.isdigit():
         if "'h" in expr or "'b" in expr or "'d" in expr:
-            expr = int(expr[3:])
+            expr = int(expr.split("'")[1][1:])
 
     if (isinstance(expr,tuple)):
         return f"{op} {eval_rvalue(expr, s, m)}"
