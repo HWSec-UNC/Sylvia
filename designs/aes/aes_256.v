@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+`define assert(expression) \
+        if (!(expression)) begin \
+            $display("ASSERTION FAILED"); \
+            $finish; \
+        end   
 module aes_256 (clk, state, key, out);
     input          clk;
     input  [127:0] state;
