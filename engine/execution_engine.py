@@ -149,6 +149,9 @@ class ExecutionEngine:
                             m.always_writes[m.curr_always].append(item.left.var.var.name)
                     elif isinstance(item.left.var, Pointer):
                         m.always_writes[m.curr_always].append(item.left.var.ptr)
+                    elif isinstance(item.left.var, Concat) and m.curr_always is not None:
+                        for sub_item in item.left.var.list:
+                            m.always_writes[m.curr_always].append(sub_item.name)
                     elif m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
                         m.always_writes[m.curr_always].append(item.left.var.name)
                 elif isinstance(item, NonblockingSubstitution):
@@ -174,7 +177,11 @@ class ExecutionEngine:
                 if m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
                     m.always_writes[m.curr_always].append(items.left.var.name)
             elif isinstance(items, NonblockingSubstitution):
-                if m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
+                if isinstance(items.left.var, Concat):
+                    for sub_item in items.left.var.list:
+                        if sub_item.name not in m.always_writes[m.curr_always]:
+                            m.always_writes[m.curr_always].append(sub_item.name)
+                elif m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
                     m.always_writes[m.curr_always].append(items.left.var.name)
             elif isinstance(items, BlockingSubstitution):
                 if m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:

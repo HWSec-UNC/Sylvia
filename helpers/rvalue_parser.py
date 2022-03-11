@@ -4,7 +4,7 @@ cases in the designs we evaluate. Please open a Github issue if you run into a d
 rvalue not handled by this."""
 
 import sys
-from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator, IdentifierScope, Identifier, StringConst
+from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator, IdentifierScope, Identifier, StringConst, Partselect
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
@@ -37,7 +37,6 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
         else:
             return f"(Cond {rvalue.cond} {rvalue.true_value} {rvalue.false_value})"
     elif isinstance(rvalue, Operator):
-        #(type(rvalue))
         operator = str(rvalue).split(" ")[0][1:]
         if isinstance(rvalue.left, Pointer):
             new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
@@ -49,6 +48,12 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
             s.store[m.curr_module][new_right] = s.store[m.curr_module][rvalue.right.var.name]
             # make a new value in the store for the pointer
             return f"({operator} {conjunction_with_pointers(rvalue.left, s, m)} {new_right})"
+        elif isinstance(rvalue.right, Partselect):
+            new_right = f"{rvalue.right.var.name}[{rvalue.right.msb}:{rvalue.right.lsb}]"
+            return f"({operator} {conjunction_with_pointers(rvalue.left, s, m)} {new_right})"
+        elif isinstance(rvalue.left, Partselect):
+            new_left = f"{rvalue.left.var.name}[{rvalue.left.msb}:{rvalue.left.lsb}]"
+            return f"({operator} {new_left} {conjunction_with_pointers(rvalue.right, s, m)} )"
         elif isinstance(rvalue.left, Identifier):
             module_name = ""
             if not rvalue.left.scope is None:
@@ -191,7 +196,6 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
 
 def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     """Takes in an AST and should return the new symbolic expression for the symbolic state."""
-    #print(rvalue)
     if not rvalue is None:
         if rvalue[0] in BINARY_OPS:
             return evaluate_binary_op(rvalue[1], rvalue[2], op_map[rvalue[0]], s, m)

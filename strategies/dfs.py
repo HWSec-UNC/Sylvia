@@ -40,8 +40,8 @@ class DepthFirst(Search):
 
 
         if not m.is_child and not m.init_run_flag and not m.ignore:
-            # print("Inital state:")
-            #print(s.store)
+            print("Inital state:")
+            print(s.store)
             ...
             
 
@@ -66,8 +66,8 @@ class DepthFirst(Search):
             # print("infeasible path...")
             ...
         
-        #if not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
-        if not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
+        if not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
+        #if not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
             print(f"Cycle {m.cycle} final state:")
             print(s.store)
        
@@ -181,7 +181,11 @@ class DepthFirst(Search):
                 else:
                     prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var.name}"]
             else:
-                prev_symbol = s.store[m.curr_module][stmt.left.var.name]
+                if isinstance(stmt.left.var, Concat):
+                    #TODO: loop over all prev symbols
+                    prev_symbol = s.store[m.curr_module][str(stmt.left.var.list[0])]
+                else:
+                    prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.left.var, Identifier) and stmt.left.var.name in m.reg_decls and m.cycle > 0:
                 ...
             elif isinstance(stmt.right.var, IntConst):
@@ -197,7 +201,12 @@ class DepthFirst(Search):
                 elif isinstance(stmt.left.var, Partselect):
                     s.store[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = s.store[m.curr_module][stmt.right.var.name]
                 else:
-                    s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
+
+                    if isinstance(stmt.left.var, Concat):
+                        for sub_item in stmt.left.var.list:
+                            s.store[m.curr_module][sub_item.name] = s.store[m.curr_module][stmt.right.var.name]
+                    else:
+                        s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             elif isinstance(stmt.right.var, Partselect):
                 if isinstance(stmt.left.var, Partselect):
                     s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
@@ -209,13 +218,24 @@ class DepthFirst(Search):
                     m.updates[stmt.left.var.name] = 0
             
             elif isinstance(stmt.right.var, Concat):
-                s.store[m.curr_module][stmt.left.var.name] = {}
-                for item in stmt.right.var.list:
-                    # TODO: concatenation is more nuanced potentially than this...
-                    # see line 237 of or1200_except
-                    str_item = evaluate(parse_tokens(tokenize(item, s, m)), s, m)
-                    s.store[m.curr_module][stmt.left.var.name][str_item] = str_item
-                    #s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
+                if isinstance(stmt.left.var, Concat):
+                    for sub_item in stmt.left.var.list:
+                        for item in stmt.right.var.list:
+                            if isinstance(item, Partselect):
+                                s.store[m.curr_module][sub_item.name] = f"{s.store[m.curr_module][item.var.name]}[{item.msb}:{item.lsb}]"
+                            elif isinstance(item, IntConst):
+                                s.store[m.curr_module][sub_item.name] = item.value
+                            else:
+                                s.store[m.curr_module][sub_item.name] = s.store[m.curr_module][item.name]
+                                # items match 1:1:
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = {}
+                    for item in stmt.right.var.list:
+                        # TODO: concatenation is more nuanced potentially than this...
+                        # see line 237 of or1200_except
+                        str_item = evaluate(parse_tokens(tokenize(item, s, m)), s, m)
+                        s.store[m.curr_module][stmt.left.var.name][str_item] = str_item
+                        #s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, Cond):
                 m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
                 opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
@@ -245,7 +265,12 @@ class DepthFirst(Search):
             elif isinstance(stmt.left.var, Partselect):
                 m.updates[f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = (1, prev_symbol)
             else:
-                m.updates[stmt.left.var.name] = (1, prev_symbol)
+
+                if isinstance(stmt.left.var, Concat):
+                    for sub_item in stmt.left.var.list:
+                        m.updates[sub_item.name] = (1, prev_symbol)
+                else:
+                    m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, NonblockingSubstitution):
             reg_width = 0
             if isinstance(stmt.left.var, Identifier):
@@ -257,14 +282,27 @@ class DepthFirst(Search):
             elif isinstance(stmt.right.var, Identifier):
                 s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             elif isinstance(stmt.right.var, Concat):
-                s.store[m.curr_module][stmt.left.var.name] = {}
-                for item in stmt.right.var.list:
-                    if isinstance(item, Partselect):
-                        s.store[m.curr_module][stmt.left.var.name][item.var.name] = f"{s.store[m.curr_module][item.var.name]}[{item.msb}:{item.lsb}]"
-                    elif isinstance(item, IntConst):
-                        s.store[m.curr_module][stmt.left.var.name][item.value] = item.value
-                    else:
-                        s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
+                # TODO make this a real concat
+                if isinstance(stmt.left.var, Concat):
+                    for sub_item in stmt.left.var.list:
+                        for item in stmt.right.var.list:
+                            if isinstance(item, Partselect):
+                                s.store[m.curr_module][sub_item.name] = f"{s.store[m.curr_module][item.var.name]}[{item.msb}:{item.lsb}]"
+                            elif isinstance(item, IntConst):
+                                s.store[m.curr_module][sub_item.name] = item.value
+                            else:
+                                s.store[m.curr_module][sub_item.name] = s.store[m.curr_module][item.name]
+                                # items match 1:1:
+                
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = {}
+                    for item in stmt.right.var.list:
+                        if isinstance(item, Partselect):
+                            s.store[m.curr_module][stmt.left.var.name][item.var.name] = f"{s.store[m.curr_module][item.var.name]}[{item.msb}:{item.lsb}]"
+                        elif isinstance(item, IntConst):
+                            s.store[m.curr_module][stmt.left.var.name][item.value] = item.value
+                        else:
+                            s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, StringConst):
                 if "'h" in stmt.right.var.value or "'b" in stmt.right.var.value or "'d" in stmt.right.var.value:
                     s.store[m.curr_always][stmt.left.var.name] = stmt.right.var.value.split("'")[1][1:]
