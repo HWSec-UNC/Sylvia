@@ -350,7 +350,7 @@ module simple_spi ( // renamed by Julius
  initial begin
     if (rst_i) begin
 	    if (s_init_state) begin
-      `assert((s_init_state || s_mst_ready_state) || s_slv_ready_state)
+      `assert((!cyc_i && !stb_i) || (cyc_i && !stb_i) || (cyc_i && stb_i))
     end
 	end
 end
