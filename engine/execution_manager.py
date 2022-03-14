@@ -44,7 +44,7 @@ class ExecutionManager:
     child_range: range = None
     always_writes = {}
     curr_always = None
-    opt_2: bool = True
+    opt_2: bool = False
     opt_3: bool = False
     assertions = []
     blocks_of_interest = []
@@ -61,6 +61,7 @@ class ExecutionManager:
     reg_decls = set()
     reg_widths = {}
     curr_case = None
+    debug: bool = False
 
     def merge_states(self, state: SymbolicState, store):
         """Merges two states."""

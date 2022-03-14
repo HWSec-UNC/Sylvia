@@ -39,9 +39,9 @@ class DepthFirst(Search):
                     s.store[m.curr_module][port.name] = init_symbol()
 
 
-        if not m.is_child and not m.init_run_flag and not m.ignore:
-            # print("Inital state:")
-            # print(s.store)
+        if m.debug and not m.is_child and not m.init_run_flag and not m.ignore:
+            print("Inital state:")
+            print(s.store)
             ...
             
 
@@ -66,8 +66,13 @@ class DepthFirst(Search):
             # print("infeasible path...")
             ...
         
-        #if not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
-        if not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
+        if m.debug and not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
+            print(f"Cycle {m.cycle} final state:")
+            print(s.store)
+       
+            print(f"Cycle {m.cycle} final path condition:")
+            print(s.pc)
+        elif not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
             print(f"Cycle {m.cycle} final state:")
             print(s.store)
        

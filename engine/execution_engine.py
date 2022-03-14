@@ -24,6 +24,7 @@ CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
 class ExecutionEngine:
     module_depth: int = 0
     search_strategy = DepthFirst()
+    debug: bool = False
 
     def check_pc_SAT(self, s: Solver, constraint: ExprRef) -> bool:
         """Check if pc is satisfiable before taking path."""
@@ -400,10 +401,12 @@ class ExecutionEngine:
                     manager.curr_level = 0
                 if self.check_dup(manager):
                 # #if False:
-                    #----------------------")
+                    if self.debug:
+                        print("----------------------")
                     ...
                 else:
-                    #print("------------------------")
+                    if self.debug:
+                        print("------------------------")
                     ...
                     #print(f"{ast.name} Path {i}")
                 manager.seen[ast.name].append(manager.path_code)
@@ -486,7 +489,8 @@ class ExecutionEngine:
         # print(manager.always_writes)
         # print(manager.assertions)
 
-    
+        if self.debug:
+            manager.debug = True
         self.assertions_always_intersect(manager)
         #print(manager.blocks_of_interest)
         #print(f"Num paths: {manager.num_paths}")
@@ -514,11 +518,13 @@ class ExecutionEngine:
 
             if self.check_dup(manager):
             #if False:
-                #print("------------------------")
+                if self.debug:
+                    print("------------------------")
                 ...
                 #continue
             else:
-                #print("------------------------")
+                if self.debug:
+                    print("------------------------")
                 ...
                 #print(f"{ast.name} Path {i}")
                 

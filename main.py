@@ -53,6 +53,7 @@ def main():
                          default=["designs/or1200/", "darkriscv/", "designs"], help="Include path")
     optparser.add_option("-D", dest="define", action="append",
                          default=[], help="Macro Definition")
+    optparser.add_option("-B", "--debug", action="store_true", dest="showdebug", help="Debug Mode")
     (options, args) = optparser.parse_args()
 
 
@@ -61,6 +62,9 @@ def main():
 
     if options.showversion:
         showVersion()
+
+    if options.showdebug:
+        engine.debug = True
 
     for f in filelist:
         if not os.path.exists(f):

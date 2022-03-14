@@ -5,6 +5,7 @@ rvalue not handled by this."""
 
 import sys
 from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator, IdentifierScope, Identifier, StringConst, Partselect
+from pyverilog.vparser.ast import Concat
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
@@ -67,6 +68,11 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
             return f"({operator} {conjunction_with_pointers(rvalue.left, s, m)} {conjunction_with_pointers(rvalue.right, s, m)})" 
     elif isinstance(rvalue, Pointer):
         return f"{rvalue.var}[{rvalue.ptr}]"
+    elif isinstance(rvalue, Concat):
+        accumulate = "{ "
+        for sub_item in rvalue.list:
+            accumulate += sub_item.name + " "
+        return accumulate + " }"
     else:
         return rvalue
 
@@ -196,6 +202,7 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
 
 def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     """Takes in an AST and should return the new symbolic expression for the symbolic state."""
+    #print(rvalue)
     if not rvalue is None:
         if rvalue[0] in BINARY_OPS:
             return evaluate_binary_op(rvalue[1], rvalue[2], op_map[rvalue[0]], s, m)
