@@ -25,7 +25,11 @@ The following command should get you started with a basic run of symbolic execut
 
 The expected usage of Sylvia is:
 
-python3 -m engine {num_cycles} {list of verilog files}
+python3 -m main {num_cycles} {list of verilog files}
 
 `python3 -m main 1 designs/test-designs/test.v designs/test-designs/test_2.v  > out.txt` for example is a command 
 with two example verilog files.
+
+You can run:
+
+`python3 -m main --help` for information about the different flags you can run Sylvia with. -B will display the initial & final symbolic store and path condition for each clock cycle during the run. 
