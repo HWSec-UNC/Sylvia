@@ -268,6 +268,7 @@ def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wi
         lhs = tokens[0]
     rhs: int = 1
     flag = 0
+    op = ""
     try: 
         for i in range(1, len(tokens)):
             #TODO: apply operator using HOF or something
@@ -282,8 +283,16 @@ def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wi
                 rhs = int(tokens[i])
         if op == "eq":
             return lhs == rhs
+        elif len(tokens) == 1:
+            assertions = s.pc.assertions()
+            for assertion in assertions:
+                if lhs in str(assertion) and "!= int2bv(1)" in str(assertion):
+                    return False
+                elif lhs in str(assertion) and "== int2bv(1)" in str(assertion):
+                    return True
         return lhs == rhs
     except Exception:
+        print("returning none")
         return None
 
 def resolve_dependency(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager) -> str:
