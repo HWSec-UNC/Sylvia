@@ -62,6 +62,7 @@ class ExecutionManager:
     reg_widths = {}
     curr_case = None
     debug: bool = False
+    initial_store = {}
 
     def merge_states(self, state: SymbolicState, store):
         """Merges two states."""

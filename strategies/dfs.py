@@ -13,6 +13,7 @@ from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_depe
 from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc, parse_concat_to_Z3
 from helpers.utils import to_binary
 import os
+import copy
 
 
 class DepthFirst(Search):
@@ -40,10 +41,12 @@ class DepthFirst(Search):
 
 
         if m.debug and not m.is_child and not m.init_run_flag and not m.ignore:
-            print("Inital state:")
+            print("Initial state:")
             print(s.store)
             ...
-            
+        
+        if not m.is_child and not m.init_run_flag and not m.ignore:
+            m.initial_store = copy.deepcopy(s.store) 
 
         for item in module.items:
             if isinstance(item, Value):
@@ -73,6 +76,9 @@ class DepthFirst(Search):
             print(f"Cycle {m.cycle} final path condition:")
             print(s.pc)
         elif not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
+            print(f"Cycle {m.cycle} inital state:")
+            print(m.initial_store)
+
             print(f"Cycle {m.cycle} final state:")
             print(s.store)
        

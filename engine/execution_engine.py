@@ -412,8 +412,24 @@ class ExecutionEngine:
                 manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
                     print("Assertion violation")
-                    #manager.assertion_violation = False
-                    self.solve_pc(state.pc)
+                    counterexample = {}
+                    symbols_to_values = {}
+                    if self.solve_pc(state.pc):
+                        solved_model = state.pc.model()
+                        decls =  solved_model.decls()
+                        for item in decls:
+                            symbols_to_values[item.name()] = solved_model[item]
+
+                        # plug in phase
+                        for module in state.store:
+                            for signal in state.store[module]:
+                                for symbol in symbols_to_values:
+                                    if state.store[module][signal] == symbol:
+                                        counterexample[signal] = symbols_to_values[symbol]
+
+                        print(counterexample)
+                    else:
+                        print("UNSAT")
                     return 
                 for module in manager.dependencies:
                     module = {}
@@ -531,9 +547,25 @@ class ExecutionEngine:
             manager.seen[ast.name].append(manager.path_code)
             if (manager.assertion_violation):
                 print("Assertion violation")
-                print(state.pc.model())
                 #manager.assertion_violation = False
-                self.solve_pc(state.pc)
+                counterexample = {}
+                symbols_to_values = {}
+                if self.solve_pc(state.pc):
+                    solved_model = state.pc.model()
+                    decls =  solved_model.decls()
+                    for item in decls:
+                        symbols_to_values[item.name()] = solved_model[item]
+
+                    # plug in phase
+                    for module in state.store:
+                        for signal in state.store[module]:
+                            for symbol in symbols_to_values:
+                                if state.store[module][signal] == symbol:
+                                    counterexample[signal] = symbols_to_values[symbol]
+
+                    print(counterexample)
+                else:
+                    print("UNSAT")
                 return
             for module in manager.dependencies:
                 module = {}
@@ -586,7 +618,24 @@ class ExecutionEngine:
             if (manager.assertion_violation):
                 print("Assertion violation")
                 manager.assertion_violation = False
-                self.solve_pc(state.pc)
+                counterexample = {}
+                symbols_to_values = {}
+                if self.solve_pc(state.pc):
+                    solved_model = state.pc.model()
+                    decls =  solved_model.decls()
+                    for item in decls:
+                        symbols_to_values[item.name()] = solved_model[item]
+
+                    # plug in phase
+                    for module in state.store:
+                        for signal in state.store[module]:
+                            for symbol in symbols_to_values:
+                                if state.store[module][signal] == symbol:
+                                    counterexample[signal] = symbols_to_values[symbol]
+
+                    print(counterexample)
+                else:
+                    print("UNSAT")
             manager.curr_level = 0
             #state.pc.reset()
         #manager.path_code = to_binary(0)

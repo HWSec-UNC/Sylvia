@@ -292,7 +292,6 @@ def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wi
                     return True
         return lhs == rhs
     except Exception:
-        print("returning none")
         return None
 
 def resolve_dependency(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager) -> str:
