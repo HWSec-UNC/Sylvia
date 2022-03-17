@@ -262,7 +262,10 @@ def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wi
     """Takes in a symbolic expression as a string that is only ints and evaluates it down to a single int.
     This is a special case."""
     tokens = symbolic_exp.split(" ")
-    lhs: int = int(tokens[0])
+    if tokens[0].isnumeric():
+        lhs = int(tokens[0])
+    else:
+        lhs = tokens[0]
     rhs: int = 1
     flag = 0
     try: 
