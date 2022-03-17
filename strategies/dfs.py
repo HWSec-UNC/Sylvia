@@ -170,7 +170,8 @@ class DepthFirst(Search):
 
                                     s.store[module][lhs] = new_symbol
                                 else:
-                                    s.store[module][lhs] = prev_symbol
+                                    # do a simpl pass?
+                                    s.store[module][lhs] = s.store[module][lhs]
                                 m.updates[lhs] = 0 
                         # simplificiation / collapsing step
             m.in_always = False               
@@ -255,6 +256,7 @@ class DepthFirst(Search):
 
                     opts[new_cond] = opts.pop(str(stmt.right.var.cond))
                 s.store[m.curr_module][stmt.left.var.name] = new_r_value
+                #print(f"printing intermediate store {s.store}")
             elif isinstance(stmt.right.var, Pointer):
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
                 m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
@@ -381,8 +383,8 @@ class DepthFirst(Search):
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
 
                 self.visit_expr(m, s, stmt.cond)
-                if (m.abandon):
-                    #print("Abandoning this path!")
+                if (m.abandon and m.debug):
+                    print("Abandoning this path!")
                     return
                 nested_ifs = m.count_conditionals_2(m, stmt.true_statement)
                 diff = 32 - bit_index
@@ -399,8 +401,8 @@ class DepthFirst(Search):
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
                         
                 self.visit_expr(m, s, stmt.cond)
-                if (m.abandon):
-                    #print("Abandoning this path!")
+                if (m.abandon and m.debug):
+                    print("Abandoning this path!")
 
                     return
                 self.visit_stmt(m, s, stmt.false_statement,  modules)
@@ -445,9 +447,9 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
                 self.visit_expr(m, s, stmt.cond)
-                if (m.abandon):
+                if (m.abandon and m.debug):
  
-                    #print("Abandoning this path!")
+                    print("Abandoning this path!")
                     return
                 # m.curr_level == (32 - bit_index) this is always true
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
@@ -458,8 +460,8 @@ class DepthFirst(Search):
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
 
                 self.visit_expr(m, s, stmt.cond)
-                if (m.abandon):
-                    #print("Abandoning this path!")
+                if (m.abandon and m.debug):
+                    print("Abandoning this path!")
 
                     return
 
