@@ -64,6 +64,7 @@ class DepthFirst(Search):
                         s.store[m.curr_module][str(signal)] = s.store[m.curr_module][str(m.cond_assigns[m.curr_module][signal][cond])]
                     else:
                         s.store[m.curr_module][str(signal)] = m.cond_assigns[m.curr_module][signal]["default"]
+                        
 
         if m.ignore:
             # print("infeasible path...")
@@ -144,8 +145,10 @@ class DepthFirst(Search):
                     for signal in m.dependencies[module]:
                         if m.dependencies[module][signal] in m.updates:
                             if m.updates[m.dependencies[module][signal]][0] == 1:
-                                print(f"dirty {m.updates[m.dependencies[module][signal]][0]}")
                                 prev_symbol = m.updates[m.dependencies[module][signal]][1]
+
+                                if m.dependencies[module][signal] in m.cond_assigns[module]:
+                                    m.cond_assigns[m.curr_module][signal] = m.cond_assigns[module][m.dependencies[module][signal]]
 
                                 if '[' in s.store[module][signal]:
                                     
@@ -157,6 +160,7 @@ class DepthFirst(Search):
                                         new_symbol += parts[i]
 
                                     s.store[module][signal] = new_symbol
+
                                 else:
                                     new_symbol = s.store[module][m.dependencies[module][signal]]
                                     s.store[module][signal] = s.store[module][signal].replace(prev_symbol, new_symbol)
@@ -322,6 +326,9 @@ class DepthFirst(Search):
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Partselect):
+                # TODO make sure the width is still enforced correctly though
+                if stmt.right.var.var.name in m.cond_assigns[m.curr_module]:
+                    m.cond_assigns[m.curr_module][stmt.left.var.name] = m.cond_assigns[m.curr_module][stmt.right.var.var.name]
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
             else:
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
