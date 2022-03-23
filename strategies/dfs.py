@@ -63,7 +63,6 @@ class DepthFirst(Search):
                     if str_to_bool(cond, s, m):
                         if isinstance(m.cond_assigns[m.curr_module][signal][cond], Operator):
                             parsed_cond = evaluate(parse_tokens(tokenize(m.cond_assigns[m.curr_module][signal][cond], s, m)), s, m)
-                            print(parsed_cond)
                             int_cond = None
                             if parsed_cond.split(" ")[0].isdigit():
                                 #TODO: get correct width here
