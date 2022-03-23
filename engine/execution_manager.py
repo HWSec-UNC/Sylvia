@@ -38,7 +38,7 @@ class ExecutionManager:
     names_list = []
     instance_count = {}
     seen_mod = {}
-    opt_1: bool = True
+    opt_1: bool = False
     curr_module: str = ""
     piece_wise: bool = False
     child_range: range = None
@@ -64,8 +64,8 @@ class ExecutionManager:
     debug: bool = False
     initial_store = {}
 
-    def merge_states(self, state: SymbolicState, store):
-        """Merges two states."""
+    def merge_states(self, state: SymbolicState, store, flag, module_name=""):
+        """Merges two states. The flag is for when we are just merging a particular module"""
         for key, val in state.store.items():
             if type(val) != dict:
                 continue
@@ -76,7 +76,10 @@ class ExecutionManager:
                         new_symbol = store[key][key2]
                         state.store[key][key2].replace(prev_symbol, new_symbol)
                     else:
-                        state.store[key][key2] = store[key][key2]
+                        if flag:
+                            state.store[module_name] = store
+                        else:
+                            state.store[key][key2] = store[key][key2]
 
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
@@ -142,7 +145,7 @@ class ExecutionManager:
                 if port.name not in s.store[self.curr_module]:
                     s.store[self.curr_module][port.name] = init_symbol()
 
-        self.merge_states(s, prev_store)
+        self.merge_states(s, prev_store, False)
 
     def count_conditionals_2(self, m:ExecutionManager, items) -> int:
         """Rewrite to actually return an int."""
