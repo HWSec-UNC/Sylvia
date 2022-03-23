@@ -22,7 +22,7 @@ module demo (
     */
 
     reg [1:0] state = 0;
-    reg [1:0] prev = 3;
+    reg [1:0] prev = 2;
     
     reg [31:0] guard = 0;
 
@@ -38,6 +38,6 @@ module demo (
             guard <= 0;
     end
 
-    assign out2 = (prev == 2) ? guard : 0;
+    assign out2 = (prev == 2) ? guard + 1: 0;
 
 endmodule

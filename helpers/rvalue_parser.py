@@ -171,10 +171,27 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
     The format is intentionally meant to match z3 to make parsing easier later."""
     #print("evaluating cond expression")
     if (isinstance(true_expr,tuple) and isinstance(false_expr,tuple)):
-        return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
-    elif (isinstance(true_expr,tuple)):
-        if false_expr.isdigit():
+        if true_expr[0] in op_map and false_expr[0] in op_map:
+            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {false_expr})"
+        elif true_expr[0] in op_map:
+            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
+        elif false_expr[0] in op_map:
             return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {false_expr})"
+        else:
+            return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
+    elif (isinstance(true_expr,tuple)):
+        if str(false_expr).isdigit():
+            if true_expr[0] in op_map:
+                new_true_expr = evaluate_binary_op(true_expr[1], true_expr[2], op_map[true_expr[0]], s, m)
+            else:
+                new_true_expr = None
+            new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+            if not new_cond is None and not new_true_expr is None:
+                return f"If({new_cond}), {new_true_expr}, {str(false_expr)})"
+            elif not new_true_expr is None:
+                return f"If({s.store[m.curr_module][cond]}), {new_true_expr}, {str(false_expr)})"
+            else:
+                return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {false_expr})"
         else:
             return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {s.store[m.curr_module][false_expr]})"
     elif (isinstance(false_expr,tuple)):
@@ -217,26 +234,26 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             #     parsed_cond = ""
             # print(parsed_cond)
             parsed_cond = ""
-            if isinstance(rvalue[1], tuple):
-                parsed_cond = str(rvalue[1][1]) +  " & " + str(rvalue[1][2])
-            if parsed_cond != "":
-                cond = BitVec(parsed_cond, 1)
-            else:
-                cond = BitVec(rvalue[1], 1)
-            one = IntVal(1)
-            one_bv = Int2BV(one, 1)
-            if not rvalue[2].isdigit():
-                true_expr = BitVec(s.store[m.curr_module][rvalue[2]], 32)
-            else:
-                true_expr_int = IntVal(rvalue[2], 32)
-                true_expr = Int2BV(true_expr_int, 32)
-            if not str(rvalue[3]).isdigit():
-                false_expr = BitVec(s.store[m.curr_module][rvalue[3]], 32)
-            else:
-                false_expr_int = IntVal(rvalue[3])
-                false_expr = Int2BV(false_expr_int, 32)
-            # TODO: i cant add it to the pc bc this a bool sort ... not a bitvec one and it will throw an error
-            #s.pc.add(If((cond == one_bv), true_expr, false_expr))
+            # if isinstance(rvalue[1], tuple):
+            #     parsed_cond = str(rvalue[1][1]) +  " & " + str(rvalue[1][2])
+            # if parsed_cond != "":
+            #     cond = BitVec(parsed_cond, 1)
+            # else:
+            #     cond = BitVec(rvalue[1], 1)
+            # one = IntVal(1)
+            # one_bv = Int2BV(one, 1)
+            # if not rvalue[2].isdigit():
+            #     true_expr = BitVec(s.store[m.curr_module][rvalue[2]], 32)
+            # else:
+            #     true_expr_int = IntVal(rvalue[2], 32)
+            #     true_expr = Int2BV(true_expr_int, 32)
+            # if not str(rvalue[3]).isdigit():
+            #     false_expr = BitVec(s.store[m.curr_module][rvalue[3]], 32)
+            # else:
+            #     false_expr_int = IntVal(rvalue[3])
+            #     false_expr = Int2BV(false_expr_int, 32)
+            # # TODO: i cant add it to the pc bc this a bool sort ... not a bitvec one and it will throw an error
+            # #s.pc.add(If((cond == one_bv), true_expr, false_expr))
             
             return result
         else:

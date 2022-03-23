@@ -61,7 +61,19 @@ class DepthFirst(Search):
                 if s.store[m.curr_module][str(signal)].startswith("If("):
                     cond = s.store[m.curr_module][str(signal)][3:].split(",")[0][:-1]
                     if str_to_bool(cond, s, m):
-                        s.store[m.curr_module][str(signal)] = s.store[m.curr_module][str(m.cond_assigns[m.curr_module][signal][cond])]
+                        if isinstance(m.cond_assigns[m.curr_module][signal][cond], Operator):
+                            parsed_cond = evaluate(parse_tokens(tokenize(m.cond_assigns[m.curr_module][signal][cond], s, m)), s, m)
+                            print(parsed_cond)
+                            int_cond = None
+                            if parsed_cond.split(" ")[0].isdigit():
+                                #TODO: get correct width here
+                                int_cond = str_to_int(parsed_cond, s, m, 32)
+                            if not int_cond is None:
+                                s.store[m.curr_module][str(signal)] = int_cond
+                            else:
+                                s.store[m.curr_module][str(signal)] = parsed_cond
+                        else:
+                            s.store[m.curr_module][str(signal)] = s.store[m.curr_module][str(m.cond_assigns[m.curr_module][signal][cond])]
                     else:
                         s.store[m.curr_module][str(signal)] = m.cond_assigns[m.curr_module][signal]["default"]
                         
