@@ -24,6 +24,7 @@ class ExecutionManager:
     in_always: bool = False
     modules = {}
     dependencies = {}
+    intermodule_dependencies = {}
     updates = {}
     seen = {}
     final = False

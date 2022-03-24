@@ -371,6 +371,7 @@ class ExecutionEngine:
                     manager.config[instance_name] = to_binary(0)
                     state.store[instance_name] = {}
                     manager.dependencies[instance_name] = {}
+                    manager.intermodule_dependencies[instance_name] = {}
                     manager.cond_assigns[instance_name] = {}
                 manager.names_list.remove(module.name)
             else:
@@ -380,6 +381,7 @@ class ExecutionEngine:
                 manager.config[module.name] = to_binary(0)
                 state.store[module.name] = {}
                 manager.dependencies[module.name] = {}
+                manager.intermodule_dependencies[instance_name] = {}
                 manager.cond_assigns[module.name] = {}
 
         total_paths = sum(manager.child_num_paths.values())
@@ -455,6 +457,8 @@ class ExecutionEngine:
                     return 
                 for module in manager.dependencies:
                     module = {}
+                for module in manager.intermodule_dependencies:
+                    module = {}
                 state.pc.reset()
 
                 manager.ignore = False
@@ -506,6 +510,7 @@ class ExecutionEngine:
                         manager.config[instance_name] = to_binary(0)
                         state.store[instance_name] = {}
                         manager.dependencies[instance_name] = {}
+                        manager.intermodule_dependencies[instance_name] = {}
                         manager.cond_assigns[instance_name] = {}
                     manager.names_list.remove(module.name)
                 else:        
@@ -514,6 +519,7 @@ class ExecutionEngine:
                     manager.config[module.name] = to_binary(0)
                     state.store[module.name] = {}
                     manager.dependencies[module.name] = {}
+                    manager.intermodule_dependencies[module.name] = {}
                     manager.cond_assigns[module.name] = {}
             total_paths = 1
             for x in manager.child_num_paths.values():
@@ -552,7 +558,7 @@ class ExecutionEngine:
             manager.seen[name] = []
         manager.curr_module = manager.names_list[0]
 
-
+        
         stride_length = len(manager.names_list)
         # for each combinatoin of multicycle paths
         for i in range(len(paths)):

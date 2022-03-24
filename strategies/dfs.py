@@ -24,7 +24,6 @@ class DepthFirst(Search):
         params = module.paramlist.params
         ports = module.portlist.ports
 
-
         for param in params:
             if isinstance(param.list[0], Parameter):
                 if m.curr_module in m.instances_loc:
@@ -58,6 +57,7 @@ class DepthFirst(Search):
                 self.visit_stmt(m, s, item, modules)
 
         # simpl / collapsing step
+        
         for module in m.cond_assigns:
             for signal in m.cond_assigns[module]:
                 res = m.cond_assigns[module][signal]
@@ -455,8 +455,10 @@ class DepthFirst(Search):
                         if f"{stmt.module}_{instance_index}" in m.instances_loc:
                             containing_module = m.instances_loc[f"{stmt.module}_{instance_index}"]
                             s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[containing_module][str(port.argname)]
+                            m.intermodule_dependencies[containing_module][str(port.argname)] = (f"{stmt.module}_{instance_index}", str(port.portname))
                     else:
                         s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.argname)]
+
                 if m.opt_1:
                     if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
                         #print("hello")
@@ -474,6 +476,8 @@ class DepthFirst(Search):
                         if f"{stmt.module}_{instance_index}" in m.instances_loc:
                             containing_module = m.instances_loc[f"{stmt.module}_{instance_index}"]
                             s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[containing_module][str(port.argname)]
+                            m.intermodule_dependencies[containing_module][str(port.argname)] = (f"{stmt.module}_{instance_index}", str(port.portname))
+
                     self.execute_child(modules[stmt.module], s, m, f"{stmt.module}_{instance_index}")
         elif isinstance(stmt, Case):
             m.curr_level += 1
@@ -696,6 +700,12 @@ class DepthFirst(Search):
             #print("------------------------")
             #print(f"{ast.name} Path {i}")
             self.visit_module(manager_sub, state, ast, parent_manager.modules)
+
+            containing_module = parent_manager.instances_loc[instance]
+            deps = parent_manager.intermodule_dependencies[containing_module]
+            for parent_signal in deps:
+                child = deps[parent_signal]
+                state.store[containing_module][parent_signal] = state.store[instance][child[1]]
             if (parent_manager.assertion_violation):
                 print("Assertion violation")
                 parent_manager.assertion_violation = False
