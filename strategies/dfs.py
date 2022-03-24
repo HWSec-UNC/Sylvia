@@ -24,7 +24,7 @@ class DepthFirst(Search):
         params = module.paramlist.params
         ports = module.portlist.ports
 
-
+        #print(m.config)
 
         for param in params:
             if isinstance(param.list[0], Parameter):
@@ -180,7 +180,7 @@ class DepthFirst(Search):
                                 prev_symbol = str(m.updates[lhs][1])
                                 if not prev_symbol.isdigit() and prev_symbol in s.store[m.curr_module]: 
                                     prev_symbol = s.store[m.curr_module][prev_symbol]
-                                if '[' in s.store[module][lhs]:
+                                if '[' in str(s.store[module][lhs]):
                                     
                                     parts = s.store[module][lhs].partition("[")
 
@@ -197,23 +197,8 @@ class DepthFirst(Search):
                         # simplificiation / collapsing step
             m.in_always = False               
         elif isinstance(stmt, Assign):
-            if isinstance(stmt.left.var, Pointer):
-                if f"{stmt.left.var.var}[{stmt.left.var.ptr}]" in s.store[m.curr_module]:
-                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"]
-                else:
-                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var}"]
-            elif isinstance(stmt.left.var, Partselect):
-                if f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]" in s.store[m.curr_module]:
-                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"]
-                else:
-                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var.name}"]
-            else:
-                if isinstance(stmt.left.var, Concat):
-                    #TODO: loop over all prev symbols
-                    prev_symbol = s.store[m.curr_module][str(stmt.left.var.list[0])]
-                else:
-                    prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.left.var, Identifier) and stmt.left.var.name in m.reg_decls and m.cycle > 0:
+                print("um")
                 ...
             elif isinstance(stmt.right.var, IntConst):
                 if isinstance(stmt.left.var, Pointer):
@@ -292,13 +277,29 @@ class DepthFirst(Search):
                 m.updates[f"{stmt.left.var.var}[{stmt.left.var.ptr}]"]= (1, prev_symbol)
             elif isinstance(stmt.left.var, Partselect):
                 m.updates[f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = (1, prev_symbol)
-            else:
 
-                if isinstance(stmt.left.var, Concat):
-                    for sub_item in stmt.left.var.list:
-                        m.updates[sub_item.name] = (1, prev_symbol)
+            if isinstance(stmt.left.var, Pointer):
+                if f"{stmt.left.var.var}[{stmt.left.var.ptr}]" in s.store[m.curr_module]:
+                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"]
                 else:
-                    m.updates[stmt.left.var.name] = (1, prev_symbol)
+                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var}"]
+            elif isinstance(stmt.left.var, Partselect):
+                if f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]" in s.store[m.curr_module]:
+                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"]
+                else:
+                    prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var.name}"]
+            else:
+                if isinstance(stmt.left.var, Concat):
+                    #TODO: loop over all prev symbols
+                    prev_symbol = s.store[m.curr_module][str(stmt.left.var.list[0])]
+                else:
+                    prev_symbol = s.store[m.curr_module][stmt.left.var.name]
+
+            if isinstance(stmt.left.var, Concat):
+                for sub_item in stmt.left.var.list:
+                    m.updates[sub_item.name] = (1, prev_symbol)
+            else:
+                m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, NonblockingSubstitution):
             reg_width = 0
             if isinstance(stmt.left.var, Identifier):
@@ -435,18 +436,20 @@ class DepthFirst(Search):
         elif isinstance(stmt, SingleStatement):
             self.visit_stmt(m, s, stmt.statement,  modules)
         elif isinstance(stmt, InstanceList):
+            instance_index = m.instances_seen[stmt.module]
+            m.instances_seen[stmt.module] += 1 % m.instance_count[stmt.module]
             if stmt.module in modules:
                 for port in stmt.instances[0].portlist:
-                    if str(port.argname) not in s.store[m.curr_module]:
+                    if str(port.argname) not in s.store[f"{stmt.module}_{instance_index}"]:
                         if m.cycle == 0:
-                            s.store[m.curr_module][str(port.argname)] = init_symbol()
-                            s.store[stmt.module][str(port.portname)] = s.store[m.curr_module][str(port.argname)]
+                            s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = init_symbol()
+                            s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.argname)]
                     else:
-                        s.store[stmt.module][str(port.portname)] = s.store[m.curr_module][str(port.argname)]
+                        s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.argname)]
                 if m.opt_1:
                     if m.seen_mod[stmt.module][m.config[stmt.module]] == {}:
                         #print("hello")
-                        self.execute_child(modules[stmt.module], s, m)
+                        self.execute_child(modules[stmt.module], s, m, f"{stmt.module}_{instance_index}")
                     else:
                         #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
                         print("already seen")
@@ -454,12 +457,11 @@ class DepthFirst(Search):
                         # this loop updates all the signals in the top level module
                         # so that the param connections seem like cont. assigns
                         for port in stmt.instances[0].portlist:
-                            s.store[m.curr_module][str(port.argname)] = s.store[stmt.module][str(port.portname)]
+                            s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.portname)]
                 else:
-                    #print("hey")
                     for port in stmt.instances[0].portlist:
-                        s.store[m.curr_module][str(port.argname)] = s.store[stmt.module][str(port.portname)]
-                    self.execute_child(modules[stmt.module], s, m)
+                        s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.portname)]
+                    self.execute_child(modules[stmt.module], s, m, f"{stmt.module}_{instance_index}")
         elif isinstance(stmt, Case):
             m.curr_level += 1
             self.cond = True
@@ -654,30 +656,30 @@ class DepthFirst(Search):
                     return
         return None
 
-    def execute_child(self, ast: ModuleDef, state: SymbolicState, parent_manager: Optional[ExecutionManager]) -> None:
+    def execute_child(self, ast: ModuleDef, state: SymbolicState, parent_manager: Optional[ExecutionManager], instance) -> None:
         """Drives symbolic execution of child modules."""
         # different manager
         # same state
         # dont call pc solve
         manager_sub = ExecutionManager()
         manager_sub.is_child = True
-        manager_sub.curr_module = ast.name
+        manager_sub.curr_module = instance
         parent_manager.init_run(manager_sub, ast)
         #print(f"Num paths: {manager.num_paths}")
         #print(f"Num paths {manager_sub.num_paths}")
-        manager_sub.path_code = parent_manager.config[ast.name]
+        manager_sub.path_code = parent_manager.config[instance]
         manager_sub.seen = parent_manager.seen
 
         # mark this exploration of the submodule as seen and store the state so we don't have to explore it again.
-        if parent_manager.seen_mod[ast.name][manager_sub.path_code] == {}:
-            parent_manager.seen_mod[ast.name][manager_sub.path_code] = state.store
+        if parent_manager.seen_mod[instance][manager_sub.path_code] == {}:
+            parent_manager.seen_mod[instance][manager_sub.path_code] = state.store
         else:
             ...
             #print("already seen this")
         # i'm pretty sure we only ever want to do 1 loop here
         for i in range(1):
         #for i in range(manager_sub.num_paths):
-            manager_sub.path_code = parent_manager.config[ast.name]
+            manager_sub.path_code = parent_manager.config[instance]
             #print("------------------------")
             #print(f"{ast.name} Path {i}")
             self.visit_module(manager_sub, state, ast, parent_manager.modules)

@@ -169,6 +169,7 @@ def evaluate_expr_to_smt(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) ->
         if (isinstance(lhs ,str) and isinstance(rhs , str)) and not lhs.isdigit() and not rhs.isdigit():
             return f"({op} {s.get_symbolic_expr(m.curr_module, lhs)} {s.get_symbolic_expr(m.curr_module, rhs)})"
         elif (isinstance(lhs ,str)) and not lhs.isdigit():
+            print(m.curr_module)
             return f"({op} {s.get_symbolic_expr(m.curr_module, lhs)} {str(rhs)})"
         elif (isinstance(rhs ,str)) and not rhs.isdigit():
             return f"({op} {str(lhs)}  {s.get_symbolic_expr(m.curr_module, rhs)})"

@@ -297,6 +297,7 @@ class ExecutionEngine:
                     self.module_count(m, items.instances)
 
 
+
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
         """Initalize run."""
         m.init_run = True
@@ -472,13 +473,25 @@ class ExecutionEngine:
                 sub_manager = ExecutionManager()
                 manager.names_list.append(module.name)
                 self.init_run(sub_manager, module)
-                self.module_count(manager, module.items)
-                manager.child_num_paths[module.name] = sub_manager.num_paths
-                manager.config[module.name] = to_binary(0)
-                state.store[module.name] = {}
-            
-                manager.dependencies[module.name] = {}
-                manager.cond_assigns[module.name] = {}
+                self.module_count(manager, module.items) 
+                if module.name in manager.instance_count:
+                    manager.instances_seen[module.name] = 0
+                    num_instances = manager.instance_count[module.name]
+                    for i in range(num_instances):
+                        instance_name = f"{module.name}_{i}"
+                        manager.names_list.append(instance_name)
+                        manager.child_num_paths[instance_name] = sub_manager.num_paths
+                        manager.config[instance_name] = to_binary(0)
+                        state.store[instance_name] = {}
+                        manager.dependencies[instance_name] = {}
+                        manager.cond_assigns[instance_name] = {}
+                    manager.names_list.remove(module.name)
+                else:        
+                    manager.child_num_paths[module.name] = sub_manager.num_paths
+                    manager.config[module.name] = to_binary(0)
+                    state.store[module.name] = {}
+                    manager.dependencies[module.name] = {}
+                    manager.cond_assigns[module.name] = {}
             total_paths = 1
             for x in manager.child_num_paths.values():
                 total_paths *= x
@@ -531,7 +544,8 @@ class ExecutionEngine:
                 self.search_strategy.visit_module(manager, state, ast, modules_dict)
                 manager.cycle += 1
                 manager.curr_level = 0
-
+                for module_name in manager.instances_seen:
+                    manager.instances_seen[module_name] = 0
             if self.check_dup(manager):
             #if False:
                 if self.debug:

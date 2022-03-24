@@ -27,14 +27,12 @@ class SymbolicState:
         elif '.' in var_name:
             real_module_name = var_name.split(".")[0]
             real_var_name = var_name.split(".")[1]
-            print(self.store)
             return self.store[real_module_name][real_var_name]
         return self.store[module_name][var_name]
 
     def get_symbols(self):
         """Returns a list of all the symbols present in the symbolic state.
         This is useful in the parsing to z3 phase because we need to know what symbols to declare as constants."""
-        print(self.store)
         symbols_list = []
         for module in self.store:
             for signal in self.store[module]:

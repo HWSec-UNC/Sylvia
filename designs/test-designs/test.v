@@ -57,9 +57,9 @@ module sanity_test
     .out (test_4_out)
   );
 
-  initial begin
-    `assert (place_holder.out == 1)
-  end
+  // initial begin
+  //   `assert (place_holder.out == 1)
+  // end
   
 endmodule
 
