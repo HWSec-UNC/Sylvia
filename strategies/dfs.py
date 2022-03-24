@@ -88,7 +88,7 @@ class DepthFirst(Search):
             print(f"Cycle {m.cycle} final path condition:")
             print(s.pc)
         elif not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
-            print(f"Cycle {m.cycle} inital state:")
+            print(f"Cycle {m.cycle} initial state:")
             print(m.initial_store)
 
             print(f"Cycle {m.cycle} final state:")

@@ -344,7 +344,7 @@ class ExecutionEngine:
     def piece_wise_execute(self, ast: ModuleDef, manager: Optional[ExecutionManager], modules) -> None:
         """Drives symbolic execution piecewise when number of paths is too large not to breakup. 
         We break it up to avoid the memory blow up."""
-
+        print("piece")
         self.module_depth += 1
         manager.piece_wise = True
         state: SymbolicState = SymbolicState()
@@ -354,15 +354,32 @@ class ExecutionEngine:
         modules_dict = {}
         for module in modules:
             modules_dict[module.name] = module
-            manager.child_path_codes[module.name] = to_binary(0)
             manager.seen_mod[module.name] = {}
             sub_manager = ExecutionManager()
             manager.names_list.append(module.name)
             self.init_run(sub_manager, module)
             self.module_count(manager, module.items)
-            manager.child_num_paths[module.name] = sub_manager.num_paths
-            manager.config[module.name] = to_binary(0)
-            state.store[module.name] = {}
+            if module.name in manager.instance_count:
+                manager.instances_seen[module.name] = 0
+                num_instances = manager.instance_count[module.name]
+                for i in range(num_instances):
+                    instance_name = f"{module.name}_{i}"
+                    manager.names_list.append(instance_name)
+                    manager.child_path_codes[instance_name] = to_binary(0)
+                    manager.child_num_paths[instance_name] = sub_manager.num_paths
+                    manager.config[instance_name] = to_binary(0)
+                    state.store[instance_name] = {}
+                    manager.dependencies[instance_name] = {}
+                    manager.cond_assigns[instance_name] = {}
+                manager.names_list.remove(module.name)
+            else:
+      
+                manager.child_path_codes[module.name] = to_binary(0)
+                manager.child_num_paths[module.name] = sub_manager.num_paths
+                manager.config[module.name] = to_binary(0)
+                state.store[module.name] = {}
+                manager.dependencies[module.name] = {}
+                manager.cond_assigns[module.name] = {}
 
         total_paths = sum(manager.child_num_paths.values())
         print(total_paths)
@@ -468,7 +485,6 @@ class ExecutionEngine:
             modules_dict = {}
             for module in modules:
                 modules_dict[module.name] = module
-                manager.child_path_codes[module.name] = to_binary(0)
                 manager.seen_mod[module.name] = {}
                 sub_manager = ExecutionManager()
                 manager.names_list.append(module.name)
@@ -480,6 +496,7 @@ class ExecutionEngine:
                     for i in range(num_instances):
                         instance_name = f"{module.name}_{i}"
                         manager.names_list.append(instance_name)
+                        manager.child_path_codes[instance_name] = to_binary(0)
                         manager.child_num_paths[instance_name] = sub_manager.num_paths
                         manager.config[instance_name] = to_binary(0)
                         state.store[instance_name] = {}
@@ -487,6 +504,7 @@ class ExecutionEngine:
                         manager.cond_assigns[instance_name] = {}
                     manager.names_list.remove(module.name)
                 else:        
+                    manager.child_path_codes[module.name] = to_binary(0)
                     manager.child_num_paths[module.name] = sub_manager.num_paths
                     manager.config[module.name] = to_binary(0)
                     state.store[module.name] = {}
@@ -531,6 +549,7 @@ class ExecutionEngine:
 
 
         stride_length = len(manager.names_list)
+
         # for each combinatoin of multicycle paths
         for i in range(len(paths)):
             manager.cycle = 0
