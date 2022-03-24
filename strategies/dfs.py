@@ -58,8 +58,8 @@ class DepthFirst(Search):
         for module in m.cond_assigns:
             for signal in m.cond_assigns[module]:
                 res = m.cond_assigns[module][signal]
-                if str(s.store[module][str(signal)]).startswith("If("):
-                    cond = s.store[module][str(signal)][3:].split(",")[0][:-1]
+                if str(signal) in s.store[module] and str(s.store[module][str(signal)]).startswith("If("):
+                    cond = str(s.store[module][str(signal)])[3:].split(",")[0][:-1]
                     if str_to_bool(cond, s, m):
                         if isinstance(m.cond_assigns[module][signal][cond], Operator):
                             parsed_cond = evaluate(parse_tokens(tokenize(m.cond_assigns[module][signal][cond], s, m)), s, m)
@@ -161,20 +161,25 @@ class DepthFirst(Search):
                                 if m.dependencies[module][signal] in m.cond_assigns[module]:
                                     m.cond_assigns[m.curr_module][signal] = m.cond_assigns[module][m.dependencies[module][signal]]
 
-                                if '[' in s.store[module][signal]:
-                                    
-                                    parts = s.store[module][signal].partition("[")
 
-                                    new_symbol = s.store[module][m.dependencies[module][signal]]
+                                if '[' in s.store[m.curr_module][signal]:
+                                    
+                                    parts = s.store[m.curr_module][signal].partition("[")
+
+                                    new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
                                     first_part = parts[0].replace(parts[0], new_symbol)
                                     for i in range(1, len(parts)):
                                         new_symbol += parts[i]
 
-                                    s.store[module][signal] = new_symbol
+                                    s.store[m.curr_module][signal] = new_symbol
 
                                 else:
-                                    new_symbol = s.store[module][m.dependencies[module][signal]]
-                                    s.store[module][signal] = s.store[module][signal].replace(prev_symbol, new_symbol)
+                                    if signal in m.dependencies[module]:
+                                        new_symbol = s.store[m.curr_module][m.dependencies[module][signal]]
+                                        s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
+                                    else:
+                                        # the signal was updated, but something trivial happened like it was just written with a constant
+                                        pass
                         for lhs in m.cond_assigns[module]:
                             if lhs in m.dependencies[module] and isinstance(m.updates[lhs], tuple) and m.updates[lhs][0] == 1:
                                 prev_symbol = str(m.updates[lhs][1])
@@ -220,6 +225,7 @@ class DepthFirst(Search):
                     else:
                         s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             elif isinstance(stmt.right.var, Partselect):
+
                 if isinstance(stmt.left.var, Partselect):
                     s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
                     m.dependencies[m.curr_module][stmt.left.var.var.name] = stmt.right.var.var.name
@@ -249,6 +255,7 @@ class DepthFirst(Search):
                         s.store[m.curr_module][stmt.left.var.name][str_item] = str_item
                         #s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, Cond):
+
                 m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
                 opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
                 m.cond_assigns[m.curr_module][stmt.left.var.name] = opts
@@ -438,6 +445,7 @@ class DepthFirst(Search):
         elif isinstance(stmt, InstanceList):
             instance_index = m.instances_seen[stmt.module]
             m.instances_seen[stmt.module] += 1 % m.instance_count[stmt.module]
+
             if stmt.module in modules:
                 for port in stmt.instances[0].portlist:
                     if str(port.argname) not in s.store[f"{stmt.module}_{instance_index}"]:
