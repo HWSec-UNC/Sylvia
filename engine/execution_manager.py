@@ -131,7 +131,6 @@ class ExecutionManager:
 
     def init_state(self, s: SymbolicState, prev_store, ast):
         """give fresh symbols and merge register values in."""
-        print("iknit")
         params = ast.paramlist.params
         ports = ast.portlist.ports
 

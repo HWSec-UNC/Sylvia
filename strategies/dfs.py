@@ -33,12 +33,12 @@ class DepthFirst(Search):
 
         for port in ports:
             if isinstance(port, Ioport):
-                if m.curr_module in m.instances_loc:
-                    containing_module = m.instances_loc[m.curr_module]
-                    s.store[m.curr_module][str(port.first.name)] = s.store[containing_module][param.list[0].name]
-                elif str(port.first.name) not in s.store[m.curr_module]:
+                if str(port.first.name) not in s.store[m.curr_module]:
                     s.store[m.curr_module][str(port.first.name)] = init_symbol()
             else:
+                if m.curr_module in m.instances_loc:
+                    containing_module = m.instances_loc[m.curr_module]
+                    s.store[m.curr_module][port.name] = s.store[containing_module][port.name]
                 if port.name not in s.store[m.curr_module]:
                     s.store[m.curr_module][port.name] = init_symbol()
 
@@ -454,7 +454,7 @@ class DepthFirst(Search):
                     if str(port.argname) not in s.store[f"{stmt.module}_{instance_index}"]:
                         if f"{stmt.module}_{instance_index}" in m.instances_loc:
                             containing_module = m.instances_loc[f"{stmt.module}_{instance_index}"]
-                            s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = s.store[containing_module][str(port.argname)]
+                            s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[containing_module][str(port.argname)]
                     else:
                         s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.argname)]
                 if m.opt_1:
@@ -473,7 +473,7 @@ class DepthFirst(Search):
                     for port in stmt.instances[0].portlist:
                         if f"{stmt.module}_{instance_index}" in m.instances_loc:
                             containing_module = m.instances_loc[f"{stmt.module}_{instance_index}"]
-                            s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = s.store[containing_module][str(port.portname)]
+                            s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[containing_module][str(port.argname)]
                     self.execute_child(modules[stmt.module], s, m, f"{stmt.module}_{instance_index}")
         elif isinstance(stmt, Case):
             m.curr_level += 1
