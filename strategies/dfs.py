@@ -454,8 +454,13 @@ class DepthFirst(Search):
                     if str(port.argname) not in s.store[f"{stmt.module}_{instance_index}"]:
                         if f"{stmt.module}_{instance_index}" in m.instances_loc:
                             containing_module = m.instances_loc[f"{stmt.module}_{instance_index}"]
-                            s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[containing_module][str(port.argname)]
-                            m.intermodule_dependencies[containing_module][str(port.argname)] = (f"{stmt.module}_{instance_index}", str(port.portname))
+                            if str(port.argname) in s.store[containing_module]:
+                                s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[containing_module][str(port.argname)]
+                                m.intermodule_dependencies[containing_module][str(port.argname)] = (f"{stmt.module}_{instance_index}", str(port.portname))
+                            else:
+                                s.store[containing_module][str(port.argname)] = init_symbol()
+                                s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[containing_module][str(port.argname)]
+                                m.intermodule_dependencies[containing_module][str(port.argname)] = (f"{stmt.module}_{instance_index}", str(port.portname))
                     else:
                         s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.argname)]
 
