@@ -203,7 +203,7 @@ class DepthFirst(Search):
             m.in_always = False               
         elif isinstance(stmt, Assign):
             if isinstance(stmt.left.var, Identifier) and stmt.left.var.name in m.reg_decls and m.cycle > 0:
-                print("um")
+                #print("um")
                 ...
             elif isinstance(stmt.right.var, IntConst):
                 if isinstance(stmt.left.var, Pointer):
