@@ -407,16 +407,19 @@ class ExecutionEngine:
             # for each combinatoin of multicycle paths
             for i in range(len(paths)):
                 manager.cycle = 0
-                # extract the single cycle path code for this iteration and execute, then merge the states
-                for j in range(0, len(paths[i]), stride_length):
-                    #print(f"Single cycle path {j} {paths[i][j]}")
-                    manager.config[manager.names_list[j  % len(manager.names_list)]] = paths[i][j]
-                    manager.path_code = paths[i][j]
-                    manager.prev_store = state.store
-                    manager.init_state(state, manager.prev_store, ast)
-                    self.search_strategy.visit_module(manager, state, ast, modules_dict)
-                    manager.cycle += 1
-                    manager.curr_level = 0
+
+                for j in range(0, len(paths[i])):
+                #print(f"Single cycle path {j} {paths[i][j]}")
+                #print(f"yee {manager.names_list[j  % len(manager.names_list)]}")
+                    for name in manager.names_list:
+                        manager.config[name] = paths[i][j]
+
+                manager.path_code = paths[i][0]
+                manager.prev_store = state.store
+                manager.init_state(state, manager.prev_store, ast)
+                self.search_strategy.visit_module(manager, state, ast, modules_dict)
+                manager.cycle += 1
+                manager.curr_level = 0
                 if self.check_dup(manager):
                 # #if False:
                     if self.debug:
@@ -549,22 +552,24 @@ class ExecutionEngine:
 
 
         stride_length = len(manager.names_list)
-
         # for each combinatoin of multicycle paths
         for i in range(len(paths)):
             manager.cycle = 0
             # extract the single cycle path code for this iteration and execute, then merge the states
-            for j in range(0, len(paths[i]), stride_length):
+            for j in range(0, len(paths[i])):
                 #print(f"Single cycle path {j} {paths[i][j]}")
-                manager.config[manager.names_list[j  % len(manager.names_list)]] = paths[i][j]
-                manager.path_code = paths[i][j]
-                manager.prev_store = state.store
-                manager.init_state(state, manager.prev_store, ast)
-                self.search_strategy.visit_module(manager, state, ast, modules_dict)
-                manager.cycle += 1
-                manager.curr_level = 0
-                for module_name in manager.instances_seen:
-                    manager.instances_seen[module_name] = 0
+                #print(f"yee {manager.names_list[j  % len(manager.names_list)]}")
+                for name in manager.names_list:
+                    manager.config[name] = paths[i][j]
+            # makes assumption top level module is first in line
+            manager.path_code = paths[i][0]
+            manager.prev_store = state.store
+            manager.init_state(state, manager.prev_store, ast)
+            self.search_strategy.visit_module(manager, state, ast, modules_dict)
+            manager.cycle += 1
+            manager.curr_level = 0
+            for module_name in manager.instances_seen:
+                manager.instances_seen[module_name] = 0
             if self.check_dup(manager):
             #if False:
                 if self.debug:

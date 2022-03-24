@@ -24,8 +24,6 @@ class DepthFirst(Search):
         params = module.paramlist.params
         ports = module.portlist.ports
 
-        #print(m.config)
-
         for param in params:
             if isinstance(param.list[0], Parameter):
                 if param.list[0].name not in s.store[m.curr_module]:
