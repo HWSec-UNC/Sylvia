@@ -1,7 +1,7 @@
 module top (
 input clk,
 input [31:0] i_data,
-input i_rdy, o_trdy,
+input i_irdy, o_trdy,
 output [31:0] o_data,
 output o_irdy, i_trdy
 );

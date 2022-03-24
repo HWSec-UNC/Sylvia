@@ -24,14 +24,19 @@ class DepthFirst(Search):
         params = module.paramlist.params
         ports = module.portlist.ports
 
+
         for param in params:
             if isinstance(param.list[0], Parameter):
-                if param.list[0].name not in s.store[m.curr_module]:
-                    s.store[m.curr_module][param.list[0].name] = init_symbol()
+                if m.curr_module in m.instances_loc:
+                    containing_module = m.instances_loc[m.curr_module]
+                    s.store[m.curr_module][param.list[0].name] = s.store[containing_module][param.list[0].name]
 
         for port in ports:
             if isinstance(port, Ioport):
-                if str(port.first.name) not in s.store[m.curr_module]:
+                if m.curr_module in m.instances_loc:
+                    containing_module = m.instances_loc[m.curr_module]
+                    s.store[m.curr_module][str(port.first.name)] = s.store[containing_module][param.list[0].name]
+                elif str(port.first.name) not in s.store[m.curr_module]:
                     s.store[m.curr_module][str(port.first.name)] = init_symbol()
             else:
                 if port.name not in s.store[m.curr_module]:
@@ -443,13 +448,13 @@ class DepthFirst(Search):
         elif isinstance(stmt, InstanceList):
             instance_index = m.instances_seen[stmt.module]
             m.instances_seen[stmt.module] += 1 % m.instance_count[stmt.module]
-
+            m.instances_loc[f"{stmt.module}_{instance_index}"] = m.curr_module
             if stmt.module in modules:
                 for port in stmt.instances[0].portlist:
                     if str(port.argname) not in s.store[f"{stmt.module}_{instance_index}"]:
-                        if m.cycle == 0:
-                            s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = init_symbol()
-                            s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.argname)]
+                        if f"{stmt.module}_{instance_index}" in m.instances_loc:
+                            containing_module = m.instances_loc[f"{stmt.module}_{instance_index}"]
+                            s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = s.store[containing_module][str(port.argname)]
                     else:
                         s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.argname)]
                 if m.opt_1:
@@ -466,7 +471,9 @@ class DepthFirst(Search):
                             s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.portname)]
                 else:
                     for port in stmt.instances[0].portlist:
-                        s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.portname)]
+                        if f"{stmt.module}_{instance_index}" in m.instances_loc:
+                            containing_module = m.instances_loc[f"{stmt.module}_{instance_index}"]
+                            s.store[f"{stmt.module}_{instance_index}"][str(port.argname)] = s.store[containing_module][str(port.portname)]
                     self.execute_child(modules[stmt.module], s, m, f"{stmt.module}_{instance_index}")
         elif isinstance(stmt, Case):
             m.curr_level += 1

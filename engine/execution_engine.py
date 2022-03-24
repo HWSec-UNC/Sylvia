@@ -361,6 +361,7 @@ class ExecutionEngine:
             self.module_count(manager, module.items)
             if module.name in manager.instance_count:
                 manager.instances_seen[module.name] = 0
+                manager.instances_loc[module.name] = ""
                 num_instances = manager.instance_count[module.name]
                 for i in range(num_instances):
                     instance_name = f"{module.name}_{i}"
@@ -495,6 +496,7 @@ class ExecutionEngine:
                 self.module_count(manager, module.items) 
                 if module.name in manager.instance_count:
                     manager.instances_seen[module.name] = 0
+                    manager.instances_loc[module.name] = ""
                     num_instances = manager.instance_count[module.name]
                     for i in range(num_instances):
                         instance_name = f"{module.name}_{i}"
@@ -570,6 +572,7 @@ class ExecutionEngine:
             manager.curr_level = 0
             for module_name in manager.instances_seen:
                 manager.instances_seen[module_name] = 0
+                manager.instances_loc[module_name] = ""
             if self.check_dup(manager):
             #if False:
                 if self.debug:

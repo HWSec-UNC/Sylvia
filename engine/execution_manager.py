@@ -64,6 +64,7 @@ class ExecutionManager:
     debug: bool = False
     initial_store = {}
     instances_seen = {}
+    instances_loc = {}
 
     def merge_states(self, state: SymbolicState, store, flag, module_name=""):
         """Merges two states. The flag is for when we are just merging a particular module"""
@@ -130,6 +131,7 @@ class ExecutionManager:
 
     def init_state(self, s: SymbolicState, prev_store, ast):
         """give fresh symbols and merge register values in."""
+        print("iknit")
         params = ast.paramlist.params
         ports = ast.portlist.ports
 
