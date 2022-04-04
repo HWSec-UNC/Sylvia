@@ -129,9 +129,19 @@ def evaluate_unary_op(expr, op, s: SymbolicState, m: ExecutionManager) -> str:
         return f"{op} {eval_rvalue(expr, s, m)}"
     else:
         if (isinstance(expr ,str) and not expr.isdigit()):
-            return f" {op} {s.get_symbolic_expr(m.curr_module, expr)}"
+            if "[" in s.get_symbolic_expr(m.curr_module, expr):
+                parts = s.store[m.curr_module][expr].partition("[")
+                first_part = parts[0]
+                if first_part.isdigit():
+                    if op == "!":
+                        return str(int(not(int(first_part))))
+            return f"{op} {s.get_symbolic_expr(m.curr_module, expr)}"
         else: 
-            return f"{op} {str(expr)}"
+            if expr.isdigit():
+                if op == "!":
+                    return str(int(not(int(expr))))
+            else:
+                return f"{op} {str(expr)}"
 
 def evaluate_binary_op(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> str: 
     """Helper function to resolve binary symbolic expressions."""
