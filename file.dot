@@ -1,9 +1,12 @@
 strict digraph "" {
 	node [label="\N"];
-	0	[label=0];
-	1	[label=1];
-	0 -> 1	[label=GreaterThan];
-	2	[label=2];
-	1 -> 2	[label=None];
-	2 -> 0	[label=None];
+	"demo.b_graphrename_0"	[color=black,
+		label="demo.b"];
+	Xor_graphrename_1	[color=black,
+		label=Xor];
+	"demo.b_graphrename_0" -> Xor_graphrename_1	[color=black];
+	demo_b	[color=black];
+	Xor_graphrename_1 -> demo_b	[color=black];
+	demo_a	[color=black];
+	Xor_graphrename_1 -> demo_a	[color=black];
 }

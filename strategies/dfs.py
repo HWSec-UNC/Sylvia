@@ -710,7 +710,9 @@ class DepthFirst(Search):
             deps = parent_manager.intermodule_dependencies[containing_module]
             for parent_signal in deps:
                 child = deps[parent_signal]
-                state.store[containing_module][parent_signal] = state.store[instance][child[1]]
+                # propagate back up unless changed in top
+                if not parent_signal in parent_manager.updates:
+                    state.store[containing_module][parent_signal] = state.store[instance][child[1]]
             if (parent_manager.assertion_violation):
                 print("Assertion violation")
                 parent_manager.assertion_violation = False
