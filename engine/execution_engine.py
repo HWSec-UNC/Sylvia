@@ -159,10 +159,26 @@ class ExecutionEngine:
                     if isinstance(item.left.var, Partselect):
                         if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
                             m.always_writes[m.curr_always].append(item.left.var.var.name)
+                    elif isinstance(item.left.var, Concat):
+                        for sub_item in item.left.var.list:
+                            if isinstance(sub_item, Partselect):
+                                if m.curr_always is not None and sub_item.var.name not in m.always_writes[m.curr_always]:
+                                    m.always_writes[m.curr_always].append(sub_item.var.name)
+                            elif isinstance(sub_item, Pointer):
+                                if m.curr_always is not None and sub_item.var.name not in m.always_writes[m.curr_always]:
+                                    m.always_writes[m.curr_always].append(sub_item.var.name)
+                            else:
+                                m.always_writes[m.curr_always].append(sub_item.name)
+                    elif isinstance(item.left.var, Pointer):
+                        if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
+                            m.always_writes[m.curr_always].append(item.left.var.var.name)
                     elif m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
                         m.always_writes[m.curr_always].append(item.left.var.name)
                 elif isinstance(item, BlockingSubstitution):
                     if isinstance(item.left.var, Partselect):
+                        if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
+                            m.always_writes[m.curr_always].append(item.left.var.var.name)
+                    elif isinstance(item.left.var, Pointer):
                         if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
                             m.always_writes[m.curr_always].append(item.left.var.var.name)
                     elif m.curr_always is not None and item.left.var.name not in m.always_writes[m.curr_always]:
@@ -182,11 +198,22 @@ class ExecutionEngine:
                     for sub_item in items.left.var.list:
                         if sub_item.name not in m.always_writes[m.curr_always]:
                             m.always_writes[m.curr_always].append(sub_item.name)
+                elif isinstance(items.left.var, Partselect):
+                    if m.curr_always is not None and items.left.var.var.name not in m.always_writes[m.curr_always]:
+                        m.always_writes[m.curr_always].append(item.left.var.var.name)
+                elif isinstance(items.left.var, Pointer):
+                    if m.curr_always is not None and items.left.var.var.name not in m.always_writes[m.curr_always]:
+                        m.always_writes[m.curr_always].append(items.left.var.var.name)
                 elif m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
                     m.always_writes[m.curr_always].append(items.left.var.name)
             elif isinstance(items, BlockingSubstitution):
-                if m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
-                    m.always_writes[m.curr_always].append(items.left.var.name)
+                if isinstance(items.left.var, Pointer):
+                    if m.curr_always is not None and items.left.var.var.name not in m.always_writes[m.curr_always]:
+                        m.always_writes[m.curr_always].append(items.left.var.var.name)
+                else:
+                    if m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
+                        m.always_writes[m.curr_always].append(items.left.var.name)
+
 
 
     def get_assertions(self, m: ExecutionManager, items):
@@ -381,6 +408,7 @@ class ExecutionEngine:
                 manager.config[module.name] = to_binary(0)
                 state.store[module.name] = {}
                 manager.dependencies[module.name] = {}
+                instance_name = module.name
                 manager.intermodule_dependencies[instance_name] = {}
                 manager.cond_assigns[module.name] = {}
 

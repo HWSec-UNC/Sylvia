@@ -71,13 +71,14 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
     elif isinstance(rvalue, Concat):
         accumulate = "{ "
         for sub_item in rvalue.list:
-            accumulate += sub_item.name + " "
+            accumulate += conjunction_with_pointers(sub_item, s, m) + " "
         return accumulate + " }"
     else:
         return rvalue
 
 def tokenize(rvalue, s: SymbolicState, m: ExecutionManager):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
+    print(rvalue)
     rvalue_converted = conjunction_with_pointers(rvalue, s, m)
     str_rvalue = str(rvalue_converted)
     tokens = []
@@ -229,7 +230,7 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
 
 def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     """Takes in an AST and should return the new symbolic expression for the symbolic state."""
-    #print(rvalue)
+    print(rvalue)
     if not rvalue is None:
         if rvalue[0] in BINARY_OPS:
             return evaluate_binary_op(rvalue[1], rvalue[2], op_map[rvalue[0]], s, m)
