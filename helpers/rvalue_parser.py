@@ -93,7 +93,11 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
     elif isinstance(rvalue, Concat):
         accumulate = "("
         for sub_item in rvalue.list:
+<<<<<<< HEAD
             accumulate += str(conjunction_with_pointers(sub_item, s, m)) + " "
+=======
+            accumulate += conjunction_with_pointers(sub_item, s, m) + " "
+>>>>>>> a675cfd... some fixes to concatenations of multiple signals on rhs of assignments
         accumulate.rstrip()
         return accumulate + ")"
     else:
@@ -153,6 +157,7 @@ def evaluate_unary_op(expr, op, s: SymbolicState, m: ExecutionManager) -> str:
         return f"{op} {eval_rvalue(expr, s, m)}"
     else:
         if (isinstance(expr ,str) and not expr.isdigit()):
+            print(expr)
             if "[" in s.get_symbolic_expr(m.curr_module, expr):
                 parts = s.store[m.curr_module][expr].partition("[")
                 first_part = parts[0]
@@ -324,6 +329,11 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             
             return result
         elif str(rvalue).startswith("(("):
+<<<<<<< HEAD
+=======
+            print("concat object")
+            result = {}
+>>>>>>> a675cfd... some fixes to concatenations of multiple signals on rhs of assignments
             tokens = []
             for elt in rvalue:
                 tokens.append(elt)
@@ -332,6 +342,7 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                 results.append(eval_rvalue(token, s, m))
             return results
         else:
+<<<<<<< HEAD
             if isinstance(rvalue, tuple) and len(rvalue) > 2:
                 results = []
                 for elt in rvalue:
@@ -339,6 +350,10 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                 return results
             else:
                 return s.store[m.curr_module][str(rvalue)]
+=======
+            print(s.store)
+            return s.store[m.curr_module][str(rvalue)]
+>>>>>>> a675cfd... some fixes to concatenations of multiple signals on rhs of assignments
 
         
 

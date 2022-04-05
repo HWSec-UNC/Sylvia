@@ -505,11 +505,15 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
                 
+<<<<<<< HEAD
 
                 if stmt.cond is None:
                     self.visit_expr(m, s, stmt.cond)
                 else:
                     self.visit_expr(m, s, stmt.cond[0])
+=======
+                self.visit_expr(m, s, stmt.cond[0])
+>>>>>>> a675cfd... some fixes to concatenations of multiple signals on rhs of assignments
                 if (m.abandon and m.debug):
  
                     print("Abandoning this path!")
@@ -522,10 +526,14 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
 
+<<<<<<< HEAD
                 if stmt.cond is None:
                     self.visit_expr(m, s, stmt.cond)
                 else:
                     self.visit_expr(m, s, stmt.cond[0])
+=======
+                self.visit_expr(m, s, stmt.cond[0])
+>>>>>>> a675cfd... some fixes to concatenations of multiple signals on rhs of assignments
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
 
@@ -650,6 +658,7 @@ class DepthFirst(Search):
         elif isinstance(expr, Land):
             parse_expr_to_Z3(expr, s, m)
         elif isinstance(expr, tuple):
+            print(expr)
             cond = expr[0]
             base = (str(cond.value)[0:1])
             if base == "b'":
