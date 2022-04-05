@@ -69,10 +69,11 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
     elif isinstance(rvalue, Pointer):
         return f"{rvalue.var}[{rvalue.ptr}]"
     elif isinstance(rvalue, Concat):
-        accumulate = "{ "
+        accumulate = "("
         for sub_item in rvalue.list:
             accumulate += conjunction_with_pointers(sub_item, s, m) + " "
-        return accumulate + " }"
+        accumulate.rstrip()
+        return accumulate + ")"
     else:
         return rvalue
 
@@ -130,6 +131,7 @@ def evaluate_unary_op(expr, op, s: SymbolicState, m: ExecutionManager) -> str:
         return f"{op} {eval_rvalue(expr, s, m)}"
     else:
         if (isinstance(expr ,str) and not expr.isdigit()):
+            print(expr)
             if "[" in s.get_symbolic_expr(m.curr_module, expr):
                 parts = s.store[m.curr_module][expr].partition("[")
                 first_part = parts[0]
@@ -267,7 +269,18 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             # #s.pc.add(If((cond == one_bv), true_expr, false_expr))
             
             return result
+        elif str(rvalue).startswith("(("):
+            print("concat object")
+            result = {}
+            tokens = []
+            for elt in rvalue:
+                tokens.append(elt)
+            results = []
+            for token in tokens:
+                results.append(eval_rvalue(token, s, m))
+            return results
         else:
+            print(s.store)
             return s.store[m.curr_module][str(rvalue)]
 
         

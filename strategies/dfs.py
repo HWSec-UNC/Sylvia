@@ -494,7 +494,8 @@ class DepthFirst(Search):
                 for lhs in m.cond_assigns[m.curr_module]:
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
-                self.visit_expr(m, s, stmt.cond)
+                
+                self.visit_expr(m, s, stmt.cond[0])
                 if (m.abandon and m.debug):
  
                     print("Abandoning this path!")
@@ -507,7 +508,7 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
 
-                self.visit_expr(m, s, stmt.cond)
+                self.visit_expr(m, s, stmt.cond[0])
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
 
@@ -628,6 +629,7 @@ class DepthFirst(Search):
         elif isinstance(expr, Land):
             parse_expr_to_Z3(expr, s, m)
         elif isinstance(expr, tuple):
+            print(expr)
             cond = expr[0]
             base = (str(cond.value)[0:1])
             if base == "b'":
