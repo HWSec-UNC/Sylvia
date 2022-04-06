@@ -71,7 +71,7 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
     elif isinstance(rvalue, Concat):
         accumulate = "("
         for sub_item in rvalue.list:
-            accumulate += conjunction_with_pointers(sub_item, s, m) + " "
+            accumulate += str(conjunction_with_pointers(sub_item, s, m)) + " "
         accumulate.rstrip()
         return accumulate + ")"
     else:
@@ -79,7 +79,7 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
 
 def tokenize(rvalue, s: SymbolicState, m: ExecutionManager):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
-    print(rvalue)
+    #print(rvalue)
     rvalue_converted = conjunction_with_pointers(rvalue, s, m)
     str_rvalue = str(rvalue_converted)
     tokens = []
@@ -131,7 +131,6 @@ def evaluate_unary_op(expr, op, s: SymbolicState, m: ExecutionManager) -> str:
         return f"{op} {eval_rvalue(expr, s, m)}"
     else:
         if (isinstance(expr ,str) and not expr.isdigit()):
-            print(expr)
             if "[" in s.get_symbolic_expr(m.curr_module, expr):
                 parts = s.store[m.curr_module][expr].partition("[")
                 first_part = parts[0]
@@ -219,8 +218,14 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
             return f"If({s.store[m.curr_module][cond]}, {true_expr}, {s.store[m.curr_module][false_expr]} )"
         elif str(false_expr).isdigit():
             #TODO: this a temporary fix need to exapnd for all cases
-            if isinstance(cond, tuple):
+            if isinstance(cond, tuple) and str(cond[0]) in BINARY_OPS:
                 new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+                if not new_cond is None:
+                    return f"If({new_cond}), {s.store[m.curr_module][true_expr]}, {false_expr})"
+                else:
+                    return f"If({s.store[m.curr_module][cond[1]]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
+            elif isinstance(cond, tuple) and str(cond[0]) in UNARY_OPS:
+                new_cond = evaluate_unary_op(cond[1], op_map[cond[0]], s, m)
                 if not new_cond is None:
                     return f"If({new_cond}), {s.store[m.curr_module][true_expr]}, {false_expr})"
                 else:
@@ -228,11 +233,25 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
             else:
                 return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
         else:
-            return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {s.store[m.curr_module][false_expr]})"
+
+            if isinstance(cond, tuple) and str(cond[0]) in BINARY_OPS:
+                new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+                if not new_cond is None:
+                    return f"If({new_cond}), {s.store[m.curr_module][true_expr]}, {false_expr})"
+                else:
+                    return f"If({s.store[m.curr_module][cond[1]]}, {s.store[m.curr_module][true_expr]}, {s.store[m.curr_module][false_expr]})"
+            elif isinstance(cond, tuple) and str(cond[0]) in UNARY_OPS:
+                new_cond = evaluate_unary_op(cond[1], op_map[cond[0]], s, m)
+                if not new_cond is None:
+                    return f"If({new_cond}), {s.store[m.curr_module][true_expr]}, {false_expr})"
+                else:
+                    return f"If({s.store[m.curr_module][cond[1]]}, {s.store[m.curr_module][true_expr]}, {s.store[m.curr_module][false_expr]})"
+            else:
+                return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {s.store[m.curr_module][false_expr]})"
 
 def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     """Takes in an AST and should return the new symbolic expression for the symbolic state."""
-    print(rvalue)
+    #print(rvalue)
     if not rvalue is None:
         if rvalue[0] in BINARY_OPS:
             return evaluate_binary_op(rvalue[1], rvalue[2], op_map[rvalue[0]], s, m)
@@ -270,8 +289,6 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             
             return result
         elif str(rvalue).startswith("(("):
-            print("concat object")
-            result = {}
             tokens = []
             for elt in rvalue:
                 tokens.append(elt)
@@ -280,8 +297,13 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                 results.append(eval_rvalue(token, s, m))
             return results
         else:
-            print(s.store)
-            return s.store[m.curr_module][str(rvalue)]
+            if isinstance(rvalue, tuple) and len(rvalue) > 2:
+                results = []
+                for elt in rvalue:
+                    results.append(eval_rvalue(elt, s, m))
+                return results
+            else:
+                return s.store[m.curr_module][str(rvalue)]
 
         
 

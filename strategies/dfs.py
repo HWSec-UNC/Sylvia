@@ -629,7 +629,6 @@ class DepthFirst(Search):
         elif isinstance(expr, Land):
             parse_expr_to_Z3(expr, s, m)
         elif isinstance(expr, tuple):
-            print(expr)
             cond = expr[0]
             base = (str(cond.value)[0:1])
             if base == "b'":
