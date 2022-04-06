@@ -81,7 +81,6 @@ class DepthFirst(Search):
                         
 
         if m.ignore:
-            # print("infeasible path...")
             ...
         
         if m.debug and not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
@@ -150,8 +149,6 @@ class DepthFirst(Search):
                                     new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
                                     s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
             else: 
-                # print(sens_list.list[0].sig) # clock
-                # print(sens_list.list[0].type) # posedge
                 sub_stmt = stmt.statement
                 m.in_always = True
                 self.visit_stmt(m, s, sub_stmt, modules)
@@ -206,7 +203,6 @@ class DepthFirst(Search):
             m.in_always = False               
         elif isinstance(stmt, Assign):
             if isinstance(stmt.left.var, Identifier) and stmt.left.var.name in m.reg_decls and m.cycle > 0:
-                #print("um")
                 ...
             elif isinstance(stmt.right.var, IntConst):
                 if isinstance(stmt.left.var, Pointer):
@@ -258,20 +254,31 @@ class DepthFirst(Search):
                         s.store[m.curr_module][stmt.left.var.name][str_item] = str_item
                         #s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, Cond):
-                m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
-                opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
-                m.cond_assigns[m.curr_module][stmt.left.var.name] = opts
-                # complexity is how many nested conditonals we have on the rhs
-                complexity = count_nested_cond(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
-                #print(complexity)
-                new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
-                if str(stmt.right.var.cond) in opts:
-                    new_cond = new_r_value[3:].split(",")[0][:-1]
-                    #print(f"new r {new_r_value}")
+                if isinstance(stmt.left.var, Pointer):
+                    m.dependencies[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
+                    opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
+                    m.cond_assigns[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"] = opts
+                    # complexity is how many nested conditonals we have on the rhs
+                    complexity = count_nested_cond(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
+                    new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
+                    if str(stmt.right.var.cond) in opts:
+                        new_cond = new_r_value[3:].split(",")[0][:-1]
 
-                    opts[new_cond] = opts.pop(str(stmt.right.var.cond))
-                s.store[m.curr_module][stmt.left.var.name] = new_r_value
-                #print(f"printing intermediate store {s.store}")
+                        opts[new_cond] = opts.pop(str(stmt.right.var.cond))
+                    s.store[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"] = new_r_value
+
+                else:
+                    m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
+                    opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
+                    m.cond_assigns[m.curr_module][stmt.left.var.name] = opts
+                    # complexity is how many nested conditonals we have on the rhs
+                    complexity = count_nested_cond(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
+                    new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
+                    if str(stmt.right.var.cond) in opts:
+                        new_cond = new_r_value[3:].split(",")[0][:-1]
+
+                        opts[new_cond] = opts.pop(str(stmt.right.var.cond))
+                    s.store[m.curr_module][stmt.left.var.name] = new_r_value
             elif isinstance(stmt.right.var, Pointer):
                 s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
                 m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
@@ -282,10 +289,6 @@ class DepthFirst(Search):
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
-            if isinstance(stmt.left.var, Pointer):
-                m.updates[f"{stmt.left.var.var}[{stmt.left.var.ptr}]"]= (1, prev_symbol)
-            elif isinstance(stmt.left.var, Partselect):
-                m.updates[f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = (1, prev_symbol)
 
             if isinstance(stmt.left.var, Pointer):
                 if f"{stmt.left.var.var}[{stmt.left.var.ptr}]" in s.store[m.curr_module]:
@@ -307,14 +310,21 @@ class DepthFirst(Search):
             if isinstance(stmt.left.var, Concat):
                 for sub_item in stmt.left.var.list:
                     m.updates[sub_item.name] = (1, prev_symbol)
+            elif isinstance(stmt.left.var, Pointer):
+                m.updates[f"{stmt.left.var.var}[{stmt.left.var.ptr}]"]= (1, prev_symbol)
+            elif isinstance(stmt.left.var, Partselect):
+                m.updates[f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = (1, prev_symbol)
             else:
                 m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, NonblockingSubstitution):
             reg_width = 0
             if isinstance(stmt.left.var, Identifier):
                 if stmt.left.var.name in m.reg_decls:
-                    #print(m.reg_widths)
-                    reg_width = m.reg_widths[stmt.left.var.name]
+                    #TODO: This is bad
+                    if stmt.left.var.name in m.reg_widths:
+                        reg_width = m.reg_widths[stmt.left.var.name]
+                    else:
+                        reg_width = 4294967296
             if isinstance(stmt.right.var, IntConst):
                 s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):
@@ -364,8 +374,7 @@ class DepthFirst(Search):
                         s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
-            #print(s.store)
-            #m.updates[stmt.left.var.name] = (1, prev_symbol)
+
         elif isinstance(stmt, BlockingSubstitution):
             prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):
@@ -590,7 +599,6 @@ class DepthFirst(Search):
         elif isinstance(expr, Identifier):
             # change this to one since inst is supposed to just be 1 bit width
             # and the identifier class actually doesn't have a width param
-            print(expr)
             symbol = s.store[m.curr_module][expr.name]
             if "'h" in s.store[m.curr_module][expr.name] or "'b" in s.store[m.curr_module][expr.name] or "'d" in s.store[m.curr_module][expr.name]:
                 symbol = s.store[m.curr_module][expr.name].split("'")[1][1:]
@@ -701,8 +709,6 @@ class DepthFirst(Search):
         manager_sub.is_child = True
         manager_sub.curr_module = instance
         parent_manager.init_run(manager_sub, ast)
-        #print(f"Num paths: {manager.num_paths}")
-        #print(f"Num paths {manager_sub.num_paths}")
         manager_sub.path_code = parent_manager.config[instance]
         manager_sub.seen = parent_manager.seen
 
@@ -716,8 +722,6 @@ class DepthFirst(Search):
         for i in range(1):
         #for i in range(manager_sub.num_paths):
             manager_sub.path_code = parent_manager.config[instance]
-            #print("------------------------")
-            #print(f"{ast.name} Path {i}")
             self.visit_module(manager_sub, state, ast, parent_manager.modules)
 
             containing_module = parent_manager.instances_loc[instance]

@@ -34,21 +34,43 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
         if isinstance(rvalue.false_value, Pointer):
             ptr_access = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
             s.store[m.curr_module][ptr_access] = s.store[m.curr_module][rvalue.false_value.var.name]
-            return f"(Cond {rvalue.cond} {rvalue.true_value} {ptr_access})"
+            return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {rvalue.true_value} {ptr_access})"
         else:
-            return f"(Cond {rvalue.cond} {rvalue.true_value} {rvalue.false_value})"
+            return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {rvalue.true_value} {rvalue.false_value})"
     elif isinstance(rvalue, Operator):
         operator = str(rvalue).split(" ")[0][1:]
-        if isinstance(rvalue.left, Pointer):
+        if isinstance(rvalue.left, Pointer) and isinstance(rvalue.right, Pointer):
+            new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
+            s.store[m.curr_module][new_left] = s.store[m.curr_module][rvalue.left.var.name]
+            new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
+            s.store[m.curr_module][new_right] = s.store[m.curr_module][rvalue.right.var.name]
+            if isinstance(rvalue.left.ptr, Operator):
+                expr_in_brackets = conjunction_with_pointers(rvalue.left.ptr, s, m)
+                new_left = f"{rvalue.left.var}[ {expr_in_brackets} ]"
+            if isinstance(rvalue.right.ptr, Operator):
+                expr_in_brackets = conjunction_with_pointers(rvalue.right.ptr, s, m)
+                new_right = f"{rvalue.right.var}[ {expr_in_brackets} ]"
+            return f"({operator} {new_left} {new_right})"
+        elif isinstance(rvalue.left, Pointer):
             new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
             s.store[m.curr_module][new_left] = s.store[m.curr_module][rvalue.left.var.name]
             # make a new value in store for the pointer
+            if isinstance(rvalue.left.ptr, Operator):
+                expr_in_brackets = conjunction_with_pointers(rvalue.left.ptr, s, m)
+                new_left = f"{rvalue.left.var}[ {expr_in_brackets} ]"
             return f"({operator} {new_left} {conjunction_with_pointers(rvalue.right, s, m)})"
         elif isinstance(rvalue.right, Pointer):
             new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
             s.store[m.curr_module][new_right] = s.store[m.curr_module][rvalue.right.var.name]
+            if isinstance(rvalue.right.ptr, Operator):
+                expr_in_brackets = conjunction_with_pointers(rvalue.right.ptr, s, m)
+                new_right = f"{rvalue.right.var}[ {expr_in_brackets} ]"
             # make a new value in the store for the pointer
             return f"({operator} {conjunction_with_pointers(rvalue.left, s, m)} {new_right})"
+        elif isinstance(rvalue.right, Partselect) and isinstance(rvalue.left, Partselect):
+            new_right = f"{rvalue.right.var.name}[{rvalue.right.msb}:{rvalue.right.lsb}]"
+            new_left = f"{rvalue.left.var.name}[{rvalue.left.msb}:{rvalue.left.lsb}]"
+            return f"({operator} {new_left} {new_right})"
         elif isinstance(rvalue.right, Partselect):
             new_right = f"{rvalue.right.var.name}[{rvalue.right.msb}:{rvalue.right.lsb}]"
             return f"({operator} {conjunction_with_pointers(rvalue.left, s, m)} {new_right})"
@@ -81,7 +103,6 @@ def tokenize(rvalue, s: SymbolicState, m: ExecutionManager):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
     #print(rvalue)
     rvalue_converted = conjunction_with_pointers(rvalue, s, m)
-    print(f"CONVERTED {rvalue_converted}")
     str_rvalue = str(rvalue_converted)
     tokens = []
     str_rvalue = str_rvalue.replace("(","( ").replace(")"," )").replace("  "," ")
@@ -214,7 +235,21 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
             return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)} )"
     else:
         if str(true_expr).isdigit() and str(false_expr).isdigit():
-            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {false_expr})"
+            #TODO: this a temporary fix need to exapnd for all cases
+            if isinstance(cond, tuple) and str(cond[0]) in BINARY_OPS:
+                new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+                if not new_cond is None:
+                    return f"If({new_cond}), {true_expr}, {false_expr})"
+                else:
+                    return f"If({s.store[m.curr_module][cond[1]]}, {true_expr}, {false_expr})"
+            elif isinstance(cond, tuple) and str(cond[0]) in UNARY_OPS:
+                new_cond = evaluate_unary_op(cond[1], op_map[cond[0]], s, m)
+                if not new_cond is None:
+                    return f"If({new_cond}), {true_expr}, {false_expr})"
+                else:
+                    return f"If({s.store[m.curr_module][cond[1]]}, {true_expr}, {false_expr})"
+            else:
+                return f"If({s.store[m.curr_module][cond]}, {true_expr}, {false_expr})"
         elif str(true_expr).isdigit():
             return f"If({s.store[m.curr_module][cond]}, {true_expr}, {s.store[m.curr_module][false_expr]} )"
         elif str(false_expr).isdigit():
@@ -265,7 +300,6 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             #     parsed_cond = evaluate_binary_op(rvalue[0], rvalue[1], rvalue[2], s, m)
             # else:
             #     parsed_cond = ""
-            # print(parsed_cond)
             parsed_cond = ""
             # if isinstance(rvalue[1], tuple):
             #     parsed_cond = str(rvalue[1][1]) +  " & " + str(rvalue[1][2])
@@ -304,7 +338,6 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                     results.append(eval_rvalue(elt, s, m))
                 return results
             else:
-                print(rvalue)
                 return s.store[m.curr_module][str(rvalue)]
 
         

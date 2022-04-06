@@ -192,7 +192,6 @@ class ExecutionManager:
                 return False
         count = 0
         seen = m.seen
-        #print(seen)
         for path in seen[m.curr_module]:
             if path[bit_index] == '1':
                 count += 1

@@ -289,7 +289,6 @@ class ExecutionEngine:
                 return False
         count = 0
         seen = m.seen
-        #print(seen)
         for path in seen[m.curr_module]:
             if path[bit_index] == '1':
                 count += 1
@@ -305,12 +304,8 @@ class ExecutionEngine:
             for item in items:
                 if isinstance(item, InstanceList):
                     if item.module in m.instance_count:
-                        print("A")
-                        print(item.instances[0].__dict__)
                         m.instance_count[item.module] += 1
                     else:
-                        print("B")
-                        print(item.instances[0].__dict__)
                         m.instance_count[item.module] = 1
                     self.module_count(m, item.instances)
                 if isinstance(item, Block):
@@ -322,10 +317,8 @@ class ExecutionEngine:
         elif items != None:
                 if isinstance(items, InstanceList):
                     if items.module in m.instance_count:
-                        print("C")
                         m.instance_count[items.module] += 1
                     else:
-                        print("D")
                         m.instance_count[items.module] = 1
                     self.module_count(m, items.instances)
 
@@ -377,7 +370,6 @@ class ExecutionEngine:
     def piece_wise_execute(self, ast: ModuleDef, manager: Optional[ExecutionManager], modules) -> None:
         """Drives symbolic execution piecewise when number of paths is too large not to breakup. 
         We break it up to avoid the memory blow up."""
-        print("piece")
         self.module_depth += 1
         manager.piece_wise = True
         state: SymbolicState = SymbolicState()
@@ -408,7 +400,6 @@ class ExecutionEngine:
                     manager.cond_assigns[instance_name] = {}
                 manager.names_list.remove(module.name)
             else:
-                print("HU")
                 manager.child_path_codes[module.name] = to_binary(0)
                 manager.child_num_paths[module.name] = sub_manager.num_paths
                 manager.config[module.name] = to_binary(0)
@@ -446,16 +437,12 @@ class ExecutionEngine:
                 manager.cycle = 0
 
                 for j in range(0, len(paths[i])):
-                #print(f"Single cycle path {j} {paths[i][j]}")
-                #print(f"yee {manager.names_list[j  % len(manager.names_list)]}")
                     for name in manager.names_list:
                         manager.config[name] = paths[i][j]
 
                 manager.path_code = paths[i][0]
                 manager.prev_store = state.store
                 manager.init_state(state, manager.prev_store, ast)
-                print(manager.instances_seen)
-                print(manager.instance_count)
                 self.search_strategy.visit_module(manager, state, ast, modules_dict)
                 manager.cycle += 1
                 manager.curr_level = 0
@@ -562,6 +549,7 @@ class ExecutionEngine:
                 total_paths *= x
             #print(total_paths)
             # have do do things piece wise
+            manager.debug = self.debug
             if total_paths > 100000:
                 start = time.time()
                 self.piece_wise_execute(ast, manager, modules)
@@ -576,19 +564,12 @@ class ExecutionEngine:
                 manager.opt_1 = False
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values(), repeat=int(num_cycles)))
-            #paths = list(product(*manager.child_path_codes.values()))
 
-            #print(f" Upper bound on num paths {len(paths)}")
-        # print(manager.instance_count)
-        # print(manager.always_writes)
-        # print(manager.assertions)
 
         if self.debug:
             manager.debug = True
         self.assertions_always_intersect(manager)
-        #print(manager.blocks_of_interest)
-        #print(f"Num paths: {manager.num_paths}")
-        #print(f"Upper bound on num paths {manager.num_paths}")
+
         manager.seen = {}
         for name in manager.names_list:
             manager.seen[name] = []
@@ -601,8 +582,7 @@ class ExecutionEngine:
             manager.cycle = 0
             # extract the single cycle path code for this iteration and execute, then merge the states
             for j in range(0, len(paths[i])):
-                #print(f"Single cycle path {j} {paths[i][j]}")
-                #print(f"yee {manager.names_list[j  % len(manager.names_list)]}")
+
                 for name in manager.names_list:
                     manager.config[name] = paths[i][j]
             # makes assumption top level module is first in line
@@ -625,7 +605,6 @@ class ExecutionEngine:
                 if self.debug:
                     print("------------------------")
                 ...
-                #print(f"{ast.name} Path {i}")
                 
             manager.seen[ast.name].append(manager.path_code)
             if (manager.assertion_violation):
@@ -660,15 +639,7 @@ class ExecutionEngine:
             for name in manager.names_list:
                 state.store[name] = {}
 
-            # for module_store in state.store:
-            #     for signal in module_store:
-            #         if signal != "CLK" or signal != "RST":
-            #             print("hi")
-            #             state.store[module_store][signal] = init_symbol()
-        #manager.path_code = to_binary(0)
-        #print(f" finishing {ast.name}")
         self.module_depth -= 1
-        ## print(state.store)
 
 
     def execute_child(self, ast: ModuleDef, state: SymbolicState, manager: Optional[ExecutionManager]) -> None:
@@ -680,8 +651,7 @@ class ExecutionEngine:
         manager_sub.is_child = True
         manager_sub.curr_module = ast.name
         self.init_run(manager_sub, ast)
-        #print(f"Num paths: {manager.num_paths}")
-        #print(f"Num paths {manager_sub.num_paths}")
+
         manager_sub.path_code = manager.config[ast.name]
         manager_sub.seen = manager.seen
 
@@ -695,8 +665,7 @@ class ExecutionEngine:
         for i in range(1):
         #for i in range(manager_sub.num_paths):
             manager_sub.path_code = manager.config[ast.name]
-            #print("------------------------")
-            #print(f"{ast.name} Path {i}")
+
             self.search_strategy.visit_module(manager_sub, state, ast, manager.modules)
             if (manager.assertion_violation):
                 print("Assertion violation")
@@ -722,9 +691,7 @@ class ExecutionEngine:
             manager.curr_level = 0
             #state.pc.reset()
         #manager.path_code = to_binary(0)
-        #print(f" finishing {ast.name}")
         if manager_sub.ignore:
             manager.ignore = True
         self.module_depth -= 1
         #manager.is_child = False
-        ## print(state.store)
