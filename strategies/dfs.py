@@ -9,7 +9,7 @@ from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial, 
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer, IdentifierScope, Operator
 from helpers.utils import init_symbol
 from typing import Optional
-from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int, str_to_bool
+from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int, str_to_bool, simpl_str_exp
 from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc, parse_concat_to_Z3
 from helpers.utils import to_binary
 import os
@@ -258,7 +258,6 @@ class DepthFirst(Search):
                         s.store[m.curr_module][stmt.left.var.name][str_item] = str_item
                         #s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, Cond):
-
                 m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
                 opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
                 m.cond_assigns[m.curr_module][stmt.left.var.name] = opts
@@ -446,6 +445,8 @@ class DepthFirst(Search):
         elif isinstance(stmt, SingleStatement):
             self.visit_stmt(m, s, stmt.statement,  modules)
         elif isinstance(stmt, InstanceList):
+            if not stmt.module in m.instances_seen:
+                m.instances_seen[stmt.module] = 1
             instance_index = m.instances_seen[stmt.module]
             m.instances_seen[stmt.module] += 1 % m.instance_count[stmt.module]
             m.instances_loc[f"{stmt.module}_{instance_index}"] = m.curr_module
@@ -495,7 +496,11 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
                 
-                self.visit_expr(m, s, stmt.cond[0])
+
+                if stmt.cond is None:
+                    self.visit_expr(m, s, stmt.cond)
+                else:
+                    self.visit_expr(m, s, stmt.cond[0])
                 if (m.abandon and m.debug):
  
                     print("Abandoning this path!")
@@ -508,7 +513,10 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
 
-                self.visit_expr(m, s, stmt.cond[0])
+                if stmt.cond is None:
+                    self.visit_expr(m, s, stmt.cond)
+                else:
+                    self.visit_expr(m, s, stmt.cond[0])
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
 
@@ -530,9 +538,11 @@ class DepthFirst(Search):
                 if not expr.width is None: 
                     if isinstance(expr.width.msb, Operator):
                         val = str_to_int(evaluate(parse_tokens(tokenize(expr.width.msb, s, m)), s, m), s, m)
-                        m.reg_widths[expr.name] = 2 ** (val + 1)
-                    else:
-                        m.reg_widths[expr.name] = 2 ** (int(expr.width.msb.value) + 1)
+                        if not val is None:
+                            m.reg_widths[expr.name] = 2 ** (val + 1)
+                        else:
+                            val = simpl_str_exp(evaluate(parse_tokens(tokenize(expr.width.msb, s, m)), s, m), s, m)
+                            m.reg_widths[expr.name] = val
                 else:
                     m.reg_widths[expr.name] = 4294967296
             else: 
@@ -580,12 +590,15 @@ class DepthFirst(Search):
         elif isinstance(expr, Identifier):
             # change this to one since inst is supposed to just be 1 bit width
             # and the identifier class actually doesn't have a width param
-
+            print(expr)
             symbol = s.store[m.curr_module][expr.name]
             if "'h" in s.store[m.curr_module][expr.name] or "'b" in s.store[m.curr_module][expr.name] or "'d" in s.store[m.curr_module][expr.name]:
                 symbol = s.store[m.curr_module][expr.name].split("'")[1][1:]
                 s.store[m.curr_module][expr.name] = symbol
-                x = Int2BV(IntVal(int(symbol)), 1)
+                if not symbol.isdigit():
+                    x = BitVec(s.store[m.curr_module][expr.name], 1)
+                else:
+                    x = Int2BV(IntVal(int(symbol)), 1)
             elif isinstance(symbol, dict):
                 bit_vec_list = parse_concat_to_Z3(symbol, s, m)
                 #TODO: get the right widths

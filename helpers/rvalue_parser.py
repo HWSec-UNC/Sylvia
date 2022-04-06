@@ -15,11 +15,11 @@ BINARY_OPS = ("Plus", "Minus", "Power", "Times", "Divide", "Mod", "Sll", "Srl", 
 "GreaterThan", "LessEq", "GreaterEq", "Eq", "NotEq", "Eql", "NotEql", "And", "Xor",
 "Xnor", "Or", "Land", "Lor")
 
-UNARY_OPS = ("Unot", "Ulnot", "Unor", "Uor")
+UNARY_OPS = ("Unot", "Ulnot", "Unor", "Uor", "Uand", "Unand")
 
 op_map = {"Plus": "+", "Minus": "-", "Power": "**", "Times": "*", "Divide": "/", "Mod": "%", "Sll": "<<", "Srl": ">>>",
 "Sra": ">>", "LessThan": "<", "GreaterThan": ">", "LessEq": "<=", "GreaterEq": ">=", "Eq": "==", "NotEq": "!=", "Eql": "===", "NotEql": "!==",
-"And": "&", "Xor": "^", "Or": "|", "Land": "&&", "Lor": "||", "Unot": "!", "Ulnot": "!", "Unor": "!", "Uor": "|"}
+"And": "&", "Xor": "^", "Or": "|", "Land": "&&", "Lor": "||", "Unot": "!", "Ulnot": "!", "Unor": "!", "Uor": "|", "Uand": "&", "Unand": "&"}
 
 def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> str: 
     """Convert the compound rvalue into proper string representation with pointers taken into account."""
@@ -81,6 +81,7 @@ def tokenize(rvalue, s: SymbolicState, m: ExecutionManager):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
     #print(rvalue)
     rvalue_converted = conjunction_with_pointers(rvalue, s, m)
+    print(f"CONVERTED {rvalue_converted}")
     str_rvalue = str(rvalue_converted)
     tokens = []
     str_rvalue = str_rvalue.replace("(","( ").replace(")"," )").replace("  "," ")
@@ -303,6 +304,7 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                     results.append(eval_rvalue(elt, s, m))
                 return results
             else:
+                print(rvalue)
                 return s.store[m.curr_module][str(rvalue)]
 
         
@@ -311,14 +313,41 @@ def str_to_int(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wid
     """Takes in a symbolic expression as a string that is only ints and evaluates it down to a single int.
     This is a special case."""
     tokens = symbolic_exp.split(" ")
+    if not tokens[0].isdigit():
+        return None
     result: int = int(tokens[0])
     try: 
         for i in range(1, len(tokens)):
             #TODO: apply operator using HOF or something
             if tokens[i] == "+":
                 result += int(tokens[i + 1]) % reg_width
+            if tokens[i] == "-":
+                result -= int(tokens[i + 1]) & reg_width
         return result % reg_width
     except Exception:
+        return None
+
+def simpl_str_exp(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_width=4294967296) -> str:
+    tokens = symbolic_exp.split(" ")
+    result = tokens[0]
+    try: 
+        for i in range(1, len(tokens)):
+            #TODO: apply operator using HOF or something
+            if tokens[i] == "+":
+                result += "+"
+                if tokens[i + 1].isdigit():
+                    result += str(int(tokens[i + 1]) % reg_width)
+                else:
+                    result += "+"
+                    result += tokens[i + 1]
+            if tokens[i] == "-":
+                result += "-"
+                if tokens[i + 1].isdigit():
+                    result += str(int(tokens[i + 1]) % reg_width)
+                else:
+                    result += tokens[i + 1]
+        return result
+    except Exception as e:
         return None
 
 def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_width=4294967296) -> int:

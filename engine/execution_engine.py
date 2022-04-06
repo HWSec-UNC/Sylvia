@@ -305,8 +305,12 @@ class ExecutionEngine:
             for item in items:
                 if isinstance(item, InstanceList):
                     if item.module in m.instance_count:
+                        print("A")
+                        print(item.instances[0].__dict__)
                         m.instance_count[item.module] += 1
                     else:
+                        print("B")
+                        print(item.instances[0].__dict__)
                         m.instance_count[item.module] = 1
                     self.module_count(m, item.instances)
                 if isinstance(item, Block):
@@ -318,8 +322,10 @@ class ExecutionEngine:
         elif items != None:
                 if isinstance(items, InstanceList):
                     if items.module in m.instance_count:
+                        print("C")
                         m.instance_count[items.module] += 1
                     else:
+                        print("D")
                         m.instance_count[items.module] = 1
                     self.module_count(m, items.instances)
 
@@ -402,7 +408,7 @@ class ExecutionEngine:
                     manager.cond_assigns[instance_name] = {}
                 manager.names_list.remove(module.name)
             else:
-      
+                print("HU")
                 manager.child_path_codes[module.name] = to_binary(0)
                 manager.child_num_paths[module.name] = sub_manager.num_paths
                 manager.config[module.name] = to_binary(0)
@@ -448,6 +454,8 @@ class ExecutionEngine:
                 manager.path_code = paths[i][0]
                 manager.prev_store = state.store
                 manager.init_state(state, manager.prev_store, ast)
+                print(manager.instances_seen)
+                print(manager.instance_count)
                 self.search_strategy.visit_module(manager, state, ast, modules_dict)
                 manager.cycle += 1
                 manager.curr_level = 0
