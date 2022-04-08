@@ -11,8 +11,8 @@ module apb_node_wrap (
 	parameter APB_ADDR_WIDTH = 32;
 	input wire clk_i;
 	input wire rst_ni;
-	input APB_BUS.Slave apb_slave;
-	input APB_BUS.Master [NB_MASTER - 1:0] apb_masters;
+	input apb_slave;
+	input [NB_MASTER - 1:0] apb_masters;
 	input wire [(NB_MASTER * APB_ADDR_WIDTH) - 1:0] start_addr_i;
 	input wire [(NB_MASTER * APB_ADDR_WIDTH) - 1:0] end_addr_i;
 	genvar i;

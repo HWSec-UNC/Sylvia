@@ -4,7 +4,7 @@ cases in the designs we evaluate. Please open a Github issue if you run into a d
 rvalue not handled by this."""
 
 import sys
-from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator, IdentifierScope, Identifier, StringConst, Partselect
+from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator, IdentifierScope, Identifier, StringConst, Partselect, Repeat
 from pyverilog.vparser.ast import Concat
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
@@ -30,6 +30,15 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
             return new_right
         else: 
             return f"({operator} {conjunction_with_pointers(rvalue.right, s, m)})"
+    elif isinstance(rvalue, Repeat):
+        times = int(rvalue.times.value)
+        accumulate = "("
+        val = conjunction_with_pointers(rvalue.value, s, m) 
+        for i in range(times):
+            accumulate += str(val) + " "
+        accumulate.rstrip()
+        accumulate += ")"
+        return accumulate
     elif isinstance(rvalue, Cond):
         if isinstance(rvalue.false_value, Pointer):
             ptr_access = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
@@ -96,6 +105,8 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
             accumulate += str(conjunction_with_pointers(sub_item, s, m)) + " "
         accumulate.rstrip()
         return accumulate + ")"
+    elif isinstance(rvalue, Partselect):
+        return f"{rvalue.var.name}[{rvalue.msb}:{rvalue.lsb}]"
     else:
         return rvalue
 
@@ -287,7 +298,6 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
 
 def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
     """Takes in an AST and should return the new symbolic expression for the symbolic state."""
-    #print(rvalue)
     if not rvalue is None:
         if rvalue[0] in BINARY_OPS:
             return evaluate_binary_op(rvalue[1], rvalue[2], op_map[rvalue[0]], s, m)
@@ -338,7 +348,20 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                     results.append(eval_rvalue(elt, s, m))
                 return results
             else:
-                return s.store[m.curr_module][str(rvalue)]
+                if len(rvalue) == 1:
+                    if not rvalue[0] in  s.store[m.curr_module] and "[" in rvalue[0]:
+                        parts = rvalue[0].partition("[")
+                        first_part = parts[0]
+                        s.store[m.curr_module][rvalue[0]] = s.store[m.curr_module][first_part]
+                    elif "'h" in rvalue[0] or "'b" in rvalue[0] or "'d" in rvalue[0]:
+                       return int(rvalue[0].split("'")[1][1:])
+                    return s.store[m.curr_module][rvalue[0]]
+                else:
+                    if not str(rvalue) in s.store[m.curr_module] and "[" in str(rvalue):
+                        parts = str(rvalue).partition("[")
+                        first_part = parts[0]
+                        s.store[m.curr_module][str(rvalue)] = s.store[m.curr_module][first_part]
+                    return s.store[m.curr_module][str(rvalue)]
 
         
 

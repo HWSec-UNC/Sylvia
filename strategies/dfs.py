@@ -7,6 +7,7 @@ from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, Sin
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer, IdentifierScope, Operator
+from pyverilog.vparser.ast import Repeat 
 from helpers.utils import init_symbol
 from typing import Optional
 from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int, str_to_bool, simpl_str_exp
@@ -442,7 +443,7 @@ class DepthFirst(Search):
                 for lhs in m.cond_assigns[m.curr_module]:
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
-                        
+                
                 self.visit_expr(m, s, stmt.cond)
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")

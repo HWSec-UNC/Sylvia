@@ -70,6 +70,21 @@ def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
         lhs = parse_expr_to_Z3(e.left, s, m)
         rhs = parse_expr_to_Z3(e.right, s, m)
         return s.pc.add(lhs.assertions() and rhs.assertions())
+    elif isinstance(e, Partselect):
+        part_sel_expr = f"{e.var.name}[{e.msb}:{e.lsb}]"
+        module_name = m.curr_module
+        is_reg = e.var.name in m.reg_decls
+        if not e.var.scope is None:
+            module_name = e.scope.labellist[0].name
+        if s.store[module_name][e.var.name].isdigit():
+            int_val = IntVal(int(s.store[module_name][e.name]))
+            return Int2BV(int_val, 32)
+        else:
+            if not part_sel_expr in s.store[m.curr_module] and "[" in part_sel_expr:
+                parts = part_sel_expr.partition("[")
+                first_part = parts[0]
+                s.store[m.curr_module][part_sel_expr] = s.store[m.curr_module][first_part]
+            return BitVec(s.store[module_name][part_sel_expr], 32)
     elif isinstance(e, Identifier):
         module_name = m.curr_module
         is_reg = e.name in m.reg_decls
