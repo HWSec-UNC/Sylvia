@@ -9,7 +9,10 @@ Requirements
 - Icarus Verilog: 10.1 or later: run `sudo apt install iverilog`
 - Jinja 2.10 or later: run `python3 -m pip install jinja2`
 - PLY 3.4 or later: run `python3 -m pip install ply`
+- Graphviz 2.38.0 or later: run `sudo apt install graphviz`
+- Pygraphviz 1.3.1 or later: run `python3 - m pip install pygraphviz`
 - PyVerilog: run `python3 -m pip install pyverilog`
+
 
 Download
 --------------------
