@@ -551,9 +551,9 @@ class ExecutionEngine:
             # have do do things piece wise
             manager.debug = self.debug
             if total_paths > 100000:
-                start = time.time()
+                start = time.process_time()
                 self.piece_wise_execute(ast, manager, modules)
-                end = time.time()
+                end = time.process_time()
                 print(f"Elapsed time {end - start}")
                 sys.exit()
             self.populate_child_paths(manager)

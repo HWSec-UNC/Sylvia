@@ -139,9 +139,9 @@ def main():
     description: Description = ast.children()[0]
     top_level_module: ModuleDef = description.children()[0]
     modules = description.definitions
-    start = time.time()
+    start = time.process_time()
     engine.execute(top_level_module, modules, None, directives, num_cycles)
-    end = time.time()
+    end = time.process_time()
     print(f"Elapsed time {end - start}")
 
 if __name__ == '__main__':
