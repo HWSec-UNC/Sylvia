@@ -119,7 +119,7 @@ class DepthFirst(Search):
             if isinstance(stmt.value.var, IntConst):
                 s.store[m.curr_module][stmt.name] = stmt.value.var
             elif isinstance(stmt.value.var, Identifier):
-                s.store[m.curr_module][stmt.name] = s.store[m.curr_module][stmt.value.var]
+                s.store[m.curr_module][stmt.name] = s.store[m.curr_module][str(stmt.value.var)]
             else:
                 if m.cycle == 0:
                     s.store[m.curr_module][stmt.name] = init_symbol()
@@ -231,7 +231,11 @@ class DepthFirst(Search):
                     m.dependencies[m.curr_module][stmt.left.var.var.name] = stmt.right.var.var.name
                     m.updates[stmt.left.var.var.name] = 0
                 else:
-                    s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+                    new_msb = evaluate(parse_tokens(tokenize(stmt.right.var.msb, s, m)), s, m)
+                    if not new_msb is None:
+                        s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{new_msb}:{stmt.right.var.lsb}]"
+                    else:
+                        s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
                     m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
                     m.updates[stmt.left.var.name] = 0
             
@@ -327,7 +331,10 @@ class DepthFirst(Search):
                     else:
                         reg_width = 4294967296
             if isinstance(stmt.right.var, IntConst):
-                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+                if isinstance(stmt.left.var, Pointer):
+                    s.store[m.curr_module][stmt.left.var.var.name] = stmt.right.var.value
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):
                 s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             elif isinstance(stmt.right.var, Concat):
@@ -361,7 +368,15 @@ class DepthFirst(Search):
                 # TODO make sure the width is still enforced correctly though
                 if stmt.right.var.var.name in m.cond_assigns[m.curr_module]:
                     m.cond_assigns[m.curr_module][stmt.left.var.name] = m.cond_assigns[m.curr_module][stmt.right.var.var.name]
-                s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+                elif isinstance(stmt.left.var, Partselect):
+                    s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
+            elif isinstance(stmt.right.var, Pointer):
+                if isinstance(stmt.left.var, Pointer):
+                    s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
             else:
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                 if new_r_value != None:
@@ -377,9 +392,15 @@ class DepthFirst(Search):
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
 
         elif isinstance(stmt, BlockingSubstitution):
-            prev_symbol = s.store[m.curr_module][stmt.left.var.name]
+            if isinstance(stmt.left.var, Partselect):
+                prev_symbol = s.store[m.curr_module][stmt.left.var.var.name]
+            else:
+                prev_symbol = s.store[m.curr_module][stmt.left.var.name]
             if isinstance(stmt.right.var, IntConst):
-                s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
+                if isinstance(stmt.left.var, Partselect):
+                    s.store[m.curr_module][stmt.left.var.var.name] = stmt.right.var.value
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):
                 s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             elif isinstance(stmt.right.var, Concat):
@@ -409,7 +430,10 @@ class DepthFirst(Search):
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
-            m.updates[stmt.left.var.name] = (1, prev_symbol)
+            if isinstance(stmt.left.var, Partselect):
+                m.updates[stmt.left.var.var.name] = (1, prev_symbol)
+            else:
+                m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, Block):
             for item in stmt.statements: 
                 self.visit_stmt(m, s, item, modules)
@@ -564,7 +588,9 @@ class DepthFirst(Search):
         elif isinstance(expr, Eq):
             # assume left is identifier
             #parse_expr_to_Z3(expr, s, m)
-            if (s.store[m.curr_module][expr.left.name]).isdigit():
+            if isinstance(expr.left, Partselect):                      
+                x = BitVec(s.store[m.curr_module][expr.left.var.name], 32)
+            elif (s.store[m.curr_module][expr.left.name]).isdigit():
                 int_val = IntVal(int(s.store[m.curr_module][expr.left.name]))
                 x = Int2BV(int_val, 32)
             elif (s.store[m.curr_module][expr.left.name]).split(" ")[0].isdigit():

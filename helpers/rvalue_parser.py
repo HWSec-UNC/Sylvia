@@ -215,15 +215,28 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
     """Helper function to resolve conditional symbolic expressions.
     The format is intentionally meant to match z3 to make parsing easier later."""
     #print("evaluating cond expression")
+
     if (isinstance(true_expr,tuple) and isinstance(false_expr,tuple)):
         if true_expr[0] in op_map and false_expr[0] in op_map:
-            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {false_expr})"
+            true_arg = ""
+            false_arg = ""
+            if str(true_expr[0]) in BINARY_OPS:
+                true_arg = evaluate_binary_op(true_expr[1], true_expr[2], op_map[true_expr[0]], s, m)
+            if str(false_expr[0]) in BINARY_OPS:
+                false_expr = evaluate_binary_op(false_expr[1], false_expr[2], op_map[false_expr[0]], s, m)
+
+            if isinstance(cond, tuple) and str(cond[0]) in BINARY_OPS:
+                new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+                if not new_cond is None and new_cond in s.store[m.curr_module]:
+                    return f"If({s.store[m.curr_module][new_cond]}, {true_arg}, {false_arg})"
+                else:
+                    return f"If({new_cond}, {true_arg}, {false_arg})"
         elif true_expr[0] in op_map:
-            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
+            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], s, m)})"
         elif false_expr[0] in op_map:
-            return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {false_expr})"
+            return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], s, m)}, {false_expr})"
         else:
-            return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)})"
+            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {false_expr})"
     elif (isinstance(true_expr,tuple)):
         if str(false_expr).isdigit():
             if true_expr[0] in op_map:

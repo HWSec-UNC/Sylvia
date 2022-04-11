@@ -149,7 +149,8 @@ class ExecutionEngine:
                         if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
                             m.always_writes[m.curr_always].append(item.left.var.var.name)
                     elif isinstance(item.left.var, Pointer):
-                        m.always_writes[m.curr_always].append(item.left.var.ptr)
+                        if m.curr_always is not None and item.left.var.var.name not in m.always_writes[m.curr_always]:
+                            m.always_writes[m.curr_always].append(item.left.var.ptr)
                     elif isinstance(item.left.var, Concat) and m.curr_always is not None:
                         for sub_item in item.left.var.list:
                             m.always_writes[m.curr_always].append(sub_item.name)
@@ -210,6 +211,9 @@ class ExecutionEngine:
                 if isinstance(items.left.var, Pointer):
                     if m.curr_always is not None and items.left.var.var.name not in m.always_writes[m.curr_always]:
                         m.always_writes[m.curr_always].append(items.left.var.var.name)
+                elif isinstance(items.left.var, Partselect):
+                    if m.curr_always is not None and items.left.var.var.name not in m.always_writes[m.curr_always]:
+                        m.always_writes[m.curr_always].append(item.left.var.var.name)
                 else:
                     if m.curr_always is not None and items.left.var.name not in m.always_writes[m.curr_always]:
                         m.always_writes[m.curr_always].append(items.left.var.name)
