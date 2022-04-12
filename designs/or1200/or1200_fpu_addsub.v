@@ -97,7 +97,7 @@ module or1200_fpu_addsub(
    
    // check if its a subtraction or an addition operation
    assign s_addop = ((s_signa_i ^ s_signb_i) & !s_fpu_op_i) |
-		    ((s_signa_i ^~ s_signb_i) & s_fpu_op_i);
+		    ((s_signa_i ^ ~ s_signb_i) & s_fpu_op_i);
    
    // sign of result
    assign s_sign_o = ((s_fract_o == 28'd0) & !(s_signa_i & s_signb_i)) ? 0 :

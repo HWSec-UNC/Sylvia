@@ -605,7 +605,7 @@ defparam lpm_ram_dq_component.lpm_width = dw,
 //
 // Generic RAM's registers and wires
 //
-reg	[dw-1:0]	mem [(1<<aw)-1:0];	// RAM content
+reg	[dw-1:0]	mem [2047:0];	// RAM content
 reg	[aw-1:0]	addr_reg;		// RAM address register
 
 //

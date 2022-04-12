@@ -105,9 +105,9 @@ module or1200_spram
    // Generic RAM's registers and wires
    //
 `ifdef OR1200_GENERIC   
-   reg [dw-1:0] 			  mem [(1<<aw)-1:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
+   reg [dw-1:0] 			  mem [1023:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
 `else
-   reg [dw-1:0] 			  mem [(1<<aw)-1:0];
+   reg [dw-1:0] 			  mem [1023:0];
 `endif
    reg [aw-1:0] 			  addr_reg;		// RAM address register
    

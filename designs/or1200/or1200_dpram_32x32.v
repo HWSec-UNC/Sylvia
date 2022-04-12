@@ -521,7 +521,7 @@ defparam altqpram_component.operation_mode = "BIDIR_DUAL_PORT",
 //
 // Generic RAM's registers and wires
 //
-reg	[dw-1:0]	mem [(1<<aw)-1:0];	// RAM content
+reg	[dw-1:0]	mem [31:0];	// RAM content
 reg	[aw-1:0]	addr_a_reg;		// RAM address registered
 
 //

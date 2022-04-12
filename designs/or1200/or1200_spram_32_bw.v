@@ -105,15 +105,15 @@ module or1200_spram_32_bw
    // Generic RAM's registers and wires
    //
 `ifdef OR1200_GENERIC   
-   reg [7:0] 				  mem0 [(1<<aw)-1:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
-   reg [7:0] 				  mem1 [(1<<aw)-1:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
-   reg [7:0] 				  mem2 [(1<<aw)-1:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
-   reg [7:0] 				  mem3 [(1<<aw)-1:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
+   reg [7:0] 				  mem0 [1023:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
+   reg [7:0] 				  mem1 [1023:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
+   reg [7:0] 				  mem2 [1023:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
+   reg [7:0] 				  mem3 [1023:0] /*synthesis syn_ramstyle = "no_rw_check"*/;
 `else
-   reg [7:0] 				  mem0 [(1<<aw)-1:0];
-   reg [7:0] 				  mem1 [(1<<aw)-1:0];
-   reg [7:0] 				  mem2 [(1<<aw)-1:0];
-   reg [7:0] 				  mem3 [(1<<aw)-1:0];
+   reg [7:0] 				  mem0 [1023:0];
+   reg [7:0] 				  mem1 [1023:0];
+   reg [7:0] 				  mem2 [1023:0];
+   reg [7:0] 				  mem3 [1023:0];
 `endif
    reg [aw-1:0] 			  addr_reg;		// RAM address register
    

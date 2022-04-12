@@ -374,7 +374,7 @@ defparam altqpram_component.operation_mode = "BIDIR_DUAL_PORT",
 //
 // Generic RAM's registers and wires
 //
-reg	[dw-1:0]	mem [(1<<aw)-1:0];	// RAM content
+reg	[dw-1:0]	mem [31:0];	// RAM content
 reg	[aw-1:0]	addr_a_reg;		// RAM read address register
 reg	[aw-1:0]	addr_b_reg;		// RAM read address register
 
@@ -387,16 +387,13 @@ assign do_b = (oe_b) ? mem[addr_b_reg] : {dw{1'b0}};
 //
 // RAM write
 //
-always @(posedge clk_a)
+always @(posedge clk_a or clk_b)
 	if (ce_a && we_a)
 		mem[addr_a] <=  di_a;
-
-//
-// RAM write
-//
-always @(posedge clk_b)
-	if (ce_b && we_b)
+	else if (ce_b && we_b)
 		mem[addr_b] <=  di_b;
+
+
 
 //
 // RAM read address register

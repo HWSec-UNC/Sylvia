@@ -73,20 +73,20 @@ output  [`OR1200_WW-1:0]  P;
 reg     [`OR1200_W-1:0]  X_saved;
 reg     [`OR1200_W-1:0]  Y_saved;
 reg     [`OR1200_WW-1:0]  p1;
-integer 		  xi;
-integer 		  yi;
+reg 		  xi;
+reg 		  yi;
 
 //
 // Conversion unsigned to signed
 //
 always @(X_saved)
-	xi = X_saved;
+	xi <= X_saved;
 
 //
 // Conversion unsigned to signed
 //
 always @(Y_saved)
-	yi = Y_saved;
+	yi <= Y_saved;
 
 //
 // First multiply stage

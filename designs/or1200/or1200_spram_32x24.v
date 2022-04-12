@@ -279,7 +279,7 @@ RAMB16_S36 ramb16_s36(
 //
 // Generic RAM's registers and wires
 //
-reg	[dw-1:0]	mem [(1<<aw)-1:0];	// RAM content
+reg	[dw-1:0]	mem [31:0];	// RAM content
 reg	[aw-1:0]	addr_reg;		// RAM address register
 
 //

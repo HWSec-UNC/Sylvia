@@ -39,7 +39,6 @@
 //
 
 // synopsys translate_off
-`include "timescale.v"
 `timescale 1ns / 1ps
 `default_nettype none
 `define assert(expression) \
@@ -93,10 +92,7 @@ module simple_spi ( // renamed by Julius
    
 
    reg [slave_select_width-1:0]        ss_r;      
-
-  // prev signals for the properties
-  reg [2:0] prev_adr_i;
-		 
+	 
   //
   // Module body
   //
@@ -123,20 +119,6 @@ module simple_spi ( // renamed by Julius
   // Wishbone interface
   wire wb_acc = cyc_i & stb_i;       // WISHBONE access
   wire wb_wr  = wb_acc & we_i;       // WISHBONE write access
-
-
-  always @(posedge clk_i) begin
-  if (`SIMPLE_SPI_RST_SENS) begin
-    prev_adr_i <= 3'b0 ;
-    prev_dat_i <= 8'b0 ;
-    prev_we_i <= 1'b0;
-  end
-  else begin
-    prev_adr_i <= adr_i ;
-    prev_dat_i <= dat_i ;
-    prev_we_i <= we_i;
-  end
-  end
 
 
   // dat_i
@@ -365,11 +347,13 @@ module simple_spi ( // renamed by Julius
 
   assign tirq = ~|tcnt & rfwe;
 
-
-   initial begin
-      `assert((cyc_i || !stb_i) || (rst_i))
-    end
+ always @(posedge clk_i) begin
  
 
+ //initial begin
+  assert((cyc_i || ~stb_i) || (rst_i));
+ // `assert((cyc_i || ~stb_i) || (rst_i))
+  end
+ 
 endmodule
 
