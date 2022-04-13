@@ -31,10 +31,11 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
         else: 
             return f"({operator} {conjunction_with_pointers(rvalue.right, s, m)})"
     elif isinstance(rvalue, Repeat):
-        times = int(rvalue.times.value)
+        times = evaluate(parse_tokens(tokenize(conjunction_with_pointers(rvalue.times, s, m), s, m)), s, m)
+        times_int = int(str_to_int(times, s, m))
         accumulate = "("
         val = conjunction_with_pointers(rvalue.value, s, m) 
-        for i in range(times):
+        for i in range(times_int):
             accumulate += str(val) + " "
         accumulate.rstrip()
         accumulate += ")"
@@ -361,7 +362,7 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                     results.append(eval_rvalue(elt, s, m))
                 return results
             else:
-                if len(rvalue) == 1:
+                if (len(rvalue) == 1 and isinstance(rvalue, tuple)):
                     if not rvalue[0] in  s.store[m.curr_module] and "[" in rvalue[0]:
                         parts = rvalue[0].partition("[")
                         first_part = parts[0]
@@ -369,6 +370,10 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                     elif "'h" in rvalue[0] or "'b" in rvalue[0] or "'d" in rvalue[0]:
                        return int(rvalue[0].split("'")[1][1:])
                     return s.store[m.curr_module][rvalue[0]]
+                elif isinstance(rvalue, str):
+                    if "'h" in rvalue or "'b" in rvalue or "'d" in rvalue:
+                       return int(rvalue.split("'")[1][1:])
+                    return s.store[m.curr_module][rvalue]
                 else:
                     if not str(rvalue) in s.store[m.curr_module] and "[" in str(rvalue):
                         parts = str(rvalue).partition("[")

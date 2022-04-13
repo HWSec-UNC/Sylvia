@@ -357,6 +357,9 @@ class DepthFirst(Search):
                             s.store[m.curr_module][stmt.left.var.name][item.var.name] = f"{s.store[m.curr_module][item.var.name]}[{item.msb}:{item.lsb}]"
                         elif isinstance(item, IntConst):
                             s.store[m.curr_module][stmt.left.var.name][item.value] = item.value
+                        elif isinstance(item, Repeat):
+                            new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
+                            s.store[m.curr_module][stmt.left.var.name][item.value] = new_r_value
                         else:
                             s.store[m.curr_module][stmt.left.var.name][item.name] = s.store[m.curr_module][item.name]
             elif isinstance(stmt.right.var, StringConst):
