@@ -183,12 +183,23 @@ def evaluate_binary_op(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> s
     """Helper function to resolve binary symbolic expressions."""
     # convert hex strings into ints
     if isinstance(rhs, str) and not rhs.isdigit():
+        print(rhs)
         if "'h" in rhs or "'b" in rhs or "'d" in rhs:
-            rhs = int(rhs.split("'")[1][1:])
+            if "'h" in rhs: 
+                rhs = int(rhs.split("'")[1][1:], 16)
+            elif "'b" in rhs: 
+                rhs = int(rhs.split("'")[1][1:], 2)
+            else:
+                rhs = int(rhs.split("'")[1][1:])
 
     if isinstance(lhs, str) and not lhs.isdigit():
         if "'h" in lhs or "'b" in lhs or "'d" in lhs:
-            lhs = int(lhs.split("'")[1][1:])
+            if "'h" in lhs:
+                lhs = int(lhs.split("'")[1][1:], 16)
+            elif "'b" in lhs:
+                lhs = int(lhs.split("'")[1][1:], 2)
+            else:
+                lhs = int(lhs.split("'")[1][1:])
 
     if (isinstance(lhs,tuple) and isinstance(rhs,tuple)):
         return f"{eval_rvalue(lhs, s, m)} {op} {eval_rvalue(rhs, s, m)}"
