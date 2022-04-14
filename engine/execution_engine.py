@@ -417,8 +417,8 @@ class ExecutionEngine:
         print(total_paths)
         manager.piece_wise = True
         #TODO: things piecewise, say 10,000 at a time.
-        for i in range(0, total_paths, 10000):
-            manager.child_range = range(i*10000, i*10000+10000)
+        for i in range(0, total_paths, 1000):
+            manager.child_range = range(i*1000, i*1000+1000)
             self.populate_child_paths(manager)
             if len(modules) > 1:
                 self.populate_seen_mod(manager)
@@ -554,7 +554,7 @@ class ExecutionEngine:
             #print(total_paths)
             # have do do things piece wise
             manager.debug = self.debug
-            if total_paths > 100000:
+            if total_paths > 1000:
                 start = time.process_time()
                 self.piece_wise_execute(ast, manager, modules)
                 end = time.process_time()
