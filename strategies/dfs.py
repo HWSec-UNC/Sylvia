@@ -165,8 +165,6 @@ class DepthFirst(Search):
                                 if m.dependencies[module][signal] in m.cond_assigns[module]:
                                     m.cond_assigns[m.curr_module][signal] = m.cond_assigns[module][m.dependencies[module][signal]]
 
-                                print(s.store[m.curr_module])
-                                print(m.curr_module)
                                 if signal in s.store[m.curr_module] and '[' in str(s.store[m.curr_module][signal]):
                                     
                                     parts = s.store[m.curr_module][signal].partition("[")
