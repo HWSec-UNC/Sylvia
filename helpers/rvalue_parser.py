@@ -276,7 +276,12 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
         elif false_expr[0] in op_map:
             return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], s, m)}, {false_expr})"
         else:
-            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {false_expr})"
+            if isinstance(cond, tuple) and str(cond[0]) in BINARY_OPS:
+                new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+                if not new_cond is None:
+                    return f"If({new_cond}, {true_expr}, {false_expr})"
+                else:
+                    return f"If({s.store[m.curr_module][cond]}, {true_expr}, {false_expr})"
     elif (isinstance(true_expr,tuple)):
         if str(false_expr).isdigit():
             if true_expr[0] in op_map:
@@ -301,6 +306,15 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
             new_cond = None
             if cond[0] in BINARY_OPS:
                 new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+
+            if not true_expr in s.store[m.curr_module] and "[" in str(true_expr):
+                parts = str(true_expr).partition("[")
+                first_part = parts[0]
+                s.store[m.curr_module][str(true_expr)] = s.store[m.curr_module][first_part]
+            if not cond in s.store[m.curr_module] and "[" in str(cond):
+                parts = str(cond).partition("[")
+                first_part = parts[0]
+                s.store[m.curr_module][str(cond)] = s.store[m.curr_module][first_part]
             if not new_cond is None and not new_false_expr is None:
                 return f"If({new_cond}), {str(true_expr)}, {new_false_expr})"
             elif not new_false_expr is None:
@@ -339,7 +353,10 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
                     else:
                         return f"If({new_cond}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)})"
                 else:
-                    return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)})"
+                    if accumulate != "":
+                        return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {accumulate})"
+                    else:
+                        return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)})"
 
     else:
         if str(true_expr).isdigit() and str(false_expr).isdigit():
@@ -570,6 +587,8 @@ def resolve_dependency(cond, true_value, false_value, s: SymbolicState, m: Execu
         return true_value
     else:
         # TODO: make sure this works
+        if isinstance(cond, Pointer):
+            return cond.var.name
         return cond.name
 
 def cond_options(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager, res):
@@ -581,7 +600,10 @@ def cond_options(cond, true_value, false_value, s: SymbolicState, m: ExecutionMa
         res[str(cond)] = true_value
         res["default"] = false_value
     else: 
-        res[cond.name] = true_value
+        if isinstance(cond, Pointer):
+            res[cond.var.name] = true_value
+        else:
+            res[cond.name] = true_value
         res["default"] = false_value
     return res
 
