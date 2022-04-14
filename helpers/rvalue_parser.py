@@ -448,7 +448,7 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                             parts = str(rvalue).partition("[")
                             first_part = parts[0]
                             s.store[m.curr_module][str(rvalue)] = s.store[m.curr_module][first_part]
-                    return s.store[m.curr_module][str(rvalue)]
+                    return s.store[m.curr_module][str(rvalue).replace("'","")]
                 else:
                     if not str(rvalue) in s.store[m.curr_module] and "[" in str(rvalue):
                         parts = str(rvalue).partition("[")
