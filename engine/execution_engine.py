@@ -4,7 +4,7 @@ from pyverilog.vparser.parser import parse
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case, Pointer
-from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg
+from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Instance
 from .execution_manager import ExecutionManager
 from .symbolic_state import SymbolicState
 import os
@@ -307,11 +307,13 @@ class ExecutionEngine:
         if hasattr(items, '__iter__'):
             for item in items:
                 if isinstance(item, InstanceList):
+                    self.module_count(m, item.instances)
+                elif isinstance(item, Instance):
                     if item.module in m.instance_count:
-                        m.instance_count[item.module] += 1
+                        #m.instance_count[item.module] += 1
+                        ...
                     else:
                         m.instance_count[item.module] = 1
-                    self.module_count(m, item.instances)
                 if isinstance(item, Block):
                     self.module_count(m, item.items)
                 elif isinstance(item, Always):
@@ -330,11 +332,11 @@ class ExecutionEngine:
 
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
         """Initalize run."""
-        m.init_run = True
+        m.init_run_flag = True
         self.count_conditionals(m, module.items)
         self.lhs_signals(m, module.items)
         self.get_assertions(m, module.items)
-        m.init_run = False
+        m.init_run_flag = False
         #self.module_count(m, module.items)
 
 

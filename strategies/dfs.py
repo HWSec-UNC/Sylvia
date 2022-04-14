@@ -38,7 +38,10 @@ class DepthFirst(Search):
             else:
                 if m.curr_module in m.instances_loc:
                     containing_module = m.instances_loc[m.curr_module]
-                    s.store[m.curr_module][port.name] = s.store[containing_module][port.name]
+                    if not port.name in s.store[containing_module]: 
+                        s.store[m.curr_module][port.name] = init_symbol()
+                    else:
+                        s.store[m.curr_module][port.name] = s.store[containing_module][port.name]
                 if port.name not in s.store[m.curr_module]:
                     s.store[m.curr_module][port.name] = init_symbol()
 
@@ -162,12 +165,13 @@ class DepthFirst(Search):
                                 if m.dependencies[module][signal] in m.cond_assigns[module]:
                                     m.cond_assigns[m.curr_module][signal] = m.cond_assigns[module][m.dependencies[module][signal]]
 
-
-                                if '[' in s.store[m.curr_module][signal]:
+                                print(s.store[m.curr_module])
+                                print(m.curr_module)
+                                if signal in s.store[m.curr_module] and '[' in str(s.store[m.curr_module][signal]):
                                     
                                     parts = s.store[m.curr_module][signal].partition("[")
 
-                                    new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
+                                    new_symbol = s.store[m.curr_module][m.dependencies[module][signal]]
                                     if isinstance(new_symbol, dict):
                                         first_parts = {}
                                         for sig_name in new_symbol:
@@ -183,9 +187,9 @@ class DepthFirst(Search):
                                         s.store[m.curr_module][signal] = new_symbol
 
                                 else:
-                                    if signal in m.dependencies[module]:
+                                    if signal in m.dependencies[module] and signal in s.store[m.curr_module]:
                                         new_symbol = s.store[m.curr_module][m.dependencies[module][signal]]
-                                        s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
+                                        s.store[m.curr_module][signal] = str(s.store[m.curr_module][signal]).replace(prev_symbol, new_symbol)
                                     else:
                                         # the signal was updated, but something trivial happened like it was just written with a constant
                                         pass
@@ -194,7 +198,7 @@ class DepthFirst(Search):
                                 prev_symbol = str(m.updates[lhs][1])
                                 if not prev_symbol.isdigit() and prev_symbol in s.store[m.curr_module]: 
                                     prev_symbol = s.store[m.curr_module][prev_symbol]
-                                if '[' in str(s.store[module][lhs]):
+                                if lhs in s.store[module] and '[' in str(s.store[module][lhs]):
                                     
                                     parts = s.store[module][lhs].partition("[")
 
@@ -206,7 +210,8 @@ class DepthFirst(Search):
                                     s.store[module][lhs] = new_symbol
                                 else:
                                     # do a simpl pass?
-                                    s.store[module][lhs] = s.store[module][lhs]
+                                    if lhs in s.store[module]:
+                                        s.store[module][lhs] = s.store[module][lhs]
                                 m.updates[lhs] = 0 
                         # simplificiation / collapsing step
             m.in_always = False               
@@ -776,8 +781,8 @@ class DepthFirst(Search):
             for parent_signal in deps:
                 child = deps[parent_signal]
                 # propagate back up unless changed in top
-                if not parent_signal in parent_manager.updates:
-                    state.store[containing_module][parent_signal] = state.store[instance][child[1]]
+                if not parent_signal in parent_manager.updates and child[1] in state.store[child[0]]:
+                    state.store[containing_module][parent_signal] = state.store[child[0]][child[1]]
             if (parent_manager.assertion_violation):
                 print("Assertion violation")
                 parent_manager.assertion_violation = False
