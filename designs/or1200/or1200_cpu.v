@@ -51,6 +51,11 @@
 `include "timescale.v"
 // synopsys translate_on
 `include "or1200_defines.v"
+`define assert(expression) \
+        if (!(expression)) begin \
+            $display("ASSERTION FAILED"); \
+            $finish; \
+        end   
 
 module or1200_cpu(
 	// Clk & Rst
@@ -896,5 +901,82 @@ or1200_cfgr or1200_cfgr(
 	.spr_addr(spr_addr),
 	.spr_dat_o(spr_dat_cfgr)
 );
+
+//python3 -m main 1 -B designs/or1200/or1200_cpu.v  designs/or1200/or1200_except.v designs/or1200/or1200_sprs.v 
+initial begin
+`assert((or1200_except.wb_pc == or1200_sprs.spr_dat_ppc) || (rst == 1))
+end
+
+
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 1) )) || (or1200_ctrl.ex_pc == or1200_sprs.spr_dat_npc) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 2) )) || (or1200_ctrl.ex_pc == or1200_sprs.spr_dat_npc) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 3) )) || (or1200_ctrl.ex_pc == or1200_sprs.spr_dat_npc) || (rst == 1));
+// assert property (~(((or1200_ctrl.ex_insn & 'hFFE00000) >> 21  == 1826) && (operand_a > operand_b)) || (or1200_sprs.to_sr[9] == 1) || (rst == 1));
+// assert property (~(((or1200_ctrl.ex_insn & 'hFFE00000) >> 21  == 1829) && (operand_a <= operand_b)) || (or1200_sprs.to_sr[9] == 1) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000)>>26==1)) || (or1200_rf.rf_addrw==9) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 2) )) || (or1200_rf.rf_addrw != 9) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 1) )) || (or1200_sprs.sr[0] == prev_sr0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 2) )) || (or1200_sprs.sr[0] == prev_sr0) || (rst == 1));
+// assert property ((~( ((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 3) & (or1200_ctrl.ex_insn & 'h3C000000 != 0) )) || (or1200_sprs.sr[0] == prev_sr0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 1) )) || (or1200_except.epcr == prev_epcr) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 2) )) || (or1200_except.epcr == prev_epcr) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 3) )) || (or1200_except.epcr == prev_epcr) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 1) )) || (or1200_except.eear == prev_eear) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 2) )) || (or1200_except.eear == prev_eear) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 3) )) || (or1200_except.eear == prev_eear) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 1) )) || (or1200_except.esr == prev_esr) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 2) )) || (or1200_except.esr == prev_esr) || (rst == 1));
+// assert property ((~( ((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 3) & (or1200_ctrl.ex_insn & 'h3C000000 != 0) )) || (or1200_except.esr == prev_esr) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 9) )) || (or1200_except.eear == prev_eear) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 9) )) || (or1200_except.epcr == prev_epcr) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 9) )) || (or1200_except.esr == prev_esr) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 9)) || (or1200_genpc.pc == or1200_except.epcr) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 9)) || (or1200_sprs.to_sr == or1200_except.esr) || (rst == 1));
+// assert property ((~((prev_ex_insn & 'hFFFF0000) >> 16 == 8192)) || (~((or1200_ctrl.ex_insn & 'hFFFF0000) >> 16 != 8192)) || (or1200_except.lsu_addr == or1200_except.eear) || (rst == 1));
+// assert property ((~((prev_ex_insn & 'hFFFF0000) >> 16 == 8192)) || (~((or1200_ctrl.ex_insn & 'hFFFF0000) >> 16 != 8192)) || (or1200_except.spr_dat_npc == or1200_except.epcr) || (rst == 1));
+// assert property ((~((or1200_ctrl.wb_insn & 'hFFFF0000) >> 16 == 8192)) || (or1200_except.lsu_addr == or1200_except.eear) || (rst == 1));
+// assert property ((~((or1200_ctrl.wb_insn & 'hFFFF0000) >> 16 == 8192)) || (or1200_except.spr_dat_npc == or1200_except.epcr) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFFFF0000) >> 16 == 8192)) || (or1200_rf.rf_addrw == ((or1200_ctrl.ex_insn & 'h03E00000) >> 21)) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 47) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 57) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 51) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 52) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 53) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 54) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 55) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 48) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFF000000) >> 24 == 21) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 9) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 17) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 0) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 4) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 3) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 8) )) || (or1200_rf.we == 0) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 48)) || (or1200_sprs.spr_dat_o == operand_b));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 2) )) || ((or1200_ctrl.ex_insn & 'h03e00000) >> 21 == or1200_rf.addrw) || (rst == 1));
+// assert property ((~(((or1200_ctrl.ex_insn & 'hC0000000) >> 30 == 3) )) || ((or1200_ctrl.ex_insn & 'h03e00000) >> 21 == or1200_rf.addrw) || (rst == 1));
+// assert property ( ((or1200_ctrl.ex_insn & 'hFC000000) >> 26 != 'h1c) || (rst == 1));
+// assert property ((id_insn == 32'h14410000) || (id_insn == 32'h14610000) || (id_insn == prev_if_insn) || (prev_id_freeze) || (rst == 1) );
+// assert property ((if_insn == 32'h14610000) || (if_insn == 32'h14410000) || (if_insn == icpu_dat_i ) || (if_insn == 0) || (rst == 1) || (if_insn == or1200_if.insn_saved));
+// assert property ((operand_b == dcpu_dat_o) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 32)) || (or1200_rf.rf_dataw == dcpu_dat_o) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 33)) || (or1200_rf.rf_dataw == dcpu_dat_o) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 34)) || (or1200_rf.rf_dataw == dcpu_dat_o) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 35)) || (or1200_rf.rf_dataw == dcpu_dat_o) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 36)) || (or1200_rf.rf_dataw == dcpu_dat_o) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 37)) || (or1200_rf.rf_dataw == dcpu_dat_o) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 38)) || (or1200_rf.rf_dataw == dcpu_dat_o) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 32)) || (dcpu_adr_o == operand_a + ex_simm) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 33)) || (dcpu_adr_o == operand_a + ex_simm) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 34)) || (dcpu_adr_o == operand_a + ex_simm) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 35)) || (dcpu_adr_o == operand_a + ex_simm) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 36)) || (dcpu_adr_o == operand_a + ex_simm) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 37)) || (dcpu_adr_o == operand_a + ex_simm) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 38)) || (dcpu_adr_o == operand_a + ex_simm) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 37)) || ((or1200_lsu.or1200_mem2reg.regdata & 16'hFFFF0000) == 0) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC000000) >> 26 == 53)) || ((or1200_lsu.or1200_reg2mem.memdata & 16'hFFFF) == (or1200_lsu.or1200_reg2mem.regdata & 16'hFFFF)) || (rst == 1));
+// assert property ((or1200_lsu.dcpu_dat_i == or1200_lsu.or1200_mem2reg.memdata) || (rst == 1));
+// assert property ((~((or1200_rf.rf_we == 1) && (or1200_rf.rf_addrw == 0))) || (or1200_rf.rf_dataw == 0) || (rst == 1));
+// assert property ((~((or1200_ctrl.ex_insn & 'hFC0003CF) == 'hE00000C8)) || (((operand_a << (6'd32 - {1'b0, operand_b[4:0]})) | (operand_a >> operand_b[4:0])) == or1200_rf.rf_dataw) || (or1200_rf.rf_dataw == 0) || (rst == 1));
 
 endmodule
