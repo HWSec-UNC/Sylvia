@@ -354,7 +354,7 @@ class ExecutionEngine:
         """Populates child path codes but in a format to keep track of corresponding states that we've seen."""
         for child in manager.child_num_paths:
             manager.seen_mod[child] = {}
-            for i in range(manager.child_num_paths[child]):
+            for i in manager.child_range:
                 manager.seen_mod[child][(to_binary(i))] = {}
 
     def merge_states(self, manager: ExecutionManager, state: SymbolicState, store):
@@ -417,19 +417,18 @@ class ExecutionEngine:
         print(total_paths)
         manager.piece_wise = True
         #TODO: things piecewise, say 10,000 at a time.
-        for i in range(0, total_paths, 100):
-            manager.child_range = range(i*100, i*100+100)
+        for i in range(0, total_paths, 10):
+            manager.child_range = range(i*10, i*10+10)
             self.populate_child_paths(manager)
             if len(modules) > 1:
-                #self.populate_seen_mod(manager)
-                manager.opt_1 = True
+                self.populate_seen_mod(manager)
+                #manager.opt_1 = True
             else:
                 manager.opt_1 = False
             manager.modules = modules_dict
             paths = list(product(*manager.child_path_codes.values()))
             #print(f" Upper bound on num paths {len(paths)}")
             self.init_run(manager, ast)
-
             manager.seen = {}
             for name in manager.names_list:
                 manager.seen[name] = []
