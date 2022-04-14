@@ -185,7 +185,7 @@ class DepthFirst(Search):
                                         s.store[m.curr_module][signal] = new_symbol
 
                                 else:
-                                    if signal in m.dependencies[module] and signal in s.store[m.curr_module]:
+                                    if signal in m.dependencies[module] and signal in s.store[m.curr_module] and m.dependencies[module][signal] in s.store[m.curr_module]:
                                         new_symbol = s.store[m.curr_module][m.dependencies[module][signal]]
                                         s.store[m.curr_module][signal] = str(s.store[m.curr_module][signal]).replace(prev_symbol, new_symbol)
                                     else:
@@ -200,7 +200,7 @@ class DepthFirst(Search):
                                     
                                     parts = s.store[module][lhs].partition("[")
 
-                                    new_symbol = s.store[module][m.dependencies[module][lhs]]
+                                    new_symbol = s.store[module][str(m.dependencies[module][lhs])]
                                     first_part = parts[0].replace(parts[0], new_symbol)
                                     for i in range(1, len(parts)):
                                         new_symbol += parts[i]

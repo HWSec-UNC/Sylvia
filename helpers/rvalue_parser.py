@@ -308,12 +308,7 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
             else:
                 return f"If({s.store[m.curr_module][cond]}, {true_expr}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)} )"
         else:
-            # if len(false_expr) >= 2:
-            #     accumulate = "("
-            #     for sub_item in false_expr:
-            #         accumulate += str(conjunction_with_pointers(sub_item, s, m)) + " "
-            #     accumulate.rstrip()
-            #     accumulate + ")"
+
             #     print(f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {accumulate} )!")
             #     return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {accumulate})"
             # else:
@@ -321,6 +316,16 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
                 new_false_expr = evaluate_binary_op(false_expr[1], false_expr[2], op_map[false_expr[0]], s, m)
                 return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {new_false_expr})"
             else:
+                accumulate = ""
+                if len(false_expr) >= 2 and false_expr[0] != "Cond":
+                    accumulate = "("
+                    for sub_item in false_expr:
+                        if isinstance(sub_item, tuple) and sub_item[0] in BINARY_OPS:
+                            accumulate += "(" + evaluate_binary_op(sub_item[1], sub_item[2], op_map[sub_item[0]], s, m) + ")"
+                        else:
+                            accumulate += str(conjunction_with_pointers(sub_item, s, m)) + " "
+                    accumulate.rstrip()
+                    accumulate += ")"
                 new_cond = None
                 if cond[0] in BINARY_OPS:
                     new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
@@ -329,7 +334,10 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
                         parts = str(true_expr).partition("[")
                         first_part = parts[0]
                         s.store[m.curr_module][str(true_expr)] = s.store[m.curr_module][first_part]
-                    return f"If({new_cond}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)})"
+                    if accumulate != "":
+                        return f"If({new_cond}, {s.store[m.curr_module][true_expr]}, {accumulate})"
+                    else:
+                        return f"If({new_cond}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)})"
                 else:
                     return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)})"
 
