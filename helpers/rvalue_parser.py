@@ -325,7 +325,6 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
                 if cond[0] in BINARY_OPS:
                     new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
                 if not new_cond is None:
-                    print(s.store[m.curr_module])
                     if not true_expr in s.store[m.curr_module] and "[" in true_expr:
                         parts = str(true_expr).partition("[")
                         first_part = parts[0]
