@@ -310,7 +310,7 @@ class ExecutionEngine:
                     self.module_count(m, item.instances)
                 elif isinstance(item, Instance):
                     if item.module in m.instance_count:
-                        #m.instance_count[item.module] += 1
+                        m.instance_count[item.module] += 1
                         ...
                     else:
                         m.instance_count[item.module] = 1
@@ -356,8 +356,12 @@ class ExecutionEngine:
         """Populates child path codes but in a format to keep track of corresponding states that we've seen."""
         for child in manager.child_num_paths:
             manager.seen_mod[child] = {}
-            for i in manager.child_range:
-                manager.seen_mod[child][(to_binary(i))] = {}
+            if manager.piece_wise:
+                for i in manager.child_range:
+                    manager.seen_mod[child][(to_binary(i))] = {}
+            else:
+                for i in range(manager.child_num_paths[child]):
+                    manager.seen_mod[child][(to_binary(i))] = {}
 
     def merge_states(self, manager: ExecutionManager, state: SymbolicState, store):
         """Merges two states."""
