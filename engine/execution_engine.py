@@ -421,7 +421,7 @@ class ExecutionEngine:
             manager.child_range = range(i*100, i*100+100)
             self.populate_child_paths(manager)
             if len(modules) > 1:
-                self.populate_seen_mod(manager)
+                #self.populate_seen_mod(manager)
                 manager.opt_1 = True
             else:
                 manager.opt_1 = False
