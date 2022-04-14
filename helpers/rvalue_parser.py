@@ -443,7 +443,12 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                 elif isinstance(rvalue, str):
                     if "'h" in rvalue or "'b" in rvalue or "'d" in rvalue:
                        return int(rvalue.split("'")[1][1:])
-                    return s.store[m.curr_module][rvalue.replace("'", "")]
+                    else:
+                        if not str(rvalue) in s.store[m.curr_module] and "[" in str(rvalue):
+                            parts = str(rvalue).partition("[")
+                            first_part = parts[0]
+                            s.store[m.curr_module][str(rvalue)] = s.store[m.curr_module][first_part]
+                    return s.store[m.curr_module][str(rvalue)]
                 else:
                     if not str(rvalue) in s.store[m.curr_module] and "[" in str(rvalue):
                         parts = str(rvalue).partition("[")
