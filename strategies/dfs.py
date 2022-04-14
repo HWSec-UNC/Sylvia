@@ -10,7 +10,7 @@ from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, Strin
 from pyverilog.vparser.ast import Repeat 
 from helpers.utils import init_symbol
 from typing import Optional
-from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int, str_to_bool, simpl_str_exp
+from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int, str_to_bool, simpl_str_exp, conjunction_with_pointers
 from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc, parse_concat_to_Z3
 from helpers.utils import to_binary
 import os
@@ -168,11 +168,19 @@ class DepthFirst(Search):
                                     parts = s.store[m.curr_module][signal].partition("[")
 
                                     new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
-                                    first_part = parts[0].replace(parts[0], new_symbol)
-                                    for i in range(1, len(parts)):
-                                        new_symbol += parts[i]
+                                    if isinstance(new_symbol, dict):
+                                        first_parts = {}
+                                        for sig_name in new_symbol:
+                                            first_parts[sig_name] = parts[0].replace(parts[0], new_symbol[sig_name])
+                                            for i in range(1, len(parts)):
+                                                new_symbol[sig_name] += parts[i]
+                                            s.store[m.curr_module][sig_name] = new_symbol[sig_name]
+                                    else:
+                                        first_part = parts[0].replace(parts[0], new_symbol)
+                                        for i in range(1, len(parts)):
+                                            new_symbol += parts[i]
 
-                                    s.store[m.curr_module][signal] = new_symbol
+                                        s.store[m.curr_module][signal] = new_symbol
 
                                 else:
                                     if signal in m.dependencies[module]:
@@ -271,7 +279,17 @@ class DepthFirst(Search):
 
                         opts[new_cond] = opts.pop(str(stmt.right.var.cond))
                     s.store[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"] = new_r_value
-
+                elif isinstance(stmt.left.var, Partselect):
+                    m.dependencies[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
+                    opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
+                    m.cond_assigns[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = opts
+                    # complexity is how many nested conditonals we have on the rhs
+                    complexity = count_nested_cond(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
+                    new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
+                    if str(stmt.right.var.cond) in opts:
+                        new_cond = new_r_value[3:].split(",")[0][:-1]
+                        opts[new_cond] = opts.pop(str(stmt.right.var.cond))
+                    s.store[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = new_r_value
                 else:
                     m.dependencies[m.curr_module][stmt.left.var.name] = resolve_dependency(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m)
                     opts = cond_options(stmt.right.var.cond, stmt.right.var.true_value, stmt.right.var.false_value, s, m, {})
@@ -281,7 +299,6 @@ class DepthFirst(Search):
                     new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                     if str(stmt.right.var.cond) in opts:
                         new_cond = new_r_value[3:].split(",")[0][:-1]
-
                         opts[new_cond] = opts.pop(str(stmt.right.var.cond))
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
             elif isinstance(stmt.right.var, Pointer):

@@ -5,7 +5,7 @@ rvalue not handled by this."""
 
 import sys
 from pyverilog.vparser.ast import Rvalue, Eq, Cond, Pointer, UnaryOperator, Operator, IdentifierScope, Identifier, StringConst, Partselect, Repeat
-from pyverilog.vparser.ast import Concat
+from pyverilog.vparser.ast import Concat, IntConst
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from z3 import If, BitVec, IntVal, Int2BV, BitVecVal
@@ -31,8 +31,11 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
         else: 
             return f"({operator} {conjunction_with_pointers(rvalue.right, s, m)})"
     elif isinstance(rvalue, Repeat):
-        times = evaluate(parse_tokens(tokenize(conjunction_with_pointers(rvalue.times, s, m), s, m)), s, m)
-        times_int = int(str_to_int(times, s, m))
+        if isinstance(rvalue.times, IntConst):
+            times_int = int(rvalue.times.value)
+        else:
+            times = evaluate(parse_tokens(tokenize(conjunction_with_pointers(rvalue.times, s, m), s, m)), s, m)
+            times_int = int(str_to_int(times, s, m))
         accumulate = "("
         val = conjunction_with_pointers(rvalue.value, s, m) 
         for i in range(times_int):
@@ -41,12 +44,22 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
         accumulate += ")"
         return accumulate
     elif isinstance(rvalue, Cond):
-        if isinstance(rvalue.false_value, Pointer):
+        if isinstance(rvalue.true_value, Pointer) and isinstance(rvalue.false_value, Pointer):
+            ptr_access_f = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
+            s.store[m.curr_module][ptr_access_f] = s.store[m.curr_module][rvalue.false_value.var.name]
+            ptr_access_t = f"{rvalue.true_value.var}[{rvalue.true_value.ptr}]"
+            s.store[m.curr_module][ptr_access_t] = s.store[m.curr_module][rvalue.true_value.var.name]
+            return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {ptr_access_t} {ptr_access_f})"
+        elif isinstance(rvalue.false_value, Pointer):
             ptr_access = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
             s.store[m.curr_module][ptr_access] = s.store[m.curr_module][rvalue.false_value.var.name]
             return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {rvalue.true_value} {ptr_access})"
+        elif isinstance(rvalue.true_value, Pointer):
+            ptr_access = f"{rvalue.true_value.var}[{rvalue.true_value.ptr}]"
+            s.store[m.curr_module][ptr_access] = s.store[m.curr_module][rvalue.true_value.var.name]
+            return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {ptr_access} {conjunction_with_pointers(rvalue.false_value, s, m)})"
         else:
-            return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {rvalue.true_value} {rvalue.false_value})"
+            return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {conjunction_with_pointers(rvalue.true_value, s, m)} {conjunction_with_pointers(rvalue.false_value, s, m)})"
     elif isinstance(rvalue, Operator):
         operator = str(rvalue).split(" ")[0][1:]
         if isinstance(rvalue.left, Pointer) and isinstance(rvalue.right, Pointer):
@@ -113,7 +126,6 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
 
 def tokenize(rvalue, s: SymbolicState, m: ExecutionManager):
     """Takes a PyVerilog Rvalue expression and splits it into Tokens."""
-    #print(rvalue)
     rvalue_converted = conjunction_with_pointers(rvalue, s, m)
     str_rvalue = str(rvalue_converted)
     tokens = []
@@ -183,23 +195,22 @@ def evaluate_binary_op(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> s
     """Helper function to resolve binary symbolic expressions."""
     # convert hex strings into ints
     if isinstance(rhs, str) and not rhs.isdigit():
-        print(rhs)
         if "'h" in rhs or "'b" in rhs or "'d" in rhs:
             if "'h" in rhs: 
-                rhs = int(rhs.split("'")[1][1:], 16)
+                rhs = int(rhs.replace("]","").split("'")[1][1:], 16)
             elif "'b" in rhs: 
-                rhs = int(rhs.split("'")[1][1:], 2)
+                rhs = int(rhs.replace("]","").split("'")[1][1:], 2)
             else:
-                rhs = int(rhs.split("'")[1][1:])
+                rhs = int(rhs.replace("]","").split("'")[1][1:])
 
     if isinstance(lhs, str) and not lhs.isdigit():
         if "'h" in lhs or "'b" in lhs or "'d" in lhs:
             if "'h" in lhs:
-                lhs = int(lhs.split("'")[1][1:], 16)
+                lhs = int(lhs.replace("]","").split("'")[1][1:], 16)
             elif "'b" in lhs:
-                lhs = int(lhs.split("'")[1][1:], 2)
+                lhs = int(lhs.replace("]","").split("'")[1][1:], 2)
             else:
-                lhs = int(lhs.split("'")[1][1:])
+                lhs = int(lhs.replace("]","").split("'")[1][1:])
 
     if (isinstance(lhs,tuple) and isinstance(rhs,tuple)):
         return f"{eval_rvalue(lhs, s, m)} {op} {eval_rvalue(rhs, s, m)}"
@@ -226,7 +237,24 @@ def evaluate_binary_op(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> s
 def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: ExecutionManager) -> str:
     """Helper function to resolve conditional symbolic expressions.
     The format is intentionally meant to match z3 to make parsing easier later."""
-    #print("evaluating cond expression")
+    if isinstance(true_expr, str) and not true_expr.isdigit():
+        if "'h" in true_expr or "'b" in true_expr or "'d" in true_expr:
+            if "'h" in true_expr: 
+                true_expr = int(true_expr.split("'")[1][1:], 16)
+            elif "'b" in true_expr: 
+                true_expr = int(true_expr.split("'")[1][1:], 2)
+            else:
+                true_expr = int(true_expr.split("'")[1][1:])
+
+    if isinstance(false_expr, str) and not false_expr.isdigit():
+        if "'h" in false_expr or "'b" in false_expr or "'d" in false_expr:
+            if "'h" in false_expr:
+                false_expr = int(false_expr.split("'")[1][1:], 16)
+            elif "'b" in false_expr:
+                false_expr = int(false_expr.split("'")[1][1:], 2)
+            else:
+                false_expr = int(false_expr.split("'")[1][1:])
+
 
     if (isinstance(true_expr,tuple) and isinstance(false_expr,tuple)):
         if true_expr[0] in op_map and false_expr[0] in op_map:
@@ -265,10 +293,42 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
         else:
             return f"If({s.store[m.curr_module][cond]}, {evaluate_cond_expr(true_expr[0], true_expr[1], true_expr[2], m, s)}, {s.store[m.curr_module][false_expr]})"
     elif (isinstance(false_expr,tuple)):
-        if true_expr.isdigit():
-            return f"If({s.store[m.curr_module][cond]}, {true_expr}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)} )"
+        if str(true_expr).isdigit():
+            if false_expr[0] in op_map:
+                new_false_expr = evaluate_binary_op(false_expr[1], false_expr[2], op_map[false_expr[0]], s, m)
+            else:
+                new_false_expr = None
+            new_cond = None
+            if cond[0] in BINARY_OPS:
+                new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+            if not new_cond is None and not new_false_expr is None:
+                return f"If({new_cond}), {str(true_expr)}, {new_false_expr})"
+            elif not new_false_expr is None:
+                return f"If({s.store[m.curr_module][cond]}), {str(true_expr)}, {new_false_expr})"
+            else:
+                return f"If({s.store[m.curr_module][cond]}, {true_expr}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)} )"
         else:
-            return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[0], false_expr[1], false_expr[2], m, s)} )"
+            # if len(false_expr) >= 2:
+            #     accumulate = "("
+            #     for sub_item in false_expr:
+            #         accumulate += str(conjunction_with_pointers(sub_item, s, m)) + " "
+            #     accumulate.rstrip()
+            #     accumulate + ")"
+            #     print(f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {accumulate} )!")
+            #     return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {accumulate})"
+            # else:
+            if false_expr[0] in op_map:
+                new_false_expr = evaluate_binary_op(false_expr[1], false_expr[2], op_map[false_expr[0]], s, m)
+                return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {new_false_expr})"
+            else:
+                new_cond = None
+                if cond[0] in BINARY_OPS:
+                    new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
+                if not new_cond is None:
+                    return f"If({new_cond}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)})"
+                else:
+                    return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {evaluate_cond_expr(false_expr[1], false_expr[2], false_expr[3], s, m)})"
+
     else:
         if str(true_expr).isdigit() and str(false_expr).isdigit():
             #TODO: this a temporary fix need to exapnd for all cases
@@ -305,7 +365,6 @@ def evaluate_cond_expr(cond, true_expr, false_expr, s: SymbolicState, m: Executi
             else:
                 return f"If({s.store[m.curr_module][cond]}, {s.store[m.curr_module][true_expr]}, {false_expr})"
         else:
-
             if isinstance(cond, tuple) and str(cond[0]) in BINARY_OPS:
                 new_cond = evaluate_binary_op(cond[1], cond[2], op_map[cond[0]], s, m)
                 if not new_cond is None:
@@ -384,12 +443,30 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                 elif isinstance(rvalue, str):
                     if "'h" in rvalue or "'b" in rvalue or "'d" in rvalue:
                        return int(rvalue.split("'")[1][1:])
-                    return s.store[m.curr_module][rvalue]
+                    return s.store[m.curr_module][rvalue.replace("'", "")]
                 else:
                     if not str(rvalue) in s.store[m.curr_module] and "[" in str(rvalue):
                         parts = str(rvalue).partition("[")
                         first_part = parts[0]
                         s.store[m.curr_module][str(rvalue)] = s.store[m.curr_module][first_part]
+                    else:
+                        new = str(rvalue).replace("(","").replace(")","").replace("  ","").replace('"',"").replace(" ", "")
+                        tokens = new.split(",")
+                        symbols = "("
+                        for i  in range(len(tokens)):
+                            if i == len(tokens) -1:
+                                if str(eval_rvalue(tokens[i], s, m)).isdigit():
+                                    symbols += str(eval_rvalue(tokens[i], s, m)) + ", "
+                                else:
+                                    symbols += s.store[m.curr_module][tokens[i].replace("'", "")] 
+                            else:
+                                if str(eval_rvalue(tokens[i], s, m)).isdigit():
+                                    symbols += str(eval_rvalue(tokens[i], s, m)) + ", "
+                                else:
+                                    symbols += s.store[m.curr_module][tokens[i].replace("'", "")] + ", "
+                        symbols.rstrip()
+                        symbols += ")"
+                        return symbols
                     return s.store[m.curr_module][str(rvalue)]
 
         
@@ -481,7 +558,7 @@ def resolve_dependency(cond, true_value, false_value, s: SymbolicState, m: Execu
 def cond_options(cond, true_value, false_value, s: SymbolicState, m: ExecutionManager, res):
     """Returns a mapping from conditionals and their resultant values."""
     if isinstance(false_value, Cond):
-        res[cond.name] = true_value
+        res[str(cond)] = true_value
         return cond_options(false_value, false_value.true_value, false_value.false_value, s, m, res)
     elif isinstance(cond, Operator):
         res[str(cond)] = true_value
