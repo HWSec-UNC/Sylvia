@@ -566,13 +566,13 @@ def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wi
                 op = "lt"
                 flag = 1
             elif tokens[i] == "<=":
-                op = "lte":
+                op = "lte"
                 flag = 1
             elif tokens[i] == ">":
-                op = "gt":
+                op = "gt"
                 flag = 1
             elif tokens[i] == ">=":
-                op = "gte":
+                op = "gte"
                 flag = 1
             elif tokens[i] == "==":
                 op = "eq"
