@@ -636,7 +636,9 @@ class DepthFirst(Search):
                     else:
                         #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
                         print("already seen")
-                        m.merge_states(s, s.store[stmt.module], True, m.curr_module)
+                        print(s.store)
+                        print(m.curr_module)
+                        m.merge_states(s, s.store, True, f"{stmt.module}_{instance_index}")
                         # this loop updates all the signals in the top level module
                         # so that the param connections seem like cont. assigns
                         for port in stmt.instances[0].portlist:

@@ -75,13 +75,13 @@ class ExecutionManager:
                 continue
             else:
                 for key2, var in val.items():
-                    if var in store.values() and (key2 in self.reg_decls or key2 == "clk" or key2 == "rst"):
+                    if var in store.values() and (key2 in self.reg_decls or key2.startswith("clk") or key2.startswith("rst")):
                         prev_symbol = state.store[key][key2]
                         new_symbol = store[key][key2]
                         state.store[key][key2].replace(prev_symbol, new_symbol)
                     else:
                         if flag:
-                            state.store[module_name] = store
+                            state.store[module_name][key2] = store[key][key2]
                         else:
                             state.store[key][key2] = store[key][key2]
 
