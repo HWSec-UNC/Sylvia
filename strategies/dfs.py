@@ -628,7 +628,9 @@ class DepthFirst(Search):
                         s.store[f"{stmt.module}_{instance_index}"][str(port.portname)] = s.store[f"{stmt.module}_{instance_index}"][str(port.argname)]
 
                 if m.opt_1:
-                    if m.seen_mod[stmt.module][m.config[m.curr_module]] == {}:
+                    if m.config[m.curr_module] in m.seen_mod[stmt.module]:
+                        self.execute_child(modules[stmt.module], s, m, f"{stmt.module}_{instance_index}")
+                    elif m.seen_mod[f"{stmt.module}_{instance_index}"][m.config[f"{stmt.module}_{instance_index}"]] == {}:
                         #print("hello")
                         self.execute_child(modules[stmt.module], s, m, f"{stmt.module}_{instance_index}")
                     else:
