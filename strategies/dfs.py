@@ -345,7 +345,7 @@ class DepthFirst(Search):
                         opts[new_cond] = opts.pop(str(stmt.right.var.cond))
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
             elif isinstance(stmt.right.var, Pointer):
-                s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
+                s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr}]"
                 m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
                 m.updates[stmt.left.var.name] = 0
             else:
@@ -396,7 +396,10 @@ class DepthFirst(Search):
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):
-                s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
+                if isinstance(stmt.left.var, Pointer):
+                    s.store[m.curr_module][f"{stmt.left.var.var}[{stmt.left.var.ptr}]"] = s.store[m.curr_module][stmt.right.var.name]
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = s.store[m.curr_module][stmt.right.var.name]
             elif isinstance(stmt.right.var, Concat):
                 # TODO make this a real concat
                 if isinstance(stmt.left.var, Concat):

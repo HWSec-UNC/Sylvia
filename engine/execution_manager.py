@@ -39,7 +39,7 @@ class ExecutionManager:
     names_list = []
     instance_count = {}
     seen_mod = {}
-    opt_1: bool = False
+    opt_1: bool = True
     curr_module: str = ""
     piece_wise: bool = False
     child_range: range = None
