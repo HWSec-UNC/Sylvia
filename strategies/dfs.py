@@ -477,7 +477,7 @@ class DepthFirst(Search):
                 solver_start = time.process_time()
                 self.visit_expr(m, s, stmt.cond)
                 solver_end = time.process_time()
-                m.solver_time += solver_start - solver_end
+                m.solver_time += solver_end - solver_start
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
                     return
@@ -498,7 +498,7 @@ class DepthFirst(Search):
                 solver_start = time.process_time()
                 self.visit_expr(m, s, stmt.cond)
                 solver_end = time.process_time()
-                m.solver_time += solver_start - solver_end
+                m.solver_time += solver_end - solver_start
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
 
@@ -518,7 +518,7 @@ class DepthFirst(Search):
                 solver_start = time.process_time()
                 self.visit_expr(m, s, stmt.cond)
                 solver_start = time.process_time()
-                m.solver_time += solver_start - solver_end
+                m.solver_time += solver_end - solver_start
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
                     return
@@ -543,7 +543,7 @@ class DepthFirst(Search):
                 solver_start = time.process_time()
                 self.visit_expr(m, s, stmt.cond)
                 solver_start = time.process_time()
-                m.solver_time += solver_start - solver_end
+                m.solver_time += solver_end - solver_start
                 while str_to_bool(evaluate(parse_tokens(tokenize(stmt.cond, s, m)), s, m), s, m):
                     self.visit_stmt(m, s, stmt.statement,  modules)
                     s.store[m.curr_module][stmt.pre.left.var.name] = str_to_int(evaluate(parse_tokens(tokenize(stmt.post.right.var, s, m)), s, m), s, m)
@@ -616,7 +616,7 @@ class DepthFirst(Search):
                 else:
                     self.visit_expr(m, s, stmt.cond[0])
                 solver_end = time.process_time()
-                m.solver_time += solver_start - solver_end
+                m.solver_time += solver_end - solver_start
                 if (m.abandon and m.debug):
  
                     print("Abandoning this path!")
@@ -636,7 +636,7 @@ class DepthFirst(Search):
                 else:
                     self.visit_expr(m, s, stmt.cond[0])
                 solver_end = time.process_time()
-                m.solver_time += solver_start - solver_end
+                m.solver_time += solver_end - solver_start
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
 
@@ -851,7 +851,7 @@ class DepthFirst(Search):
                 solver_start = time.process_time()
                 solve_pc(state.pc)
                 solver_end = time.process_time()
-                parent_manager.solver_time += solver_start - solver_end
+                parent_manager.solver_time += solver_end - solver_start
             parent_manager.curr_level = 0
             #state.pc.reset()
         #manager.path_code = to_binary(0)
