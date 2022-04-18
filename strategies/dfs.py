@@ -635,9 +635,6 @@ class DepthFirst(Search):
                         self.execute_child(modules[stmt.module], s, m, f"{stmt.module}_{instance_index}")
                     else:
                         #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
-                        print("already seen")
-                        print(s.store)
-                        print(m.curr_module)
                         m.merge_states(s, s.store, True, f"{stmt.module}_{instance_index}")
                         # this loop updates all the signals in the top level module
                         # so that the param connections seem like cont. assigns
