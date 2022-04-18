@@ -15,6 +15,7 @@ from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc, parse_concat_to_Z3
 from helpers.utils import to_binary
 import os
 import copy
+import time
 
 
 class DepthFirst(Search):
@@ -473,7 +474,10 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
 
+                solver_start = time.process_time()
                 self.visit_expr(m, s, stmt.cond)
+                solver_end = time.process_time()
+                m.solver_time += solver_start - solver_end
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
                     return
@@ -491,7 +495,10 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
                 
+                solver_start = time.process_time()
                 self.visit_expr(m, s, stmt.cond)
+                solver_end = time.process_time()
+                m.solver_time += solver_start - solver_end
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
 
@@ -508,7 +515,10 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
 
+                solver_start = time.process_time()
                 self.visit_expr(m, s, stmt.cond)
+                solver_start = time.process_time()
+                m.solver_time += solver_start - solver_end
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
                     return
@@ -530,8 +540,10 @@ class DepthFirst(Search):
                 #self.visit_stmt(m, s, stmt.pre,  modules)
                 s.store[m.curr_module][str(stmt.pre.left.var.name)] = stmt.pre.right.var.value
                 
+                solver_start = time.process_time()
                 self.visit_expr(m, s, stmt.cond)
-                
+                solver_start = time.process_time()
+                m.solver_time += solver_start - solver_end
                 while str_to_bool(evaluate(parse_tokens(tokenize(stmt.cond, s, m)), s, m), s, m):
                     self.visit_stmt(m, s, stmt.statement,  modules)
                     s.store[m.curr_module][stmt.pre.left.var.name] = str_to_int(evaluate(parse_tokens(tokenize(stmt.post.right.var, s, m)), s, m), s, m)
@@ -598,10 +610,13 @@ class DepthFirst(Search):
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
                 
 
+                solver_start = time.process_time()
                 if stmt.cond is None:
                     self.visit_expr(m, s, stmt.cond)
                 else:
                     self.visit_expr(m, s, stmt.cond[0])
+                solver_end = time.process_time()
+                m.solver_time += solver_start - solver_end
                 if (m.abandon and m.debug):
  
                     print("Abandoning this path!")
@@ -614,10 +629,14 @@ class DepthFirst(Search):
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
 
+
+                solver_start = time.process_time()
                 if stmt.cond is None:
                     self.visit_expr(m, s, stmt.cond)
                 else:
                     self.visit_expr(m, s, stmt.cond[0])
+                solver_end = time.process_time()
+                m.solver_time += solver_start - solver_end
                 if (m.abandon and m.debug):
                     print("Abandoning this path!")
 
@@ -729,6 +748,7 @@ class DepthFirst(Search):
                     #print("Abandoning infeasible path")
                     m.abandon = True
                     m.ignore = True
+                    time.process_time()
                     return
 
         # Handling Assertions
@@ -828,7 +848,10 @@ class DepthFirst(Search):
             if (parent_manager.assertion_violation):
                 print("Assertion violation")
                 parent_manager.assertion_violation = False
+                solver_start = time.process_time()
                 solve_pc(state.pc)
+                solver_end = time.process_time()
+                parent_manager.solver_time += solver_start - solver_end
             parent_manager.curr_level = 0
             #state.pc.reset()
         #manager.path_code = to_binary(0)

@@ -347,13 +347,13 @@ module simple_spi ( // renamed by Julius
 
   assign tirq = ~|tcnt & rfwe;
 
- always @(posedge clk_i) begin
+//always @(posedge clk_i) begin
  
 
- //initial begin
-  assert((cyc_i || ~stb_i) || (rst_i));
- // `assert((cyc_i || ~stb_i) || (rst_i))
-  end
+ initial begin
+  //assert((cyc_i || ~stb_i) || (rst_i));
+ `assert((cyc_i || ~stb_i) || (rst_i))
+end
  
 endmodule
 

@@ -478,7 +478,10 @@ class ExecutionEngine:
                     print("Assertion violation")
                     counterexample = {}
                     symbols_to_values = {}
+                    solver_start = time.process_time()
                     if self.solve_pc(state.pc):
+                        solver_end = time.process_time()
+                        manager.solver_time += solver_start - solver_end
                         solved_model = state.pc.model()
                         decls =  solved_model.decls()
                         for item in decls:
@@ -572,6 +575,7 @@ class ExecutionEngine:
                 self.piece_wise_execute(ast, manager, modules)
                 end = time.process_time()
                 print(f"Elapsed time {end - start}")
+                print(f"Solver time {manager.solver_time}")
                 sys.exit()
             self.populate_child_paths(manager)
             if len(modules) > 1:
@@ -628,7 +632,10 @@ class ExecutionEngine:
                 #manager.assertion_violation = False
                 counterexample = {}
                 symbols_to_values = {}
+                solver_start = time.process_time()
                 if self.solve_pc(state.pc):
+                    solver_end = time.process_time
+                    manager.solver_time += solver_start - solver_end
                     solved_model = state.pc.model()
                     decls =  solved_model.decls()
                     for item in decls:
@@ -688,7 +695,10 @@ class ExecutionEngine:
                 manager.assertion_violation = False
                 counterexample = {}
                 symbols_to_values = {}
+                solver_start = time.process_time()
                 if self.solve_pc(state.pc):
+                    solver_end = time.process_time()
+                    manager.solver_time += solver_start - solver_end
                     solved_model = state.pc.model()
                     decls =  solved_model.decls()
                     for item in decls:
