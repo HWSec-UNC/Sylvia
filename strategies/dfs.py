@@ -6,7 +6,7 @@ from engine.symbolic_state import SymbolicState
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
-from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer, IdentifierScope, Operator
+from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer, IdentifierScope, Operator, ForStatement
 from pyverilog.vparser.ast import Repeat 
 from helpers.utils import init_symbol
 from typing import Optional
@@ -485,8 +485,8 @@ class DepthFirst(Search):
                     m.completed.append(bit_index)
                 self.visit_stmt(m, s, stmt.true_statement,  modules)
             else:
+                m.count_conditionals_2(m, stmt.true_statement)
                 self.branch = False
-
                 for lhs in m.cond_assigns[m.curr_module]:
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
                         m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
@@ -497,6 +497,50 @@ class DepthFirst(Search):
 
                     return
                 self.visit_stmt(m, s, stmt.false_statement,  modules)
+        elif isinstance(stmt, ForStatement):
+            m.curr_level += 1
+            self.cond = True
+            bit_index = len(m.path_code) - m.curr_level
+            if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
+                self.branch = True
+
+                for lhs in m.cond_assigns[m.curr_module]:
+                    if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
+                        m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs][str(stmt.cond)])
+
+                self.visit_expr(m, s, stmt.cond)
+                if (m.abandon and m.debug):
+                    print("Abandoning this path!")
+                    return
+                nested_ifs = m.count_conditionals_2(m, stmt.statement)
+                diff = 32 - bit_index
+                # m.curr_level == (32 - bit_index) this is always true
+                #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
+                s.store[m.curr_module][str(stmt.pre.left.var.name)] = stmt.pre.right.var.value
+                while str_to_bool(evaluate(parse_tokens(tokenize(stmt.cond, s, m)), s, m), s, m):
+                    self.visit_stmt(m, s, stmt.statement,  modules)
+                    r = evaluate(parse_tokens(tokenize(stmt.post.right.var, s, m)), s, m)
+                    s.store[m.curr_module][stmt.pre.left.var.name] = str_to_int(evaluate(parse_tokens(tokenize(stmt.post.right.var, s, m)), s, m), s, m)
+            else:
+                m.count_conditionals_2(m, stmt.statement)
+                self.branch = False
+                for lhs in m.cond_assigns[m.curr_module]:
+                    if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
+                        m.updates[lhs] = (1, m.cond_assigns[m.curr_module][lhs]["default"])
+                #self.visit_stmt(m, s, stmt.pre,  modules)
+                s.store[m.curr_module][str(stmt.pre.left.var.name)] = stmt.pre.right.var.value
+                
+                self.visit_expr(m, s, stmt.cond)
+                
+                while str_to_bool(evaluate(parse_tokens(tokenize(stmt.cond, s, m)), s, m), s, m):
+                    self.visit_stmt(m, s, stmt.statement,  modules)
+                    s.store[m.curr_module][stmt.pre.left.var.name] = str_to_int(evaluate(parse_tokens(tokenize(stmt.post.right.var, s, m)), s, m), s, m)
+
+                if (m.abandon and m.debug):
+                    print("Abandoning this path!")
+
+                    return
+                self.visit_stmt(m, s, stmt.statement,  modules)
         elif isinstance(stmt, SystemCall):
             m.assertion_violation = True
         elif isinstance(stmt, SingleStatement):

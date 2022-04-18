@@ -562,6 +562,18 @@ def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wi
             #TODO: apply operator using HOF or something
             if tokens[i] == "+" and flag == 0:
                 lhs += int(tokens[i + 1]) % reg_width
+            elif tokens[i] == "<":
+                op = "lt"
+                flag = 1
+            elif tokens[i] == "<=":
+                op = "lte":
+                flag = 1
+            elif tokens[i] == ">":
+                op = "gt":
+                flag = 1
+            elif tokens[i] == ">=":
+                op = "gte":
+                flag = 1
             elif tokens[i] == "==":
                 op = "eq"
                 flag = 1
@@ -571,6 +583,14 @@ def str_to_bool(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wi
                 rhs = int(tokens[i])
         if op == "eq":
             return lhs == rhs
+        elif op == "lt":
+            return lhs < rhs
+        elif op == "lte":
+            return lhs <= rhs
+        elif op == "gt":
+            return lhs > rhs
+        elif op == "gte":
+            return lhs >= rhs
         elif len(tokens) == 1:
             assertions = s.pc.assertions()
             for assertion in assertions:

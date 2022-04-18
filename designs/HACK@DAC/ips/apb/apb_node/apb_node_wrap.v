@@ -24,8 +24,8 @@ module apb_node_wrap (
 	wire [(NB_MASTER * 32) - 1:0] prdata;
 	wire [NB_MASTER - 1:0] pready;
 	wire [NB_MASTER - 1:0] pslverr;
-	generate
-		for (i = 0; i < NB_MASTER; i = i + 1) begin : genblk1
+	initial begin
+		for (i = 0; i < NB_MASTER; i = i + 1) begin
 			assign apb_masters[i].penable = penable[i];
 			assign apb_masters[i].pwrite = pwrite[i];
 			assign apb_masters[i].paddr = paddr[i * 32+:32];
@@ -35,7 +35,7 @@ module apb_node_wrap (
 			assign pready[i] = apb_masters[i].pready;
 			assign pslverr[i] = apb_masters[i].pslverr;
 		end
-	endgenerate
+	end
 	apb_node #(
 		.NB_MASTER(NB_MASTER),
 		.APB_DATA_WIDTH(APB_DATA_WIDTH),

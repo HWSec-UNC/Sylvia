@@ -64,11 +64,12 @@ class ExecutionEngine:
         if hasattr(stmts, '__iter__'):
             for item in stmts:
                 if isinstance(item, CONDITIONALS):
-                    if isinstance(item, IfStatement) or isinstance(item, CaseStatement):
-                        if isinstance(item, IfStatement):
-                            return self.count_conditionals_2(m, item.true_statement) + self.count_conditionals_2(m, item.false_statement)  + 1
-                        if isinstance(items, CaseStatement):
-                            return self.count_conditionals_2(m, items.caselist) + 1
+                    if isinstance(item, IfStatement):
+                        return self.count_conditionals_2(m, item.true_statement) + self.count_conditionals_2(m, item.false_statement)  + 1
+                    elif isinstance(items, CaseStatement):
+                        return self.count_conditionals_2(m, items.caselist) + 1
+                    elif isinstance(items, ForStatement):
+                        return self.count_conditionals_2(m, items.statement) + 1
                 if isinstance(item, Block):
                     return self.count_conditionals_2(m, item.items)
                 elif isinstance(item, Always):
@@ -81,6 +82,8 @@ class ExecutionEngine:
                 self.count_conditionals_2(m, items.false_statement)) + 1
             if isinstance(items, CaseStatement):
                 return self.count_conditionals_2(m, items.caselist) + len(items.caselist)
+            if isinstance(items, ForStatement):
+                return self.count_conditionals_2(m, items.statement) + 1
         return 0
 
     def count_conditionals(self, m: ExecutionManager, items):
@@ -92,15 +95,17 @@ class ExecutionEngine:
         if hasattr(stmts, '__iter__'):
             for item in stmts:
                 if isinstance(item, CONDITIONALS):
-                    if isinstance(item, IfStatement) or isinstance(item, CaseStatement):
-                        if isinstance(item, IfStatement):
+                    if isinstance(item, IfStatement):
+                        m.num_paths *= 2
+                        self.count_conditionals(m, item.true_statement)
+                        self.count_conditionals(m, item.false_statement)
+                    elif isinstance(item, CaseStatement):
+                        for case in item.caselist:
                             m.num_paths *= 2
-                            self.count_conditionals(m, item.true_statement)
-                            self.count_conditionals(m, item.false_statement)
-                        if isinstance(item, CaseStatement):
-                            for case in item.caselist:
-                                m.num_paths *= 2
-                                self.count_conditionals(m, case.statement)
+                            self.count_conditionals(m, case.statement)
+                    elif isinstance(item, ForStatement):
+                        m.num_paths *= 2
+                        self.count_conditionals(m, item.statement) 
                 if isinstance(item, Block):
                     self.count_conditionals(m, item.items)
                 elif isinstance(item, Always):
@@ -118,6 +123,9 @@ class ExecutionEngine:
                 for case in items.caselist:
                     m.num_paths *= 2
                     self.count_conditionals(m, case.statement)
+            if isinstance(items, ForStatement):
+                m.num_paths *= 2
+                self.count_conditionals(m, item.statement) 
 
     def lhs_signals(self, m: ExecutionManager, items):
         """Take stock of which signals are written to in which always blocks for COI analysis."""
@@ -310,7 +318,7 @@ class ExecutionEngine:
                     self.module_count(m, item.instances)
                 elif isinstance(item, Instance):
                     if item.module in m.instance_count:
-                        m.instance_count[item.module] += 1
+                        #m.instance_count[item.module] += 1
                         ...
                     else:
                         m.instance_count[item.module] = 1
@@ -584,7 +592,6 @@ class ExecutionEngine:
             manager.seen[name] = []
         manager.curr_module = manager.names_list[0]
 
-        
         stride_length = len(manager.names_list)
         # for each combinatoin of multicycle paths
         for i in range(len(paths)):
