@@ -243,7 +243,7 @@ class ExecutionEngine:
                             if isinstance(item.true_statement.statements[0], SingleStatement):
                                 if isinstance(item.true_statement.statements[0].statement, SystemCall) and "ASSERTION" in item.true_statement.statements[0].statement.args[0].value:
                                     m.assertions.append(item.cond)
-                                    print("assertion found")
+                                    #print("assertion found")
                             else:     
                                 self.get_assertions(m, item.true_statement)
                             #self.get_assertions(m, item.false_statement)
