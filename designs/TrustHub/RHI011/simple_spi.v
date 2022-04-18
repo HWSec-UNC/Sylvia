@@ -350,10 +350,52 @@ module simple_spi ( // renamed by Julius
 //always @(posedge clk_i) begin
  
 
- initial begin
-  //assert((cyc_i || ~stb_i) || (rst_i));
- `assert((cyc_i || ~stb_i) || (rst_i))
-end
+  initial begin
+      `assert((cyc_i || !stb_i) || (rst_i))
+    end
+ "
+   initial begin
+        if (!cyc_i && !stb_i) begin
+      `assert((((!cyc_i && !stb_i) || (cyc_i && !stb_i) || (cyc_i && stb_i)))|| (rst_i))
+        end
+  end"
+"   initial begin                                                             
+if (cyc_i && !stb_i) begin
+      `assert((((!cyc_i && !stb_i) || (cyc_i && !stb_i) || (cyc_i && stb_i))) || (rst_i))
+    end
+  end"
+"   initial begin
+        if (cyc_i && stb_i) begin
+      `assert((((!cyc_i && !stb_i) || (cyc_i && !stb_i) || (cyc_i && stb_i))) || (rst_i))
+    end
+  end"
+"   initial begin
+        if ((cyc_i && !stb_i) && !ack_o)begin
+      `assert((cyc_i && !stb_i) || (rst_i))
+    end
+  end"
+"   initial begin
+        if ((ack_o) && !stb_i) begin
+      `assert(!ack_o || rst_i)
+    end
+  end"
+"   initial begin
+        if (cyc_i && !stb_i)begin
+      `assert(((adr_i == prev_adr_i) && !ack_o) || ((adr_i != prev_adr_i) && ack_o) || rst_i)
+    end
+  end"
+"   initial begin
+        if (cyc_i && !stb_i)begin
+      `assert(((dat_i == prev_dat_i) && !ack_o) || ((dat_i != dat_adr_i) && ack_o) || rst_i)
+    end
+  end"
+
+"   initial begin
+        if (cyc_i && !stb_i)begin
+      `assert(((we_i == prev_we_i) && !ack_o) || ((we_i != dat_we_i) && ack_o) || rst_i)
+    end
+  end"
+
  
 endmodule
 

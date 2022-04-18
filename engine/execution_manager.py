@@ -39,14 +39,14 @@ class ExecutionManager:
     names_list = []
     instance_count = {}
     seen_mod = {}
-    opt_1: bool = True
+    opt_1: bool = False
     curr_module: str = ""
     piece_wise: bool = False
     child_range: range = None
     always_writes = {}
     curr_always = None
-    opt_2: bool = False
-    opt_3: bool = False
+    opt_2: bool = True
+    opt_3: bool = True
     assertions = []
     blocks_of_interest = []
     init_run_flag: bool = False
