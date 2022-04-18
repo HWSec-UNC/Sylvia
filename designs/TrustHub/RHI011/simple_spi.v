@@ -42,8 +42,8 @@
 `timescale 1ns / 1ps
 `default_nettype none
 `define assert(expression) \
-        if ((expression)) begin \
-            $display( ASSERTION FAILED ); \
+        if (!(expression)) begin \
+            $display("ASSERTION FAILED"); \
             $finish; \
         end   
 // synopsys translate_on
