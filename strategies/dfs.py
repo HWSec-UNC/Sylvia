@@ -13,6 +13,7 @@ from typing import Optional
 from helpers.rvalue_parser import tokenize, parse_tokens, evaluate, resolve_dependency, count_nested_cond, cond_options, str_to_int, str_to_bool, simpl_str_exp, conjunction_with_pointers
 from helpers.rvalue_to_z3 import parse_expr_to_Z3, solve_pc, parse_concat_to_Z3
 from helpers.utils import to_binary
+from itertools import product, permutations
 import os
 import copy
 import time
@@ -135,24 +136,62 @@ class DepthFirst(Search):
                     sub_stmt = stmt.statement
                     m.in_always = True
                     self.visit_stmt(m, s, sub_stmt, modules)
-                    for signal in m.dependencies:
-                        if m.dependencies[m.curr_module][signal] in m.updates:
-                            if m.updates[m.dependencies[m.curr_module][signal]][0] == 1:
-                                prev_symbol = m.updates[m.dependencies[m.curr_module][signal]][1]
-                            
-                                if '[' in s.store[m.curr_module][signal]:
-                                    
-                                    parts = s.store[m.curr_module][signal].partition("[")
+                    for module in m.dependencies:
+                        for signal in m.dependencies[module]:
+                            if m.dependencies[module][signal] in m.updates:
+                                if m.updates[m.dependencies[module][signal]][0] == 1:
+                                    prev_symbol = m.updates[m.dependencies[module][signal]][1]
 
-                                    new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
-                                    first_part = parts[0].replace(parts[0], new_symbol)
-                                    for i in range(1, len(parts)):
-                                        new_symbol += parts[i]
+                                    if m.dependencies[module][signal] in m.cond_assigns[module]:
+                                        m.cond_assigns[m.curr_module][signal] = m.cond_assigns[module][m.dependencies[module][signal]]
 
-                                    s.store[m.curr_module][signal] = new_symbol
-                                else:
-                                    new_symbol = s.store[m.curr_module][m.dependencies[m.curr_module][signal]]
-                                    s.store[m.curr_module][signal] = s.store[m.curr_module][signal].replace(prev_symbol, new_symbol)
+                                    if signal in s.store[m.curr_module] and '[' in str(s.store[m.curr_module][signal]):
+                                        
+                                        parts = s.store[m.curr_module][signal].partition("[")
+
+                                        new_symbol = s.store[m.curr_module][m.dependencies[module][signal]]
+                                        if isinstance(new_symbol, dict):
+                                            first_parts = {}
+                                            for sig_name in new_symbol:
+                                                first_parts[sig_name] = parts[0].replace(parts[0], new_symbol[sig_name])
+                                                for i in range(1, len(parts)):
+                                                    new_symbol[sig_name] += parts[i]
+                                                s.store[m.curr_module][sig_name] = new_symbol[sig_name]
+                                        else:
+                                            first_part = parts[0].replace(parts[0], new_symbol)
+                                            for i in range(1, len(parts)):
+                                                new_symbol += parts[i]
+
+                                            s.store[m.curr_module][signal] = new_symbol
+
+                                    else:
+                                        if signal in m.dependencies[module] and signal in s.store[m.curr_module] and m.dependencies[module][signal] in s.store[m.curr_module]:
+                                            new_symbol = s.store[m.curr_module][m.dependencies[module][signal]]
+                                            s.store[m.curr_module][signal] = str(s.store[m.curr_module][signal]).replace(prev_symbol, new_symbol)
+                                        else:
+                                            # the signal was updated, but something trivial happened like it was just written with a constant
+                                            pass
+                            for lhs in m.cond_assigns[module]:
+                                if lhs in m.dependencies[module] and isinstance(m.updates[lhs], tuple) and m.updates[lhs][0] == 1:
+                                    prev_symbol = str(m.updates[lhs][1])
+                                    if not prev_symbol.isdigit() and prev_symbol in s.store[m.curr_module]: 
+                                        prev_symbol = s.store[m.curr_module][prev_symbol]
+                                    if lhs in s.store[module] and '[' in str(s.store[module][lhs]):
+                                        
+                                        parts = s.store[module][lhs].partition("[")
+
+                                        new_symbol = s.store[module][str(m.dependencies[module][lhs])]
+                                        first_part = parts[0].replace(parts[0], new_symbol)
+                                        for i in range(1, len(parts)):
+                                            new_symbol += parts[i]
+
+                                        s.store[module][lhs] = new_symbol
+                                    else:
+                                        # do a simpl pass?
+                                        if lhs in s.store[module]:
+                                            s.store[module][lhs] = s.store[module][lhs]
+                                    m.updates[lhs] = 0 
+
             else: 
                 sub_stmt = stmt.statement
                 m.in_always = True
@@ -459,8 +498,15 @@ class DepthFirst(Search):
             else:
                 m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, Block):
-            for item in stmt.statements: 
-                self.visit_stmt(m, s, item, modules)
+            if m.opt_2:
+                for item in stmt.statements: 
+                    self.visit_stmt(m, s, item, modules)
+            else:
+                all_orderings = list(permutations(stmt.statements))
+                for ordering in all_orderings:
+                    for item in ordering: 
+                        self.visit_stmt(m, s, item, modules)
+            
         elif isinstance(stmt, Initial):
             self.visit_stmt(m, s, stmt.statement,  modules)
         elif isinstance(stmt, IfStatement):
@@ -811,6 +857,31 @@ class DepthFirst(Search):
                     #print("Abandoning infeasible path")
                     m.abandon = True
                     m.ignore = True
+                    return
+        elif isinstance(expr, Operator):
+            #TODO Fix?
+            new_val = evaluate(parse_tokens(tokenize(expr, s, m)), s, m)
+            x = BitVec(new_val, 1)
+            one = IntVal(1)
+            one_bv = Int2BV(one, 1)
+            if self.branch:
+                s.pc.push()
+                s.pc.add(x==one_bv)
+                if not solve_pc(s.pc):
+                    s.pc.pop()
+                    #print("Abandoning infeasible path")
+                    m.abandon = True
+                    m.ignore = True
+                    return
+            else: 
+                s.pc.push()
+                s.pc.add(x != one_bv)
+                if not solve_pc(s.pc):
+                    s.pc.pop()
+                    #print("Abandoning infeasible path")
+                    m.abandon = True
+                    m.ignore = True
+                    time.process_time()
                     return
         return None
 
