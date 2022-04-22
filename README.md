@@ -1,5 +1,7 @@
 # Sylvia - A Software-Style Symbolic Execution Engine for Verilog
+# The full table of bugs from the paper is below:
 
+![bug_table](bug_table.pdf)
 ## Setup
 
 Requirements
