@@ -80,6 +80,8 @@ def main():
                          default=False, help="Reorder the contineous tree, Default=False")
     optparser.add_option("--delay", action="store_true", dest="delay",
                          default=False, help="Inset Delay Node to walk Regs, Default=False")
+    optparser.add_option("-G", action="make_graph", dest="buildgraph",
+                         default=False, help="Build dependency graph, Default=False")
     (options, args) = optparser.parse_args()
 
 
@@ -105,31 +107,31 @@ def main():
                             preprocess_include=options.include,
                             preprocess_define=options.define)
 
+    if options.buildgraph:
+        analyzer = VerilogDataflowAnalyzer(filelist, options.topmodule,
+                                            noreorder=options.noreorder,
+                                            nobind=options.nobind,
+                                            preprocess_include=options.include,
+                                            preprocess_define=options.define)
+        analyzer.generate()
 
-    analyzer = VerilogDataflowAnalyzer(filelist, options.topmodule,
-                                        noreorder=options.noreorder,
-                                        nobind=options.nobind,
-                                        preprocess_include=options.include,
-                                        preprocess_define=options.define)
-    analyzer.generate()
+        directives = analyzer.get_directives()
+        terms = analyzer.getTerms()
+        binddict = analyzer.getBinddict()
 
-    directives = analyzer.get_directives()
-    terms = analyzer.getTerms()
-    binddict = analyzer.getBinddict()
+        optimizer = VerilogDataflowOptimizer(terms, binddict)
 
-    optimizer = VerilogDataflowOptimizer(terms, binddict)
+        optimizer.resolveConstant()
+        resolved_terms = optimizer.getResolvedTerms()
+        resolved_binddict = optimizer.getResolvedBinddict()
+        constlist = optimizer.getConstlist()
 
-    optimizer.resolveConstant()
-    resolved_terms = optimizer.getResolvedTerms()
-    resolved_binddict = optimizer.getResolvedBinddict()
-    constlist = optimizer.getConstlist()
+        graphgen = VerilogGraphGenerator(options.topmodule, terms, binddict,
+                                        resolved_terms, resolved_binddict, constlist, options.outputfile)
 
-    graphgen = VerilogGraphGenerator(options.topmodule, terms, binddict,
-                                      resolved_terms, resolved_binddict, constlist, options.outputfile)
-
-    for target in options.searchtarget:
-        graphgen.generate(target, walk=options.walk, identical=options.identical,
-                          step=options.step)
+        for target in options.searchtarget:
+            graphgen.generate(target, walk=options.walk, identical=options.identical,
+                            step=options.step)
 
     #graphgen.draw()
 
