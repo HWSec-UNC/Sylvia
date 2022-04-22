@@ -418,7 +418,7 @@ class ExecutionEngine:
         total_paths = sum(manager.child_num_paths.values())
         print(total_paths)
         manager.piece_wise = True
-        #TODO: things piecewise, say 10,000 at a time.
+        
         for i in range(0, total_paths, 10):
             manager.child_range = range(i*10, i*10+10)
             self.populate_child_paths(manager)
@@ -501,7 +501,6 @@ class ExecutionEngine:
 
     def multicycle_helper(self, ast: ModuleDef, modules_dict, paths,  s: SymbolicState, manager: ExecutionManager, num_cycles: int) -> None:
         """Recursive Helper to resolve multi cycle execution."""
-        #TODO: Add in the merging state element to this helper function
         for a in range(num_cycles):
             for i in range(len(paths)):
                 for j in range(len(paths[i])):

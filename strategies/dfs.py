@@ -72,7 +72,7 @@ class DepthFirst(Search):
                             parsed_cond = evaluate(parse_tokens(tokenize(m.cond_assigns[module][signal][cond], s, m)), s, m)
                             int_cond = None
                             if parsed_cond.split(" ")[0].isdigit():
-                                #TODO: get correct width here
+                                 : get correct width here
                                 int_cond = str_to_int(parsed_cond, s, m, 32)
                             if not int_cond is None:
                                 s.store[module][str(signal)] = int_cond
@@ -327,7 +327,7 @@ class DepthFirst(Search):
                     prev_symbol = s.store[m.curr_module][f"{stmt.left.var.var.name}"]
             else:
                 if isinstance(stmt.left.var, Concat):
-                    #TODO: loop over all prev symbols
+                     : loop over all prev symbols
                     prev_symbol = s.store[m.curr_module][str(stmt.left.var.list[0])]
                 else:
                     prev_symbol = s.store[m.curr_module][stmt.left.var.name]
@@ -345,7 +345,7 @@ class DepthFirst(Search):
             reg_width = 0
             if isinstance(stmt.left.var, Identifier):
                 if stmt.left.var.name in m.reg_decls:
-                    #TODO: This is bad
+                     : This is bad
                     if stmt.left.var.name in m.reg_widths:
                         reg_width = m.reg_widths[stmt.left.var.name]
                     else:
@@ -527,7 +527,7 @@ class DepthFirst(Search):
                         #print("hello")
                         self.execute_child(modules[stmt.module], s, m, f"{stmt.module}_{instance_index}")
                     else:
-                        #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
+                         : Instead of another self.execute, we can just go and grab that state and bring it over int our own
                         print("already seen")
                         m.merge_states(s, s.store[stmt.module], True, m.curr_module)
                         # this loop updates all the signals in the top level module
@@ -659,7 +659,7 @@ class DepthFirst(Search):
                     x = Int2BV(IntVal(int(symbol)), 1)
             elif isinstance(symbol, dict):
                 bit_vec_list = parse_concat_to_Z3(symbol, s, m)
-                #TODO: get the right widths
+                 : get the right widths
                 x = BitVec(Concat(bit_vec_list), 1)
             else:
                 x = BitVec(s.store[m.curr_module][expr.name], 1)
@@ -722,7 +722,7 @@ class DepthFirst(Search):
             symbol = s.store[m.curr_module][str(m.curr_case)]
             if isinstance(symbol, dict):
                 bit_vec_list = parse_concat_to_Z3(symbol, s, m)
-                #TODO: get the right widths
+                 : get the right widths
                 if len(bit_vec_list) == 2:
                     x = Concat(BitVec(str(bit_vec_list[0]), width // 2), BitVec(str(bit_vec_list[1]), width //2))
                 else:

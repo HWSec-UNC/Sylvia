@@ -135,7 +135,7 @@ def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
 
         # if lhs and rhs are just simple bit vecs
         if isinstance(rhs, BitVecRef) and isinstance(lhs, BitVecRef):
-            #TODO fix this right now im not doing anything
+
             #s.pc.add(rhs)
             return s
         elif isinstance(rhs, BitVecRef):
@@ -150,7 +150,7 @@ def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
                 return s.pc.add(rhs.pc.assertions())
 
             return s
-            #TODO:FIX!
+   
             #return s.pc.add(lhs.pc.assertions() and rhs.pc.assertions())
     return s
 

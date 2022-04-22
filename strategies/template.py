@@ -38,10 +38,10 @@ class Search:
 
         for item in module.items:
             if isinstance(item, Value):
-                #TODO: Visit expression?
+                 : Visit expression?
                 pass
             else:
-                #TODO: Visit statement?
+                 : Visit statement?
                 pass
         
 
@@ -50,7 +50,7 @@ class Search:
         """Traverse the statements within a module."""
         if isinstance(stmt, Decl):
             for item in stmt.list:
-                #TODO
+                 
                 pass
         elif isinstance(stmt, Parameter):
             if isinstance(stmt.value.var, IntConst):
@@ -61,7 +61,7 @@ class Search:
                 s.store[m.curr_module][stmt.name] = init_symbol()
         elif isinstance(stmt, Always):
             sens_list = stmt.sens_list
-            #TODO
+             
             pass
         elif isinstance(stmt, Assign):
             if isinstance(stmt.right.var, IntConst):
@@ -131,10 +131,10 @@ class Search:
             m.updates[stmt.left.var.name] = (1, prev_symbol)
         elif isinstance(stmt, Block):
             for item in stmt.statements: 
-                #TODO: Visit each statement in the Block Statement
+                 : Visit each statement in the Block Statement
                 pass
         elif isinstance(stmt, Initial):
-            #TODO: Visit each statement in the Initial block
+             : Visit each statement in the Initial block
             pass
         elif isinstance(stmt, IfStatement):
             m.curr_level += 1
@@ -143,7 +143,7 @@ class Search:
             if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
                 self.branch = True
 
-                #TODO: May want to visit the expression. Access it using stmt.cond self
+                 : May want to visit the expression. Access it using stmt.cond self
                 if (m.abandon):
 
                     return
@@ -154,15 +154,15 @@ class Search:
                 if m.seen_all_cases(m, bit_index, nested_ifs):
                      m.completed.append(bit_index)
                 
-                #TODO: Visit the then block?
+                 : Visit the then block?
             else:
                 self.branch = False
-                #TODO: May want to visit the expression. Access it using stmt.cond self
+                 : May want to visit the expression. Access it using stmt.cond self
                 if (m.abandon):
                     #print("Abandoning this path!")
 
                     return
-                #TODO: Visit the else block?
+                 : Visit the else block?
         elif isinstance(stmt, SystemCall):
             m.assertion_violation = True
         elif isinstance(stmt, SingleStatement):
@@ -183,7 +183,7 @@ class Search:
                         # TODO: Visit child module. See helper execute_child in DFS strategy.
                         pass
                     else:
-                        #TODO: Instead of another self.execute, we can just go and grab that state and bring it over int our own
+                         : Instead of another self.execute, we can just go and grab that state and bring it over int our own
                         #print("ho")
                         m.merge_states(m, s, m.seen_mod[stmt.module][m.config[stmt.module]])
                         # this loop updates all the signals in the top level module
@@ -213,7 +213,7 @@ class Search:
                     return
                 # m.curr_level == (32 - bit_index) this is always true
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
-                #TODO: Visit case list? 
+                 : Visit case list? 
             else:
                 self.branch = False
                 # TODO: May want to visit the case expr. Can access using stmt.comp
@@ -221,7 +221,7 @@ class Search:
                     #print("Abandoning this path!")
 
                     return
-                #TODO: Visit case list? 
+                 : Visit case list? 
 
 
     @abstractmethod
