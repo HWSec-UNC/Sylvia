@@ -352,7 +352,11 @@ class DepthFirst(Search):
                         opts[new_cond] = opts.pop(str(stmt.right.var.cond))
                     s.store[m.curr_module][stmt.left.var.name] = new_r_value
             elif isinstance(stmt.right.var, Pointer):
-                s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr}]"
+                expr_in_brackets = evaluate(parse_tokens(tokenize(stmt.right.var.ptr, s, m)), s, m)
+                if not expr_in_brackets is None:
+                    s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[ {expr_in_brackets} ]"
+                else:
+                    s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr}]"
                 m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
                 m.updates[stmt.left.var.name] = 0
             else:
@@ -446,10 +450,17 @@ class DepthFirst(Search):
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
             elif isinstance(stmt.right.var, Pointer):
+                expr_in_brackets = evaluate(parse_tokens(tokenize(stmt.right.var.ptr, s, m)), s, m)
                 if isinstance(stmt.left.var, Pointer):
-                    s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
+                    if not expr_in_brackets is None:
+                        s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[ {expr_in_brackets} ]"
+                    else:
+                        s.store[m.curr_module][stmt.left.var.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
                 else:
-                    s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
+                    if not expr_in_brackets is None:
+                        s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[ {expr_in_brackets} ]"
+                    else: 
+                         s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.ptr.value}]"
             else:
                 new_r_value = evaluate(parse_tokens(tokenize(stmt.right.var, s, m)), s, m)
                 if new_r_value != None:

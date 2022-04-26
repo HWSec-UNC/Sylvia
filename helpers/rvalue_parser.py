@@ -45,17 +45,33 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
         return accumulate
     elif isinstance(rvalue, Cond):
         if isinstance(rvalue.true_value, Pointer) and isinstance(rvalue.false_value, Pointer):
-            ptr_access_f = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
+            if isinstance(rvalue.false_value.ptr, Operator):
+                inside_brackets = conjunction_with_pointers(rvalue.false_value.ptr, s, m)
+                ptr_access_f = f"{rvalue.false_value.var}[{inside_brackets}]"
+            else:
+                ptr_access_f = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
             s.store[m.curr_module][ptr_access_f] = s.store[m.curr_module][rvalue.false_value.var.name]
-            ptr_access_t = f"{rvalue.true_value.var}[{rvalue.true_value.ptr}]"
+            if isinstance(rvalue.true_value.ptr, Operator):
+                inside_brackets = conjunction_with_pointers(rvalue.true_value.ptr, s, m)
+                ptr_access_t = f"{rvalue.true_value.var}[{inside_brackets}]"
+            else:
+                ptr_access_t = f"{rvalue.true_value.var}[{rvalue.true_value.ptr}]"
             s.store[m.curr_module][ptr_access_t] = s.store[m.curr_module][rvalue.true_value.var.name]
             return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {ptr_access_t} {ptr_access_f})"
         elif isinstance(rvalue.false_value, Pointer):
-            ptr_access = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
+            if isinstance(rvalue.false_value.ptr, Operator):
+                inside_brackets = conjunction_with_pointers(rvalue.false_value.ptr, s, m)
+                ptr_access = f"{rvalue.false_value.var}[{inside_brackets}]"
+            else:
+                ptr_access = f"{rvalue.false_value.var}[{rvalue.false_value.ptr}]"
             s.store[m.curr_module][ptr_access] = s.store[m.curr_module][rvalue.false_value.var.name]
             return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {rvalue.true_value} {ptr_access})"
         elif isinstance(rvalue.true_value, Pointer):
-            ptr_access = f"{rvalue.true_value.var}[{rvalue.true_value.ptr}]"
+            if isinstance(rvalue.true_value.ptr, Operator):
+                inside_brackets = conjunction_with_pointers(rvalue.true_value.ptr, s, m)
+                ptr_access = f"{rvalue.true_value.var}[{inside_brackets}]"
+            else:
+                ptr_access = f"{rvalue.true_value.var}[{rvalue.true_value.ptr}]"
             s.store[m.curr_module][ptr_access] = s.store[m.curr_module][rvalue.true_value.var.name]
             return f"(Cond {conjunction_with_pointers(rvalue.cond, s, m)} {ptr_access} {conjunction_with_pointers(rvalue.false_value, s, m)})"
         else:
@@ -64,31 +80,35 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
         operator = str(rvalue).split(" ")[0][1:]
         if isinstance(rvalue.left, Pointer) and isinstance(rvalue.right, Pointer):
             new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
-            s.store[m.curr_module][new_left] = s.store[m.curr_module][rvalue.left.var.name]
             new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
-            s.store[m.curr_module][new_right] = s.store[m.curr_module][rvalue.right.var.name]
             if isinstance(rvalue.left.ptr, Operator):
                 expr_in_brackets = conjunction_with_pointers(rvalue.left.ptr, s, m)
                 new_left = f"{rvalue.left.var}[ {expr_in_brackets} ]"
             if isinstance(rvalue.right.ptr, Operator):
                 expr_in_brackets = conjunction_with_pointers(rvalue.right.ptr, s, m)
                 new_right = f"{rvalue.right.var}[ {expr_in_brackets} ]"
+            s.store[m.curr_module][new_right] = s.store[m.curr_module][rvalue.right.var.name]
+            s.store[m.curr_module][new_left] = s.store[m.curr_module][rvalue.left.var.name]
             return f"({operator} {new_left} {new_right})"
         elif isinstance(rvalue.left, Pointer):
             new_left = f"{rvalue.left.var}[{rvalue.left.ptr}]"
-            s.store[m.curr_module][new_left] = s.store[m.curr_module][rvalue.left.var.name]
             # make a new value in store for the pointer
+            new_left_s = None
             if isinstance(rvalue.left.ptr, Operator):
                 expr_in_brackets = conjunction_with_pointers(rvalue.left.ptr, s, m)
-                new_left = f"{rvalue.left.var}[ {expr_in_brackets} ]"
+                new_left_s = f"{rvalue.left.var}[ {evaluate(parse_tokens(tokenize(expr_in_brackets, s, m)), s, m)} ]"
+                new_left = f"{rvalue.left.var}[ {(expr_in_brackets)} ]"
+            if not new_left_s is None:
+                s.store[m.curr_module][new_left_s] = s.store[m.curr_module][rvalue.left.var.name]
+            else:
+                s.store[m.curr_module][new_left] = s.store[m.curr_module][rvalue.left.var.name]
             return f"({operator} {new_left} {conjunction_with_pointers(rvalue.right, s, m)})"
         elif isinstance(rvalue.right, Pointer):
             new_right = f"{rvalue.right.var}[{rvalue.right.ptr}]"
-            s.store[m.curr_module][new_right] = s.store[m.curr_module][rvalue.right.var.name]
             if isinstance(rvalue.right.ptr, Operator):
                 expr_in_brackets = conjunction_with_pointers(rvalue.right.ptr, s, m)
                 new_right = f"{rvalue.right.var}[ {expr_in_brackets} ]"
-            # make a new value in the store for the pointer
+            s.store[m.curr_module][new_right] = s.store[m.curr_module][rvalue.right.var.name]
             return f"({operator} {conjunction_with_pointers(rvalue.left, s, m)} {new_right})"
         elif isinstance(rvalue.right, Partselect) and isinstance(rvalue.left, Partselect):
             new_right = f"{rvalue.right.var.name}[{rvalue.right.msb}:{rvalue.right.lsb}]"
@@ -112,6 +132,9 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
         else: 
             return f"({operator} {conjunction_with_pointers(rvalue.left, s, m)} {conjunction_with_pointers(rvalue.right, s, m)})" 
     elif isinstance(rvalue, Pointer):
+        if isinstance(rvalue.ptr, Operator):
+            expr_in_brackets = conjunction_with_pointers(rvalue.left.ptr, s, m)
+            return f"{rvalue.var}[ {expr_in_brackets} ]"
         return f"{rvalue.var}[{rvalue.ptr}]"
     elif isinstance(rvalue, Concat):
         accumulate = "("
