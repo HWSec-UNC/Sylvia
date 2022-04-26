@@ -93,11 +93,7 @@ def conjunction_with_pointers(rvalue, s: SymbolicState, m: ExecutionManager) -> 
     elif isinstance(rvalue, Concat):
         accumulate = "("
         for sub_item in rvalue.list:
-<<<<<<< HEAD
-            accumulate += str(conjunction_with_pointers(sub_item, s, m)) + " "
-=======
             accumulate += conjunction_with_pointers(sub_item, s, m) + " "
->>>>>>> a675cfd... some fixes to concatenations of multiple signals on rhs of assignments
         accumulate.rstrip()
         return accumulate + ")"
     else:
@@ -342,18 +338,8 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
                 results.append(eval_rvalue(token, s, m))
             return results
         else:
-<<<<<<< HEAD
-            if isinstance(rvalue, tuple) and len(rvalue) > 2:
-                results = []
-                for elt in rvalue:
-                    results.append(eval_rvalue(elt, s, m))
-                return results
-            else:
-                return s.store[m.curr_module][str(rvalue)]
-=======
             print(s.store)
             return s.store[m.curr_module][str(rvalue)]
->>>>>>> a675cfd... some fixes to concatenations of multiple signals on rhs of assignments
 
         
 
