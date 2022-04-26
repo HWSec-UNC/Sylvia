@@ -108,7 +108,6 @@ class DepthFirst(Search):
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
         "Traverse the statements in a hardware design"
-        print(type(stmt))
         if m.ignore:
             return
         if isinstance(stmt, Decl):
@@ -121,6 +120,7 @@ class DepthFirst(Search):
                 # ref_width = int(item.width.msb.value) + 1
                 #  dont want to actually call z3 here, just when looking at PC
                 # x = BitVec(ref_name, ref_width)
+            
         elif isinstance(stmt, Parameter):
             if isinstance(stmt.value.var, IntConst):
                 s.store[m.curr_module][stmt.name] = stmt.value.var
@@ -709,7 +709,6 @@ class DepthFirst(Search):
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         """Traverse the expressions in a hardware design."""
-        print(type(expr))
         if isinstance(expr, Reg):
             if not expr.name in m.reg_writes:
                 if m.cycle == 0: 
@@ -732,6 +731,7 @@ class DepthFirst(Search):
         elif isinstance(expr, Wire):
             if m.cycle == 0:
                 s.store[m.curr_module][expr.name] = init_symbol()
+            return 
         elif isinstance(expr, Eq):
             # assume left is identifier
             #parse_expr_to_Z3(expr, s, m)
@@ -898,7 +898,11 @@ class DepthFirst(Search):
                     m.ignore = True
                     time.process_time()
                     return
-        return None
+        elif isinstance(expr, Decl):
+            #print("here")
+            ...
+        else:   
+            return None
 
     def execute_child(self, ast: ModuleDef, state: SymbolicState, parent_manager: Optional[ExecutionManager], instance) -> None:
         """Drives symbolic execution of child modules."""
