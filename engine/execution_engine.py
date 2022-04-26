@@ -318,7 +318,7 @@ class ExecutionEngine:
                     self.module_count(m, item.instances)
                 elif isinstance(item, Instance):
                     if item.module in m.instance_count:
-                        #m.instance_count[item.module] += 1
+                        m.instance_count[item.module] += 1
                         ...
                     else:
                         m.instance_count[item.module] = 1
