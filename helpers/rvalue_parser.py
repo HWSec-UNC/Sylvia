@@ -325,11 +325,8 @@ def eval_rvalue(rvalue, s: SymbolicState, m: ExecutionManager) -> str:
             
             return result
         elif str(rvalue).startswith("(("):
-<<<<<<< HEAD
-=======
             print("concat object")
             result = {}
->>>>>>> a675cfd... some fixes to concatenations of multiple signals on rhs of assignments
             tokens = []
             for elt in rvalue:
                 tokens.append(elt)
