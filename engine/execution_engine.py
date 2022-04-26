@@ -125,7 +125,7 @@ class ExecutionEngine:
                     self.count_conditionals(m, case.statement)
             if isinstance(items, ForStatement):
                 m.num_paths *= 2
-                self.count_conditionals(m, item.statement) 
+                self.count_conditionals(m, items.statement) 
 
     def lhs_signals(self, m: ExecutionManager, items):
         """Take stock of which signals are written to in which always blocks for COI analysis."""
