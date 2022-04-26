@@ -518,7 +518,11 @@ def str_to_int(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wid
             if tokens[i] == "+":
                 result += int(tokens[i + 1]) % reg_width
             if tokens[i] == "-":
-                result -= int(tokens[i + 1]) & reg_width
+                result -= int(tokens[i + 1]) % reg_width
+            if tokens[i] == "/":
+                result /= int(tokens[i + 1]) % reg_width
+            if tokens[i] == "*": 
+                result *= int(tokens[i + 1]) % reg_width
         return result % reg_width
     except Exception:
         return None
