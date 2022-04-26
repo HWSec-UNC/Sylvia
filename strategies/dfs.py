@@ -108,6 +108,7 @@ class DepthFirst(Search):
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
         "Traverse the statements in a hardware design"
+        print(type(stmt))
         if m.ignore:
             return
         if isinstance(stmt, Decl):
@@ -283,8 +284,14 @@ class DepthFirst(Search):
                     m.updates[stmt.left.var.var.name] = 0
                 else:
                     new_msb = evaluate(parse_tokens(tokenize(stmt.right.var.msb, s, m)), s, m)
-                    if not new_msb is None:
+                    new_lsb = evaluate(parse_tokens(tokenize(stmt.right.var.lsb, s, m)), s, m)
+                    #TODO : cases
+                    if not new_msb is None and not new_lsb is None:
+                        s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{new_msb}:{new_lsb}]"
+                    elif not new_msb is None:
                         s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{new_msb}:{stmt.right.var.lsb}]"
+                    elif not new_lsb is None: 
+                        s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{new_lsb}]"
                     else:
                         s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
                     m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name
@@ -554,6 +561,7 @@ class DepthFirst(Search):
                     return
                 self.visit_stmt(m, s, stmt.false_statement,  modules)
         elif isinstance(stmt, ForStatement):
+            print("FOR")
             m.curr_level += 1
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
@@ -577,6 +585,7 @@ class DepthFirst(Search):
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
                 s.store[m.curr_module][str(stmt.pre.left.var.name)] = stmt.pre.right.var.value
                 while str_to_bool(evaluate(parse_tokens(tokenize(stmt.cond, s, m)), s, m), s, m):
+                    print("bey")
                     self.visit_stmt(m, s, stmt.statement,  modules)
                     r = evaluate(parse_tokens(tokenize(stmt.post.right.var, s, m)), s, m)
                     s.store[m.curr_module][stmt.pre.left.var.name] = str_to_int(evaluate(parse_tokens(tokenize(stmt.post.right.var, s, m)), s, m), s, m)
@@ -595,6 +604,7 @@ class DepthFirst(Search):
                 m.solver_time += solver_end - solver_start
                 while str_to_bool(evaluate(parse_tokens(tokenize(stmt.cond, s, m)), s, m), s, m):
                     self.visit_stmt(m, s, stmt.statement,  modules)
+                    print("hi")
                     s.store[m.curr_module][stmt.pre.left.var.name] = str_to_int(evaluate(parse_tokens(tokenize(stmt.post.right.var, s, m)), s, m), s, m)
 
                 if (m.abandon and m.debug):
@@ -699,6 +709,7 @@ class DepthFirst(Search):
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         """Traverse the expressions in a hardware design."""
+        print(type(expr))
         if isinstance(expr, Reg):
             if not expr.name in m.reg_writes:
                 if m.cycle == 0: 
