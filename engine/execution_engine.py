@@ -634,7 +634,7 @@ class ExecutionEngine:
                 symbols_to_values = {}
                 solver_start = time.process_time()
                 if self.solve_pc(state.pc):
-                    solver_end = time.process_time
+                    solver_end = time.process_time()
                     manager.solver_time += solver_end - solver_start
                     solved_model = state.pc.model()
                     decls =  solved_model.decls()
