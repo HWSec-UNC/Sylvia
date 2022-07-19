@@ -7,6 +7,7 @@ from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial, 
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Instance
 from .execution_manager import ExecutionManager
 from .symbolic_state import SymbolicState
+from .cfg import CFG
 import os
 from optparse import OptionParser
 from typing import Optional
@@ -596,6 +597,17 @@ class ExecutionEngine:
             manager.seen[name] = []
         manager.curr_module = manager.names_list[0]
 
+
+        cfg = CFG()
+        print("before CFG")
+        always = cfg.get_always(manager, state, ast.items)
+        if not always is None:
+            cfg.basic_blocks(manager,state, always, [])
+        print(cfg.basic_block_list)
+        cfg.build_cfg(manager, state)
+        print("after CFG")
+
+
         stride_length = len(manager.names_list)
         # for each combinatoin of multicycle paths
         for i in range(len(paths)):
@@ -634,7 +646,7 @@ class ExecutionEngine:
                 symbols_to_values = {}
                 solver_start = time.process_time()
                 if self.solve_pc(state.pc):
-                    solver_end = time.process_time
+                    solver_end = time.process_time()
                     manager.solver_time += solver_end - solver_start
                     solved_model = state.pc.model()
                     decls =  solved_model.decls()
