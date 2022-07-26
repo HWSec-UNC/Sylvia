@@ -616,7 +616,9 @@ class ExecutionEngine:
             for module_name in manager.instances_seen:
                 manager.instances_seen[module_name] = 0
                 manager.instances_loc[module_name] = ""
-            run_tests(state.store, state.pc);
+            
+            # RUN TESTS AT END OF CLOCK CYCLE
+            run_tests(manager.prev_store, state.store, state.pc);
             if self.check_dup(manager):
             #if False:
                 if self.debug:
