@@ -17,6 +17,7 @@ from itertools import product, permutations
 import logging
 from helpers.utils import to_binary
 from strategies.dfs import DepthFirst
+from testing.updowncounter_test import run_tests
 import sys
 
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
@@ -615,6 +616,7 @@ class ExecutionEngine:
             for module_name in manager.instances_seen:
                 manager.instances_seen[module_name] = 0
                 manager.instances_loc[module_name] = ""
+            run_tests(state.store, state.pc);
             if self.check_dup(manager):
             #if False:
                 if self.debug:
@@ -625,7 +627,7 @@ class ExecutionEngine:
                 if self.debug:
                     print("------------------------")
                 ...
-                
+               
             manager.seen[ast.name].append(manager.path_code)
             if (manager.assertion_violation):
                 print("Assertion violation")
