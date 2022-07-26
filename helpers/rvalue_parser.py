@@ -552,7 +552,11 @@ def str_to_int(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_wid
 
 def simpl_str_exp(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_width=4294967296) -> str:
     tokens = symbolic_exp.split(" ")
+    negate: bool = False
     result = tokens[0]
+    if result == "!":
+        result = ""
+        negate = True
     try: 
         for i in range(1, len(tokens)):
             #TODO: apply operator using HOF or something
@@ -569,7 +573,15 @@ def simpl_str_exp(symbolic_exp: str, s: SymbolicState, m: ExecutionManager, reg_
                     result += str(int(tokens[i + 1]) % reg_width)
                 else:
                     result += tokens[i + 1]
-        return result
+            if i == 1:
+                if tokens[i].isdigit():
+                    result += str(int(tokens[i]) % reg_width)
+                else:
+                    result += tokens[i]
+        if negate and len(result) == 1 and result.isdigit():
+            return str(abs(~int(result)))
+        else:
+            return result
     except Exception as e:
         return None
 

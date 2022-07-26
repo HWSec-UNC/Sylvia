@@ -475,7 +475,7 @@ class ExecutionEngine:
                     #print(f"{ast.name} Path {i}")
                 manager.seen[ast.name].append(manager.path_code)
                 if (manager.assertion_violation):
-                    print("Assertion violation")
+                    #print("Assertion violation")
                     counterexample = {}
                     symbols_to_values = {}
                     solver_start = time.process_time()
@@ -634,7 +634,7 @@ class ExecutionEngine:
                 symbols_to_values = {}
                 solver_start = time.process_time()
                 if self.solve_pc(state.pc):
-                    solver_end = time.process_time
+                    solver_end = time.process_time()
                     manager.solver_time += solver_end - solver_start
                     solved_model = state.pc.model()
                     decls =  solved_model.decls()
@@ -691,7 +691,7 @@ class ExecutionEngine:
 
             self.search_strategy.visit_module(manager_sub, state, ast, manager.modules)
             if (manager.assertion_violation):
-                print("Assertion violation")
+                #print("Assertion violation")
                 manager.assertion_violation = False
                 counterexample = {}
                 symbols_to_values = {}
@@ -711,7 +711,7 @@ class ExecutionEngine:
                                 if state.store[module][signal] == symbol:
                                     counterexample[signal] = symbols_to_values[symbol]
 
-                    print(counterexample)
+                    #print(counterexample)
                 else:
                     print("UNSAT")
             manager.curr_level = 0

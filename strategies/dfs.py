@@ -886,7 +886,7 @@ class DepthFirst(Search):
                     return
         elif isinstance(expr, Operator):
             #TODO Fix?
-            new_val = evaluate(parse_tokens(tokenize(expr, s, m)), s, m)
+            new_val = simpl_str_exp(evaluate(parse_tokens(tokenize(expr, s, m)), s, m), s, m)
             x = BitVec(new_val, 1)
             one = IntVal(1)
             one_bv = Int2BV(one, 1)
@@ -947,10 +947,10 @@ class DepthFirst(Search):
                 if not parent_signal in parent_manager.updates and child[1] in state.store[child[0]]:
                     state.store[containing_module][parent_signal] = state.store[child[0]][child[1]]
             if (parent_manager.assertion_violation):
-                print("Assertion violation")
+                #print("Assertion violation")
                 parent_manager.assertion_violation = False
                 solver_start = time.process_time()
-                solve_pc(state.pc)
+                #solve_pc(state.pc)
                 solver_end = time.process_time()
                 parent_manager.solver_time += solver_end - solver_start
             parent_manager.curr_level = 0
