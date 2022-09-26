@@ -12,6 +12,8 @@ Requirements
 - Graphviz 2.38.0 or later: run `sudo apt install graphviz`
 - Pygraphviz 1.3.1 or later: run `python3 - m pip install pygraphviz`. If you have trouble with this step with errors related to building wheel for pygraphviz, try running `sudo apt install graphviz-dev` and then rerunning the `python3 - m pip install pygraphviz` command.
 - PyVerilog: run `python3 -m pip install pyverilog`
+- networkx: run `python3 -m pip install networkx`
+- matplotlib: run `python3 -m pip install matplotlib`
 
 
 Download

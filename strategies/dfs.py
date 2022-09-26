@@ -886,7 +886,7 @@ class DepthFirst(Search):
                     return
         elif isinstance(expr, Operator):
             #TODO Fix?
-            new_val = evaluate(parse_tokens(tokenize(expr, s, m)), s, m)
+            new_val = simpl_str_exp(evaluate(parse_tokens(tokenize(expr, s, m)),s,m), s, m)
             x = BitVec(new_val, 1)
             one = IntVal(1)
             one_bv = Int2BV(one, 1)
