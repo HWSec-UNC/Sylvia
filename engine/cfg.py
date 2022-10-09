@@ -91,9 +91,14 @@ class CFG:
             if isinstance(ast[0], IfStatement):
                 self.all_nodes.append(ast[0])
                 self.partition_points.append(self.curr_idx)
+                parent_idx = self.curr_idx
                 self.curr_idx += 1
+                edge_1 = (parent_idx, self.curr_idx)
                 self.basic_blocks(m, s, ast[0].true_statement) 
                 self.basic_blocks(m, s, ast[0].false_statement)
+                edge_2 = (parent_idx, self.curr_idx)
+                self.edgelist.append(edge_1)
+                self.edgelist.append(edge_2)
             elif isinstance(ast[0], CaseStatement):
                 self.all_nodes.append(ast)
                 self.partition_points.append(self.curr_idx)
@@ -105,6 +110,8 @@ class CFG:
                 self.curr_idx += 1
                 self.basic_blocks(m, s, ast[0].statement) 
             elif isinstance(ast[0], Block):
+                self.all_nodes.append(ast[0])
+                self.curr_idx += 1
                 self.basic_blocks(m, s, ast[0].items)
             elif isinstance(ast[0], Always):
                 # print("entering always")
@@ -123,9 +130,14 @@ class CFG:
             if isinstance(ast, IfStatement):
                 self.partition_points.append(self.curr_idx)
                 self.all_nodes.append(ast)
+                parent_idx = self.curr_idx
                 self.curr_idx += 1
+                edge_1 = (parent_idx, self.curr_idx)
                 self.basic_blocks(m, s, ast.true_statement) 
                 self.basic_blocks(m, s, ast.false_statement)
+                edge_2 = (parent_idx, self.curr_idx)
+                self.edgelist.append(edge_1)
+                self.edgelist.append(edge_2)
             elif isinstance(ast, CaseStatement):
                 self.all_nodes.append(ast)
                 self.partition_points.append(self.curr_idx)
@@ -137,6 +149,8 @@ class CFG:
                 self.curr_idx += 1
                 self.basic_blocks(m, s, ast.statement) 
             elif isinstance(ast, Block):
+                self.all_nodes.append(ast)
+                self.curr_idx += 1
                 self.basic_blocks(m, s, ast.statements)
             elif isinstance(ast, Always):
                 self.all_nodes.append(ast)
@@ -153,13 +167,13 @@ class CFG:
     def partition(self):
         """Slices up the list of all nodes into the actual basic blocks"""
         self.partition_points.append(len(self.all_nodes)-1)
-        for i in range(len(self.partition_points)):
-            if i == len(self.partition_points) - 1: 
-                basic_block = self.all_nodes[self.partition_points[i]]
-                self.basic_block_list.append(basic_block)
-            else:
-                basic_block = self.all_nodes[self.partition_points[i]:self.partition_points[i+1]]
-                self.basic_block_list.append(basic_block)
+        for i in range(len(self.partition_points)-1):
+            # if i == len(self.partition_points) - 1: 
+            #     basic_block = self.all_nodes[self.partition_points[i]]
+            #     self.basic_block_list.append(basic_block)
+            # else:
+            basic_block = self.all_nodes[self.partition_points[i]:self.partition_points[i+1]+1]
+            self.basic_block_list.append(basic_block)
             print(f" {basic_block} {i}")
 
 

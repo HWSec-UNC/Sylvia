@@ -607,6 +607,7 @@ class ExecutionEngine:
             cfg.partition()
         print(cfg.partition_points)
         print(len(cfg.basic_block_list))
+        print(cfg.edgelist)
         #cfg.build_cfg(manager, state)
         print("after CFG")
 
