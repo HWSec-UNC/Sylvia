@@ -602,9 +602,12 @@ class ExecutionEngine:
         print("before CFG")
         always = cfg.get_always(manager, state, ast.items)
         if not always is None:
-            cfg.basic_blocks(manager,state, always, [])
-        print(cfg.basic_block_list)
-        cfg.build_cfg(manager, state)
+            #cfg.basic_blocks(manager,state, always, [])
+            cfg.basic_blocks(manager, state, always)
+            cfg.partition()
+        print(cfg.partition_points)
+        print(len(cfg.basic_block_list))
+        #cfg.build_cfg(manager, state)
         print("after CFG")
 
 

@@ -722,7 +722,8 @@ class DepthFirst(Search):
         """Traverse the expressions in a hardware design."""
         if isinstance(expr, Reg):
             if not expr.name in m.reg_writes:
-                if m.cycle == 0: 
+                if m.cycle == 0:
+                    print(expr.name)
                     s.store[m.curr_module][expr.name] = init_symbol()
                 m.reg_writes.add(expr.name)
                 m.reg_decls.add(expr.name)

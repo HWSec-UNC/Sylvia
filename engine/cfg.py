@@ -26,6 +26,20 @@ import matplotlib.pyplot as plt
 class CFG:
     """CFG of Verilog RTL."""
     basic_block_list = []
+    # for partitioning
+    curr_idx = 0
+
+    # add all nodes in the always block
+    all_nodes = []
+
+    # partition indices
+    partition_points = [0]
+
+    # basic blocks. A list made up of slices of all_nodes determined by partition_points.
+    basic_blocks = []
+
+    # the edgelist will be a list of tuples of indices of the basic blocks
+    edgelist = []
     
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
         """get always block"""
@@ -69,63 +83,86 @@ class CFG:
             else:
                 return None
 
-    def basic_blocks(self, m: ExecutionManager, s: SymbolicState, ast, basic_block=[]):
-        """Populates the basic block list."""
-        leader = ast
-        if isinstance(ast, Block):
-            ast = ast.statements
+    def basic_blocks(self, m:ExecutionManager, s: SymbolicState, ast):
+        """We want to get a list of AST nodes partitioned into basic blocks.
+        Need to keep track of children/parent indices of each block in the list."""
 
         if hasattr(ast, '__iter__'):
-            print("up!")
-            #for item in ast:
             if isinstance(ast[0], IfStatement):
-                basic_block.append(ast[0])
-                self.basic_block_list.append((basic_block, 0))
-                then_block = []
-                self.basic_blocks(m, s, ast[0].true_statement, then_block) 
-                self.basic_block_list.append((then_block, 1))
-                else_block = []
-                self.basic_blocks(m, s, ast[0].false_statement, else_block)
-                self.basic_block_list.append((else_block, 1))
-            elif isinstance(ast, CaseStatement):
-                return self.basic_blocks(m, s, ast.caselist) 
-            elif isinstance(ast, ForStatement):
-                return self.basic_blocks(m, s, ast.statement) 
+                self.all_nodes.append(ast[0])
+                self.partition_points.append(self.curr_idx)
+                self.curr_idx += 1
+                self.basic_blocks(m, s, ast[0].true_statement) 
+                self.basic_blocks(m, s, ast[0].false_statement)
+            elif isinstance(ast[0], CaseStatement):
+                self.all_nodes.append(ast)
+                self.partition_points.append(self.curr_idx)
+                self.curr_idx += 1
+                self.basic_blocks(m, s, ast[0].caselist) 
+            elif isinstance(ast[0], ForStatement):
+                self.all_nodes.append(ast)
+                self.partition_points.append(self.curr_idx)
+                self.curr_idx += 1
+                self.basic_blocks(m, s, ast[0].statement) 
             elif isinstance(ast[0], Block):
-                #basic_block.append(item)
                 self.basic_blocks(m, s, ast[0].items)
             elif isinstance(ast[0], Always):
-                print("entering always")
-                #basic_block.append(item)
-                self.basic_block_list.append(basic_block)
-                basic_block = []
-                self.basic_blocks(m, s, ast[0].statement, basic_block)             
+                # print("entering always")
+                self.all_nodes.append(ast[0])
+                self.curr_idx += 1
+                self.basic_blocks(m, s, ast[0].statement)             
             elif isinstance(ast[0], Initial):
-                #basic_block.append(item)
+                self.all_nodes.append(ast[0])
+                self.curr_idx += 1
                 self.basic_blocks(m, s, ast[0].statement)
             else:
                 print(f"{ast[0]} else top")
-                basic_block.append(ast[0])
-            #self.basic_block_list.append(basic_block)
+                self.curr_idx += 1
+                self.all_nodes.append(ast[0])
         elif ast != None:
             if isinstance(ast, IfStatement):
-                return self.basic_blocks(m, s, ast.true_statement) 
-                #self.basic_blocks(m, s, ast.false_statement))
+                self.partition_points.append(self.curr_idx)
+                self.all_nodes.append(ast)
+                self.curr_idx += 1
+                self.basic_blocks(m, s, ast.true_statement) 
+                self.basic_blocks(m, s, ast.false_statement)
             elif isinstance(ast, CaseStatement):
-                return self.basic_blocks(m, s, ast.caselist)
+                self.all_nodes.append(ast)
+                self.partition_points.append(self.curr_idx)
+                self.curr_idx += 1
+                self.basic_blocks(m, s, ast.caselist)
             elif isinstance(ast, ForStatement):
-                return self.basic_blocks(m, s, ast.statement)
+                self.all_nodes.append(ast)
+                self.partition_points.append(self.curr_idx)
+                self.curr_idx += 1
+                self.basic_blocks(m, s, ast.statement) 
             elif isinstance(ast, Block):
-                basic_block.append(ast)
-                return self.basic_blocks(m, s, ast.items)
+                self.basic_blocks(m, s, ast.statements)
             elif isinstance(ast, Always):
-                basic_block.append(ast)
-                return self.basic_blocks(m, s, ast.statement)             
+                self.all_nodes.append(ast)
+                self.curr_idx += 1
+                self.basic_blocks(m, s, ast.statement)             
             elif isinstance(ast, Initial):
-                basic_block.append(ast)
-                return self.basic_blocks(m, s, ast.statement)
+                self.all_nodes.append(ast)
+                self.curr_idx += 1
+                self.basic_blocks(m, s, ast.statement)
             else:
-                basic_block.append(ast)
+                self.all_nodes.append(ast)
+                self.curr_idx += 1
+
+    def partition(self):
+        """Slices up the list of all nodes into the actual basic blocks"""
+        self.partition_points.append(len(self.all_nodes)-1)
+        for i in range(len(self.partition_points)):
+            if i == len(self.partition_points) - 1: 
+                basic_block = self.all_nodes[self.partition_points[i]]
+                self.basic_block_list.append(basic_block)
+            else:
+                basic_block = self.all_nodes[self.partition_points[i]:self.partition_points[i+1]]
+                self.basic_block_list.append(basic_block)
+            print(f" {basic_block} {i}")
+
+
 
     def build_cfg(self, m: ExecutionManager, s: SymbolicState):
         """Build networkx digraph."""
