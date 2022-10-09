@@ -605,6 +605,7 @@ class ExecutionEngine:
             #cfg.basic_blocks(manager,state, always, [])
             cfg.basic_blocks(manager, state, always)
             cfg.partition()
+        print(cfg.all_nodes)
         print(cfg.partition_points)
         print(len(cfg.basic_block_list))
         print(cfg.edgelist)
