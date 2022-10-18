@@ -45,6 +45,9 @@ class CFG:
 
     # edges between basic blocks, determined by the above edgelist
     cfg_edges = []
+
+    # indices of basic blocks that need to connect to dummy exit node
+    leaves = set()
     
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
         """get always block"""
@@ -180,7 +183,7 @@ class CFG:
         print(partition_list)
         for i in range(len(partition_list)):
             if i == len(partition_list) - 1: 
-                basic_block = self.all_nodes[partition_list[i]]
+                basic_block = [self.all_nodes[partition_list[i]]]
                 self.basic_block_list.append(basic_block)
             elif i > 0: 
                 basic_block = self.all_nodes[partition_list[i]+1:partition_list[i+1]+1]
@@ -188,40 +191,61 @@ class CFG:
             else:
                 basic_block = self.all_nodes[partition_list[i]:partition_list[i+1]+1]
                 self.basic_block_list.append(basic_block)
-            print(f" {basic_block} {i}")
 
-    def find_basic_block(self, node_idx: int):
-        """Given a node index, find the basic block that we're in."""
+    def find_basic_block(self, node_idx) -> int:
+        """Given a node index, find the index of the basic block that we're in."""
+        node = self.all_nodes[node_idx]
+        found_block = None
+        for block in self.basic_block_list:
+            if node in block:
+                found_block = indexOf(self.basic_block_list, block)
+                return found_block
 
     def make_paths(self):
         """Map the edge between AST nodes to a path between basic blocks."""
+        print("making paths")
         for edge in self.edgelist:
             block1 = self.find_basic_block(edge[0])
             block2 = self.find_basic_block(edge[1])
             path = (block1, block2)
             self.cfg_edges.append(path)
 
+    def find_leaves(self):
+        """Find leaves in cfg, to know which nodes need to connect to dummy exit."""
+        starts = set(edge[0] for edge in self.cfg_edges)
+        ends = set(edges[1] for edges in self.cfg_edges)
+        self.leaves = ends - starts
+
 
     def build_cfg(self, m: ExecutionManager, s: SymbolicState):
         """Build networkx digraph."""
+        self.make_paths()
+        print(self.basic_block_list)
+        print(self.cfg_edges)
+
         G = nx.Graph()
         for block in self.basic_block_list:
-            hashable_block = (tuple(block[0]), block[1])
-            G.add_node(hashable_block)
+            # converts the list into a tuple. Needs to be hashable type
+            G.add_node(indexOf(self.basic_block_list, block), data=tuple(block))
         
-        G.add_node(("Dummy Start", -1))
-        G.add_node(("Dummy End", 3))
+        G.add_node(-1, data="Dummy Start")
+        G.add_node(-2, data="Dummy End")
 
-        for u in G.nodes():
-            for v in G.nodes():
-                if u[1] > v[1] and v[1] != -1 and u[1] !=3 :
-                    G.add_edge(u, v)
-                elif v[1] == -1 and u[1] == 0:
-                    G.add_edge(u, v)
-                elif u[1] == 3 and v[1] == 1:
-                    G.add_edge(u, v)
+        # print(list(G.nodes))
+        for edge in self.cfg_edges:
+            start = edge[0]
+            end = edge[1]
+            G.add_edge(start, end)
 
-        print(G.edges())
+        # link up dummy start
+        G.add_edge(-1, 0)
+        self.find_leaves()
+        
+        # link of dummy exit
+        for leaf in self.leaves:
+            G.add_edge(leaf, -2)
+
+        #print(G.edges())
         subax1 = plt.subplot(121)
         nx.draw(G, with_labels=True, font_weight='bold')
         plt.show()
