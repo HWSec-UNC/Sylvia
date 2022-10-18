@@ -216,6 +216,11 @@ class CFG:
         ends = set(edges[1] for edges in self.cfg_edges)
         self.leaves = ends - starts
 
+    def display_cfg(self, graph):
+        """Display CFG."""
+        subax1 = plt.subplot(121)
+        nx.draw(graph, with_labels=True, font_weight='bold')
+        plt.show()
 
     def build_cfg(self, m: ExecutionManager, s: SymbolicState):
         """Build networkx digraph."""
@@ -223,7 +228,7 @@ class CFG:
         print(self.basic_block_list)
         print(self.cfg_edges)
 
-        G = nx.Graph()
+        G = nx.DiGraph()
         for block in self.basic_block_list:
             # converts the list into a tuple. Needs to be hashable type
             G.add_node(indexOf(self.basic_block_list, block), data=tuple(block))
@@ -246,6 +251,8 @@ class CFG:
             G.add_edge(leaf, -2)
 
         #print(G.edges())
-        subax1 = plt.subplot(121)
-        nx.draw(G, with_labels=True, font_weight='bold')
-        plt.show()
+
+        #self.display_cfg(G)
+
+        traversed = nx.edge_dfs(G, source=-1)
+        print(list(traversed))
