@@ -48,6 +48,9 @@ class CFG:
 
     # indices of basic blocks that need to connect to dummy exit node
     leaves = set()
+
+    #paths... list of paths with start and end being the dummy nodes
+    paths = []
     
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
         """get always block"""
@@ -254,5 +257,7 @@ class CFG:
 
         #self.display_cfg(G)
 
-        traversed = nx.edge_dfs(G, source=-1)
-        print(list(traversed))
+        #traversed = nx.edge_dfs(G, source=-1)
+        paths = nx.all_simple_paths(G, source=-1, target=-2)
+        #print(list(traversed))
+        print(list(paths))
