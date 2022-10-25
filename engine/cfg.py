@@ -228,8 +228,8 @@ class CFG:
     def build_cfg(self, m: ExecutionManager, s: SymbolicState):
         """Build networkx digraph."""
         self.make_paths()
-        print(self.basic_block_list)
-        print(self.cfg_edges)
+        # print(self.basic_block_list)
+        # print(self.cfg_edges)
 
         G = nx.DiGraph()
         for block in self.basic_block_list:
@@ -258,6 +258,6 @@ class CFG:
         #self.display_cfg(G)
 
         #traversed = nx.edge_dfs(G, source=-1)
-        paths = nx.all_simple_paths(G, source=-1, target=-2)
+        self.paths = nx.all_simple_paths(G, source=-1, target=-2)
         #print(list(traversed))
-        print(list(paths))
+        #print(list(self.paths))

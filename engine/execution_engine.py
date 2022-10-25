@@ -605,12 +605,18 @@ class ExecutionEngine:
             #cfg.basic_blocks(manager,state, always, [])
             cfg.basic_blocks(manager, state, always)
             cfg.partition()
-        print(cfg.all_nodes)
-        print(cfg.partition_points)
-        print(len(cfg.basic_block_list))
-        print(cfg.edgelist)
+        # print(cfg.all_nodes)
+        # print(cfg.partition_points)
+        # print(len(cfg.basic_block_list))
+        # print(cfg.edgelist)
         cfg.build_cfg(manager, state)
         print("after CFG")
+
+        paths = list(cfg.paths)
+        print(paths)
+
+        # for each combination of mulitcycle paths
+        for i in range(len())
 
 
         stride_length = len(manager.names_list)
