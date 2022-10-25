@@ -615,9 +615,9 @@ class ExecutionEngine:
         paths = list(cfg.paths)
         print(paths)
 
-        # for each combination of mulitcycle paths
-        for i in range(len())
-
+        # single cycle path
+        for path in paths:
+            self.search_strategy.visit_module(manager, state, ast, modules_dict)
 
         stride_length = len(manager.names_list)
         # for each combinatoin of multicycle paths
