@@ -535,9 +535,12 @@ class ExecutionEngine:
             manager: ExecutionManager = ExecutionManager()
             manager.debugging = False
             modules_dict = {}
+            # a dictionary keyed by module name, that gives the list of cfgs
+            cfgs_by_module = {}
             for module in modules:
                 modules_dict[module.name] = module
                 manager.seen_mod[module.name] = {}
+                cfgs_by_module[module.name] = []
                 sub_manager = ExecutionManager()
                 manager.names_list.append(module.name)
                 self.init_run(sub_manager, module)
@@ -549,18 +552,51 @@ class ExecutionEngine:
                     for i in range(num_instances):
                         instance_name = f"{module.name}_{i}"
                         manager.names_list.append(instance_name)
-                        manager.child_path_codes[instance_name] = to_binary(0)
-                        manager.child_num_paths[instance_name] = sub_manager.num_paths
-                        manager.config[instance_name] = to_binary(0)
+
+                        # build the CFG for the particular module 
+                        cfg = CFG()
+                        print("before CFG")
+                        always = cfg.get_always(manager, state, ast.items)
+                        if not always is None:
+                            #cfg.basic_blocks(manager,state, always, [])
+                            cfg.basic_blocks(manager, state, always)
+                            cfg.partition()
+                        # print(cfg.all_nodes)
+                        # print(cfg.partition_points)
+                        # print(len(cfg.basic_block_list))
+                        # print(cfg.edgelist)
+                        cfg.build_cfg(manager, state)
+                        cfg.module_name = ast.name
+                        print("after CFG")
+                        cfgs_by_module[instance_name] = cfg
+
+                        print(cfg.paths)
+
+
                         state.store[instance_name] = {}
                         manager.dependencies[instance_name] = {}
                         manager.intermodule_dependencies[instance_name] = {}
                         manager.cond_assigns[instance_name] = {}
                     manager.names_list.remove(module.name)
                 else:        
-                    manager.child_path_codes[module.name] = to_binary(0)
-                    manager.child_num_paths[module.name] = sub_manager.num_paths
-                    manager.config[module.name] = to_binary(0)
+                    # build the CFG for the particular module 
+                    cfg = CFG()
+                    print("before CFG")
+                    always = cfg.get_always(manager, state, ast.items)
+                    if not always is None:
+                        #cfg.basic_blocks(manager,state, always, [])
+                        cfg.basic_blocks(manager, state, always)
+                        cfg.partition()
+                    # print(cfg.all_nodes)
+                    # print(cfg.partition_points)
+                    # print(len(cfg.basic_block_list))
+                    # print(cfg.edgelist)
+                    cfg.build_cfg(manager, state)
+                    cfg.module_name = ast.name
+                    print("after CFG")
+                    cfgs_by_module[module.name] = cfg
+                    #print(cfg.paths)
+
                     state.store[module.name] = {}
                     manager.dependencies[module.name] = {}
                     manager.intermodule_dependencies[module.name] = {}
@@ -585,7 +621,15 @@ class ExecutionEngine:
             else:
                 manager.opt_1 = False
             manager.modules = modules_dict
-            paths = list(product(*manager.child_path_codes.values(), repeat=int(num_cycles)))
+
+            print(cfg.paths)
+            mapped_paths = {}
+            for module_name in cfgs_by_module:
+                mapped_paths[module_name] = cfgs_by_module[module_name].paths
+            print(mapped_paths)
+            total_paths = list(product(*mapped_paths.values(), repeat=int(num_cycles)))
+            print(total_paths)
+            #exit()
 
 
         if self.debug:
@@ -598,38 +642,18 @@ class ExecutionEngine:
         manager.curr_module = manager.names_list[0]
 
 
-        cfg = CFG()
-        print("before CFG")
-        always = cfg.get_always(manager, state, ast.items)
-        if not always is None:
-            #cfg.basic_blocks(manager,state, always, [])
-            cfg.basic_blocks(manager, state, always)
-            cfg.partition()
-        # print(cfg.all_nodes)
-        # print(cfg.partition_points)
-        # print(len(cfg.basic_block_list))
-        # print(cfg.edgelist)
-        cfg.build_cfg(manager, state)
-        print("after CFG")
-
-        paths = list(cfg.paths)
-        print(paths)
-
-        # single cycle path
-        for path in paths:
-            self.search_strategy.visit_module(manager, state, ast, modules_dict)
-
         stride_length = len(manager.names_list)
         # for each combinatoin of multicycle paths
-        for i in range(len(paths)):
+        for i in range(len(total_paths)):
             manager.cycle = 0
             # extract the single cycle path code for this iteration and execute, then merge the states
-            for j in range(0, len(paths[i])):
+            for j in range(0, len(total_paths[i])):
 
                 for name in manager.names_list:
-                    manager.config[name] = paths[i][j]
+                    manager.config[name] = total_paths[i][j]
             # makes assumption top level module is first in line
-            manager.path_code = paths[i][0]
+            # ! no longer path code as in bit string, but indices
+            manager.path_code = [i][0]
             manager.prev_store = state.store
             manager.init_state(state, manager.prev_store, ast)
             self.search_strategy.visit_module(manager, state, ast, modules_dict)

@@ -51,6 +51,9 @@ class CFG:
 
     #paths... list of paths with start and end being the dummy nodes
     paths = []
+
+    # name corresponding to the module. there could be multiple always blocks (or CFGS) per module
+    module_name = ""
     
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
         """get always block"""
@@ -179,6 +182,10 @@ class CFG:
                 self.all_nodes.append(ast)
                 self.curr_idx += 1
 
+    def map_to_path(self):
+        """Just return the paths"""
+        return self.paths
+
     def partition(self):
         """Slices up the list of all nodes into the actual basic blocks"""
         self.partition_points.add(len(self.all_nodes)-1)
@@ -258,6 +265,6 @@ class CFG:
         #self.display_cfg(G)
 
         #traversed = nx.edge_dfs(G, source=-1)
-        self.paths = nx.all_simple_paths(G, source=-1, target=-2)
+        self.paths = list(nx.all_simple_paths(G, source=-1, target=-2))
         #print(list(traversed))
         #print(list(self.paths))
