@@ -674,19 +674,23 @@ class ExecutionEngine:
             print(cfgs_by_module[manager.curr_module][curr_cfg].decls)
 
             for node in cfgs_by_module[manager.curr_module][curr_cfg].decls:
-                self.search_strategy.visit_stmt(manager, state, node, modules_dict)
+                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
             # each single cycle path is a list in the big tuple
             for single_cycle_path in curr_path:
                 directions = cfgs_by_module[manager.curr_module][curr_cfg].compute_direction(single_cycle_path)
                 print(directions)
+                k: int = 0
                 for basic_block_idx in single_cycle_path:
-                    # ignore dummy nodes
-                    if basic_block_idx >= 0: 
+                    if basic_block_idx < 0: 
+                        # dummy node
+                        continue
+                    else:
+                        direction = directions[k]
+                        k += 1
                         basic_block = cfgs_by_module[manager.curr_module][curr_cfg].basic_block_list[basic_block_idx]
                         for stmt in basic_block:
-                            self.search_strategy.visit_stmt(manager, state, stmt, modules_dict)
-                    else:
-                        continue
+                            self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
+
             self.done = True
             self.check_state(manager, state)
             self.done = False

@@ -89,7 +89,7 @@ class DepthFirst(Search):
         
     
 
-    def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
+    def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional[dict], direction: Optional[int]):
         "Traverse the statements in a hardware design"
         if m.ignore:
             return
@@ -98,7 +98,7 @@ class DepthFirst(Search):
                 if isinstance(item, Value):
                     self.visit_expr(m, s, item)
                 else:
-                    self.visit_stmt(m, s, item, modules)
+                    self.visit_stmt(m, s, item, modules, direction)
                 # ref_name = item.name
                 # ref_width = int(item.width.msb.value) + 1
                 #  dont want to actually call z3 here, just when looking at PC
@@ -119,7 +119,7 @@ class DepthFirst(Search):
                 if stmt in m.blocks_of_interest:
                     sub_stmt = stmt.statement
                     m.in_always = True
-                    self.visit_stmt(m, s, sub_stmt, modules)
+                    self.visit_stmt(m, s, sub_stmt, modules, direction)
                     for module in m.dependencies:
                         for signal in m.dependencies[module]:
                             if m.dependencies[module][signal] in m.updates:
@@ -179,7 +179,7 @@ class DepthFirst(Search):
             else: 
                 sub_stmt = stmt.statement
                 m.in_always = True
-                self.visit_stmt(m, s, sub_stmt, modules)
+                self.visit_stmt(m, s, sub_stmt, modules, direction)
                 for module in m.dependencies:
                     for signal in m.dependencies[module]:
                         if m.dependencies[module][signal] in m.updates:
@@ -504,12 +504,12 @@ class DepthFirst(Search):
         elif isinstance(stmt, Block):
             if m.opt_2:
                 for item in stmt.statements: 
-                    self.visit_stmt(m, s, item, modules)
+                    self.visit_stmt(m, s, item, modules, direction)
             else:
                 all_orderings = list(permutations(stmt.statements))
                 for ordering in all_orderings:
                     for item in ordering: 
-                        self.visit_stmt(m, s, item, modules)
+                        self.visit_stmt(m, s, item, modules, direction)
             
         elif isinstance(stmt, Initial):
             self.visit_stmt(m, s, stmt.statement,  modules)
@@ -537,7 +537,7 @@ class DepthFirst(Search):
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
                 if m.seen_all_cases(m, bit_index, nested_ifs):
                     m.completed.append(bit_index)
-                self.visit_stmt(m, s, stmt.true_statement,  modules)
+                self.visit_stmt(m, s, stmt.true_statement,  modules, direction)
             else:
                 m.count_conditionals_2(m, stmt.true_statement)
                 self.branch = False
@@ -553,7 +553,7 @@ class DepthFirst(Search):
                     print("Abandoning this path!")
 
                     return
-                self.visit_stmt(m, s, stmt.false_statement,  modules)
+                self.visit_stmt(m, s, stmt.false_statement,  modules, direction)
         elif isinstance(stmt, ForStatement):
             print("FOR")
             m.curr_level += 1
@@ -605,11 +605,11 @@ class DepthFirst(Search):
                     print("Abandoning this path!")
 
                     return
-                self.visit_stmt(m, s, stmt.statement,  modules)
+                self.visit_stmt(m, s, stmt.statement,  modules, direction)
         elif isinstance(stmt, SystemCall):
             m.assertion_violation = True
         elif isinstance(stmt, SingleStatement):
-            self.visit_stmt(m, s, stmt.statement,  modules)
+            self.visit_stmt(m, s, stmt.statement,  modules, direction)
         elif isinstance(stmt, InstanceList):
             if not stmt.module in m.instances_seen:
                 m.instances_seen[stmt.module] = 1
@@ -699,7 +699,7 @@ class DepthFirst(Search):
         elif isinstance(stmt, CaseStatement):
             m.curr_case = stmt.comp
             for case in stmt.caselist:
-                self.visit_stmt(m, s, case, modules)
+                self.visit_stmt(m, s, case, modules, direction)
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         """Traverse the expressions in a hardware design."""

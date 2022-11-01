@@ -70,9 +70,9 @@ class CFG:
         directions = []
         for i in range(1, len(path)-1):
             if path[i] + 1 == path[i + 1]:
-                directions.append("1")
+                directions.append(1)
             else:
-                directions.append("0")
+                directions.append(0)
         return directions
     
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
