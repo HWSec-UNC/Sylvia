@@ -1,4 +1,5 @@
 """Extracting the CFG from the AST."""
+from math import comb
 from operator import indexOf
 import z3
 from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef, If, BitVecVal, And
@@ -28,6 +29,9 @@ class CFG:
     """CFG of Verilog RTL."""
     # basic blocks. A list made up of slices of all_nodes determined by partition_points.
     basic_block_list = []
+
+    # used for figuring out the path conditions / which way we are forking during execution; one per edge
+    directions = []
     # for partitioning
     curr_idx = 0
 
@@ -52,11 +56,26 @@ class CFG:
 
     # name corresponding to the module. there could be multiple always blocks (or CFGS) per module
     module_name = ""
+
+    # Decl nodes outside the always block to be executed once up front for all paths
+    decls = []
+
+    # Combinational logic nodes outside the always block to be twice for all paths
+    comb = []
+
+    # the nodes in the AST that correspond to always blocks
+    always_blocks = []
+
+    def compute_direction(self, path):
+        """Given a path, figure out the direction"""
+        for i in range(len(path)):
+            ...
+
     
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
-        """get always block"""
+        """Populate the always block list."""
         if isinstance(ast, Block):
-                ast = ast.statements
+            ast = ast.statements
 
         if hasattr(ast, '__iter__'):
             for item in ast:
@@ -68,20 +87,23 @@ class CFG:
                 elif isinstance(ast, ForStatement):
                     return self.get_always(m, s, ast.statement) 
                 elif isinstance(item, Block):
-                    #basic_block.append(item)
                     self.get_always(m, s, item.items)
                 elif isinstance(item, Always):
-                    print("found")
-                    return item            
+                    self.always_blocks.append(item)           
                 elif isinstance(item, Initial):
-                    #basic_block.append(item)
+                    self.get_always(m, s, item.statement)
+                elif isinstance(item, SingleStatement):
                     self.get_always(m, s, item.statement)
                 else:
+                    if isinstance(item, Decl):
+                        self.decls.append(item)
+                    elif isinstance(item, Assign):
+                        self.comb.append(item)
                     ...
         elif ast != None:
             if isinstance(ast, IfStatement):
                 self.get_always(m, s, ast.true_statement) 
-                #self.basic_blocks(m, s, ast.false_statement))
+                self.basic_blocks(m, s, ast.false_statement)
             elif isinstance(ast, CaseStatement):
                 self.get_always(m, s, ast.caselist)
             elif isinstance(ast, ForStatement):
@@ -89,11 +111,17 @@ class CFG:
             elif isinstance(ast, Block):
                 self.get_always(m, s, ast.items)
             elif isinstance(ast, Always):
-                return ast            
+                self.always_blocks.append(ast)          
             elif isinstance(ast, Initial):
                 self.get_always(m, s, ast.statement)
+            elif isinstance(ast, SingleStatement):
+                self.get_always(m, s, ast.statement)
             else:
-                return None
+                if isinstance(ast, Decl):
+                    self.decls.append(ast)
+                elif isinstance(ast, Assign):
+                    self.comb.append(ast)
+                ...
 
     def basic_blocks(self, m:ExecutionManager, s: SymbolicState, ast):
         """We want to get a list of AST nodes partitioned into basic blocks.
@@ -124,11 +152,8 @@ class CFG:
                 self.curr_idx += 1
                 self.basic_blocks(m, s, ast[0].statement) 
             elif isinstance(ast[0], Block):
-                #self.all_nodes.append(ast[0])
-                #self.curr_idx += 1
                 self.basic_blocks(m, s, ast[0].items)
             elif isinstance(ast[0], Always):
-                # print("entering always")
                 self.all_nodes.append(ast[0])
                 self.curr_idx += 1
                 self.basic_blocks(m, s, ast[0].statement)             
@@ -165,8 +190,6 @@ class CFG:
                 self.curr_idx += 1
                 self.basic_blocks(m, s, ast.statement) 
             elif isinstance(ast, Block):
-                #self.all_nodes.append(ast)
-                #self.curr_idx += 1
                 self.basic_blocks(m, s, ast.statements)
             elif isinstance(ast, Always):
                 self.all_nodes.append(ast)

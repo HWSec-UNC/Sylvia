@@ -47,11 +47,6 @@ class DepthFirst(Search):
                 if port.name not in s.store[m.curr_module]:
                     s.store[m.curr_module][port.name] = init_symbol()
 
-
-        if m.debug and not m.is_child and not m.init_run_flag and not m.ignore:
-            print("Initial state:")
-            print(s.store)
-            ...
         
         if not m.is_child and not m.init_run_flag and not m.ignore:
             m.initial_store = copy.deepcopy(s.store) 
@@ -60,7 +55,10 @@ class DepthFirst(Search):
             if isinstance(item, Value):
                 self.visit_expr(m, s, item)
             else:
-                self.visit_stmt(m, s, item, modules)
+                continue
+                # This should be handled by exploration in always blocks
+                # self.visit_stmt(m, s, item, modules)
+        
 
         # simpl / collapsing step
         
@@ -89,26 +87,10 @@ class DepthFirst(Search):
         if m.ignore:
             ...
         
-        if m.debug and not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
-            print(f"Cycle {m.cycle} final state:")
-            print(s.store)
-       
-            print(f"Cycle {m.cycle} final path condition:")
-            print(s.pc)
-        elif not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
-            print(f"Cycle {m.cycle} initial state:")
-            print(m.initial_store)
-
-            print(f"Cycle {m.cycle} final state:")
-            print(s.store)
-       
-            print(f"Cycle {m.cycle} final path condition:")
-            print(s.pc)
     
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
         "Traverse the statements in a hardware design"
-        print("visiting stmt")
         if m.ignore:
             return
         if isinstance(stmt, Decl):
