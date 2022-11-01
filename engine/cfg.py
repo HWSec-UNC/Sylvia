@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 
 class CFG:
     """CFG of Verilog RTL."""
+    # basic blocks. A list made up of slices of all_nodes determined by partition_points.
     basic_block_list = []
     # for partitioning
     curr_idx = 0
@@ -36,9 +37,6 @@ class CFG:
     # partition indices
     partition_points = set()
     partition_points.add(0)
-
-    # basic blocks. A list made up of slices of all_nodes determined by partition_points.
-    basic_blocks = []
 
     # the edgelist will be a list of tuples of indices of the ast nodes blocks
     edgelist = []

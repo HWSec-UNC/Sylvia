@@ -108,6 +108,7 @@ class DepthFirst(Search):
 
     def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
         "Traverse the statements in a hardware design"
+        print("visiting stmt")
         if m.ignore:
             return
         if isinstance(stmt, Decl):
@@ -533,8 +534,8 @@ class DepthFirst(Search):
         elif isinstance(stmt, IfStatement):
             m.curr_level += 1
             self.cond = True
-            bit_index = len(m.path_code) - m.curr_level
-            if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
+            bit_index = m.curr_level
+            if (True):
                 self.branch = True
 
                 for lhs in m.cond_assigns[m.curr_module]:

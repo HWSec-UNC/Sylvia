@@ -656,8 +656,25 @@ class ExecutionEngine:
             manager.path_code = [i][0]
             manager.prev_store = state.store
             manager.init_state(state, manager.prev_store, ast)
+
+            print(manager.config)
+            print(total_paths[i])
+            
+            # actually want to terminate this part after the decl and comb part
             self.search_strategy.visit_module(manager, state, ast, modules_dict)
+
+            curr_path = total_paths[i]
+            # each single cycle path is a list in the big tuple
+            for single_cycle_path in curr_path:
+                for basic_block_idx in single_cycle_path:
+                    # this 
+                    basic_block = cfgs_by_module[manager.curr_module].basic_block_list[basic_block_idx]
+                    for stmt in basic_block:
+                        self.search_strategy.visit_stmt(manager, state, stmt, modules_dict)
+            exit()
             manager.cycle += 1
+
+            exit()
             manager.curr_level = 0
             for module_name in manager.instances_seen:
                 manager.instances_seen[module_name] = 0
