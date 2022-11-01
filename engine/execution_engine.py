@@ -556,7 +556,8 @@ class ExecutionEngine:
 
                         # build X CFGx for the particular module 
                         cfg = CFG()
-
+                        cfg.all_nodes = []
+                        cfg.partition_points = []
                         cfg.get_always(manager, state, ast.items)
                         cfg_count = len(cfg.always_blocks)
                         for k in range(cfg_count):
@@ -583,8 +584,12 @@ class ExecutionEngine:
                 else:        
                     # build X CFGx for the particular module 
                     cfg = CFG()
+                    cfg.all_nodes = []
+                    #cfg.partition_points = []
                     cfg.get_always(manager, state, ast.items)
                     cfg_count = len(cfg.always_blocks)
+                    print(f"cfg count! {cfg_count}")
+                    always_blocks_by_module = []
                     for k in range(cfg_count):
 
                         cfg.basic_blocks(manager, state, cfg.always_blocks[k])
@@ -596,6 +601,9 @@ class ExecutionEngine:
                         cfg.build_cfg(manager, state)
                         cfg.module_name = ast.name
                         cfgs_by_module[module.name].append(cfg)
+                        cfg.all_nodes = []
+                        cfg.partition_points.clear()
+                        cfg.partition_points.add(0)
 
                         #print(cfg.paths)
 
