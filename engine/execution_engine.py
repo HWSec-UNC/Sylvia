@@ -677,6 +677,8 @@ class ExecutionEngine:
                 self.search_strategy.visit_stmt(manager, state, node, modules_dict)
             # each single cycle path is a list in the big tuple
             for single_cycle_path in curr_path:
+                directions = cfgs_by_module[manager.curr_module][curr_cfg].compute_direction(single_cycle_path)
+                print(directions)
                 for basic_block_idx in single_cycle_path:
                     # ignore dummy nodes
                     if basic_block_idx >= 0: 

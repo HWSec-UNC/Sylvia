@@ -30,8 +30,6 @@ class CFG:
     # basic blocks. A list made up of slices of all_nodes determined by partition_points.
     basic_block_list = []
 
-    # used for figuring out the path conditions / which way we are forking during execution; one per edge
-    directions = []
     # for partitioning
     curr_idx = 0
 
@@ -68,9 +66,14 @@ class CFG:
 
     def compute_direction(self, path):
         """Given a path, figure out the direction"""
-        for i in range(len(path)):
-            ...
-
+        print('directions')
+        directions = []
+        for i in range(1, len(path)-1):
+            if path[i] + 1 == path[i + 1]:
+                directions.append("1")
+            else:
+                directions.append("0")
+        return directions
     
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
         """Populate the always block list."""
