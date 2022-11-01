@@ -517,7 +517,7 @@ class DepthFirst(Search):
             m.curr_level += 1
             self.cond = True
             bit_index = m.curr_level
-            if (True):
+            if (direction):
                 self.branch = True
 
                 for lhs in m.cond_assigns[m.curr_module]:
@@ -537,7 +537,7 @@ class DepthFirst(Search):
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
                 if m.seen_all_cases(m, bit_index, nested_ifs):
                     m.completed.append(bit_index)
-                self.visit_stmt(m, s, stmt.true_statement,  modules, direction)
+                #self.visit_stmt(m, s, stmt.true_statement,  modules, direction)
             else:
                 m.count_conditionals_2(m, stmt.true_statement)
                 self.branch = False
@@ -553,13 +553,13 @@ class DepthFirst(Search):
                     print("Abandoning this path!")
 
                     return
-                self.visit_stmt(m, s, stmt.false_statement,  modules, direction)
+                #self.visit_stmt(m, s, stmt.false_statement,  modules, direction)
         elif isinstance(stmt, ForStatement):
             print("FOR")
             m.curr_level += 1
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
-            if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
+            if (direction):
                 self.branch = True
 
                 for lhs in m.cond_assigns[m.curr_module]:
@@ -657,7 +657,7 @@ class DepthFirst(Search):
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
 
-            if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
+            if (direction):
                 self.branch = True
                 for lhs in m.cond_assigns[m.curr_module]:
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:

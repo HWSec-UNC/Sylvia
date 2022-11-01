@@ -66,7 +66,6 @@ class CFG:
 
     def compute_direction(self, path):
         """Given a path, figure out the direction"""
-        print('directions')
         directions = []
         for i in range(1, len(path)-1):
             if path[i] + 1 == path[i + 1]:
@@ -165,7 +164,6 @@ class CFG:
                 self.curr_idx += 1
                 self.basic_blocks(m, s, ast[0].statement)
             else:
-                print(f"{ast[0]} else top")
                 self.curr_idx += 1
                 self.all_nodes.append(ast[0])
         elif ast != None:
@@ -214,7 +212,6 @@ class CFG:
         """Slices up the list of all nodes into the actual basic blocks"""
         self.partition_points.add(len(self.all_nodes)-1)
         partition_list = list(self.partition_points)
-        print(partition_list)
         for i in range(len(partition_list)):
             if i == len(partition_list) - 1: 
                 basic_block = [self.all_nodes[partition_list[i]]]
@@ -237,7 +234,6 @@ class CFG:
 
     def make_paths(self):
         """Map the edge between AST nodes to a path between basic blocks."""
-        print("making paths")
         for edge in self.edgelist:
             block1 = self.find_basic_block(edge[0])
             block2 = self.find_basic_block(edge[1])
@@ -270,7 +266,6 @@ class CFG:
         G.add_node(-1, data="Dummy Start")
         G.add_node(-2, data="Dummy End")
 
-        # print(list(G.nodes))
         for edge in self.cfg_edges:
             start = edge[0]
             end = edge[1]

@@ -556,7 +556,7 @@ class ExecutionEngine:
 
                         # build X CFGx for the particular module 
                         cfg = CFG()
-                        print("before CFG")
+
                         cfg.get_always(manager, state, ast.items)
                         cfg_count = len(cfg.always_blocks)
                         for k in range(cfg_count):
@@ -569,10 +569,10 @@ class ExecutionEngine:
                             # print(cfg.edgelist)
                             cfg.build_cfg(manager, state)
                             cfg.module_name = ast.name
-                            print("after CFG")
+
                             cfgs_by_module[instance_name].append(cfg)
 
-                            print(cfg.paths)
+                            #print(cfg.paths)
 
 
                         state.store[instance_name] = {}
@@ -583,7 +583,6 @@ class ExecutionEngine:
                 else:        
                     # build X CFGx for the particular module 
                     cfg = CFG()
-                    print("before CFG")
                     cfg.get_always(manager, state, ast.items)
                     cfg_count = len(cfg.always_blocks)
                     for k in range(cfg_count):
@@ -596,10 +595,9 @@ class ExecutionEngine:
                         # print(cfg.edgelist)
                         cfg.build_cfg(manager, state)
                         cfg.module_name = ast.name
-                        print("after CFG")
                         cfgs_by_module[module.name].append(cfg)
 
-                        print(cfg.paths)
+                        #print(cfg.paths)
 
                     state.store[module.name] = {}
                     manager.dependencies[module.name] = {}
@@ -608,7 +606,7 @@ class ExecutionEngine:
             total_paths = 1
             for x in manager.child_num_paths.values():
                 total_paths *= x
-            #print(total_paths)
+
             # have do do things piece wise
             manager.debug = self.debug
             if total_paths > 100:
@@ -626,14 +624,13 @@ class ExecutionEngine:
                 manager.opt_1 = False
             manager.modules = modules_dict
 
-            print(cfg.paths)
             mapped_paths = {}
             for module_name in cfgs_by_module:
                 for cfg in cfgs_by_module[module.name]:
                     mapped_paths[module_name] = cfg.paths
-            print(mapped_paths)
+ 
             total_paths = list(product(*mapped_paths.values(), repeat=int(num_cycles)))
-            print(total_paths)
+            #print(total_paths)
 
         if self.debug:
             manager.debug = True
@@ -660,9 +657,6 @@ class ExecutionEngine:
             manager.path_code = [i][0]
             manager.prev_store = state.store
             manager.init_state(state, manager.prev_store, ast)
-
-            print(manager.config)
-            print(total_paths[i])
             
 
             # actually want to terminate this part after the decl and comb part
@@ -671,14 +665,16 @@ class ExecutionEngine:
 
             curr_path = total_paths[i]
 
-            print(cfgs_by_module[manager.curr_module][curr_cfg].decls)
+            #print(cfgs_by_module[manager.curr_module][curr_cfg].decls)
 
             for node in cfgs_by_module[manager.curr_module][curr_cfg].decls:
                 self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
+
+            for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
+                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)   
             # each single cycle path is a list in the big tuple
             for single_cycle_path in curr_path:
                 directions = cfgs_by_module[manager.curr_module][curr_cfg].compute_direction(single_cycle_path)
-                print(directions)
                 k: int = 0
                 for basic_block_idx in single_cycle_path:
                     if basic_block_idx < 0: 
@@ -690,6 +686,8 @@ class ExecutionEngine:
                         basic_block = cfgs_by_module[manager.curr_module][curr_cfg].basic_block_list[basic_block_idx]
                         for stmt in basic_block:
                             self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
+            for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
+                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
 
             self.done = True
             self.check_state(manager, state)
