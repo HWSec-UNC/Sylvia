@@ -633,11 +633,6 @@ class ExecutionEngine:
             manager.modules = modules_dict
 
             mapped_paths = {}
-            for module_name in cfgs_by_module:
-                for cfg in cfgs_by_module[module.name]:
-                    mapped_paths[module_name] = cfg.paths
- 
-            total_paths = list(product(*mapped_paths.values(), repeat=int(num_cycles)))
             #print(total_paths)
 
         if self.debug:
@@ -651,88 +646,95 @@ class ExecutionEngine:
 
         # index into cfgs list
         curr_cfg = 0
-        stride_length = len(manager.names_list)
+        for cfg in cfgs_by_module[manager.curr_module]:
+            mapped_paths[manager.curr_module] = cfg.paths
+            print(f"Currently executing CFG {curr_cfg}")
+            total_paths = list(product(*mapped_paths.values(), repeat=int(num_cycles)))
+
+            stride_length = len(manager.names_list)
         # for each combinatoin of multicycle paths
-        for i in range(len(total_paths)):
-            manager.cycle = 0
-            # extract the single cycle path code for this iteration and execute, then merge the states
-            for j in range(0, len(total_paths[i])):
+            for i in range(len(total_paths)):
+                manager.cycle = 0
+                # extract the single cycle path code for this iteration and execute, then merge the states
+                for j in range(0, len(total_paths[i])):
 
-                for name in manager.names_list:
-                    manager.config[name] = total_paths[i][j]
-            # makes assumption top level module is first in line
-            # ! no longer path code as in bit string, but indices
-            manager.path_code = [i][0]
-            manager.prev_store = state.store
-            manager.init_state(state, manager.prev_store, ast)
-            
+                    for name in manager.names_list:
+                        manager.config[name] = total_paths[i][j]
+                # makes assumption top level module is first in line
+                # ! no longer path code as in bit string, but indices
+                manager.path_code = [i][0]
+                manager.prev_store = state.store
+                manager.init_state(state, manager.prev_store, ast)
+                
 
-            # actually want to terminate this part after the decl and comb part
-            self.search_strategy.visit_module(manager, state, ast, modules_dict)
-            self.check_state(manager, state)
+                # actually want to terminate this part after the decl and comb part
+                self.search_strategy.visit_module(manager, state, ast, modules_dict)
+                self.check_state(manager, state)
 
-            curr_path = total_paths[i]
+                curr_path = total_paths[i]
 
-            #print(cfgs_by_module[manager.curr_module][curr_cfg].decls)
+                #print(cfgs_by_module[manager.curr_module][curr_cfg].decls)
 
-            for node in cfgs_by_module[manager.curr_module][curr_cfg].decls:
-                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
+                for node in cfgs_by_module[manager.curr_module][curr_cfg].decls:
+                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
 
-            for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
-                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)   
-            # each single cycle path is a list in the big tuple
-            for single_cycle_path in curr_path:
-                directions = cfgs_by_module[manager.curr_module][curr_cfg].compute_direction(single_cycle_path)
-                k: int = 0
-                for basic_block_idx in single_cycle_path:
-                    if basic_block_idx < 0: 
-                        # dummy node
-                        continue
+                for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
+                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)   
+                # each single cycle path is a list in the big tuple
+                for single_cycle_path in curr_path:
+                    directions = cfgs_by_module[manager.curr_module][curr_cfg].compute_direction(single_cycle_path)
+                    k: int = 0
+                    for basic_block_idx in single_cycle_path:
+                        if basic_block_idx < 0: 
+                            # dummy node
+                            continue
+                        else:
+                            direction = directions[k]
+                            k += 1
+                            basic_block = cfgs_by_module[manager.curr_module][curr_cfg].basic_block_list[basic_block_idx]
+                            for stmt in basic_block:
+                                self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
+                for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
+                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
+
+                self.done = True
+                self.check_state(manager, state)
+                self.done = False
+                manager.cycle += 1
+
+                manager.curr_level = 0
+                for module_name in manager.instances_seen:
+                    manager.instances_seen[module_name] = 0
+                    manager.instances_loc[module_name] = ""
+                if self.debug:
+                    print("------------------------")
+                if (manager.assertion_violation):
+                    print("Assertion violation")
+                    #manager.assertion_violation = False
+                    counterexample = {}
+                    symbols_to_values = {}
+                    solver_start = time.process_time()
+                    if self.solve_pc(state.pc):
+                        solver_end = time.process_time()
+                        manager.solver_time += solver_end - solver_start
+                        solved_model = state.pc.model()
+                        decls =  solved_model.decls()
+                        for item in decls:
+                            symbols_to_values[item.name()] = solved_model[item]
+
+                        # plug in phase
+                        for module in state.store:
+                            for signal in state.store[module]:
+                                for symbol in symbols_to_values:
+                                    if state.store[module][signal] == symbol:
+                                        counterexample[signal] = symbols_to_values[symbol]
+
+                        print(counterexample)
                     else:
-                        direction = directions[k]
-                        k += 1
-                        basic_block = cfgs_by_module[manager.curr_module][curr_cfg].basic_block_list[basic_block_idx]
-                        for stmt in basic_block:
-                            self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
-            for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
-                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
+                        print("UNSAT")
+                    return
 
-            self.done = True
-            self.check_state(manager, state)
-            self.done = False
-            manager.cycle += 1
-
-            manager.curr_level = 0
-            for module_name in manager.instances_seen:
-                manager.instances_seen[module_name] = 0
-                manager.instances_loc[module_name] = ""
-            if self.debug:
-                print("------------------------")
-            if (manager.assertion_violation):
-                print("Assertion violation")
-                #manager.assertion_violation = False
-                counterexample = {}
-                symbols_to_values = {}
-                solver_start = time.process_time()
-                if self.solve_pc(state.pc):
-                    solver_end = time.process_time()
-                    manager.solver_time += solver_end - solver_start
-                    solved_model = state.pc.model()
-                    decls =  solved_model.decls()
-                    for item in decls:
-                        symbols_to_values[item.name()] = solved_model[item]
-
-                    # plug in phase
-                    for module in state.store:
-                        for signal in state.store[module]:
-                            for symbol in symbols_to_values:
-                                if state.store[module][signal] == symbol:
-                                    counterexample[signal] = symbols_to_values[symbol]
-
-                    print(counterexample)
-                else:
-                    print("UNSAT")
-                return
+            curr_cfg += 1
             for module in manager.dependencies:
                 module = {}
             state.pc.reset()
