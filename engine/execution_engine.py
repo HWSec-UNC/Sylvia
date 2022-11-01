@@ -7,6 +7,7 @@ from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial, 
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Instance
 from .execution_manager import ExecutionManager
 from .symbolic_state import SymbolicState
+from .cfg import CFG
 import os
 from optparse import OptionParser
 from typing import Optional
@@ -25,6 +26,7 @@ class ExecutionEngine:
     module_depth: int = 0
     search_strategy = DepthFirst()
     debug: bool = False
+    done: bool = False
 
     def check_pc_SAT(self, s: Solver, constraint: ExprRef) -> bool:
         """Check if pc is satisfiable before taking path."""
@@ -534,9 +536,12 @@ class ExecutionEngine:
             manager: ExecutionManager = ExecutionManager()
             manager.debugging = False
             modules_dict = {}
+            # a dictionary keyed by module name, that gives the list of cfgs
+            cfgs_by_module = {}
             for module in modules:
                 modules_dict[module.name] = module
                 manager.seen_mod[module.name] = {}
+                cfgs_by_module[module.name] = []
                 sub_manager = ExecutionManager()
                 manager.names_list.append(module.name)
                 self.init_run(sub_manager, module)
@@ -548,18 +553,60 @@ class ExecutionEngine:
                     for i in range(num_instances):
                         instance_name = f"{module.name}_{i}"
                         manager.names_list.append(instance_name)
-                        manager.child_path_codes[instance_name] = to_binary(0)
-                        manager.child_num_paths[instance_name] = sub_manager.num_paths
-                        manager.config[instance_name] = to_binary(0)
+
+                        # build X CFGx for the particular module 
+                        cfg = CFG()
+                        cfg.all_nodes = []
+                        cfg.partition_points = []
+                        cfg.get_always(manager, state, ast.items)
+                        cfg_count = len(cfg.always_blocks)
+                        for k in range(cfg_count):
+
+                            cfg.basic_blocks(manager, state, cfg.always_blocks[k])
+                            cfg.partition()
+                            # print(cfg.all_nodes)
+                            # print(cfg.partition_points)
+                            # print(len(cfg.basic_block_list))
+                            # print(cfg.edgelist)
+                            cfg.build_cfg(manager, state)
+                            cfg.module_name = ast.name
+
+                            cfgs_by_module[instance_name].append(cfg)
+
+                            #print(cfg.paths)
+
+
                         state.store[instance_name] = {}
                         manager.dependencies[instance_name] = {}
                         manager.intermodule_dependencies[instance_name] = {}
                         manager.cond_assigns[instance_name] = {}
                     manager.names_list.remove(module.name)
                 else:        
-                    manager.child_path_codes[module.name] = to_binary(0)
-                    manager.child_num_paths[module.name] = sub_manager.num_paths
-                    manager.config[module.name] = to_binary(0)
+                    # build X CFGx for the particular module 
+                    cfg = CFG()
+                    cfg.all_nodes = []
+                    #cfg.partition_points = []
+                    cfg.get_always(manager, state, ast.items)
+                    cfg_count = len(cfg.always_blocks)
+                    print(f"cfg count! {cfg_count}")
+                    always_blocks_by_module = []
+                    for k in range(cfg_count):
+
+                        cfg.basic_blocks(manager, state, cfg.always_blocks[k])
+                        cfg.partition()
+                        # print(cfg.all_nodes)
+                        # print(cfg.partition_points)
+                        # print(len(cfg.basic_block_list))
+                        # print(cfg.edgelist)
+                        cfg.build_cfg(manager, state)
+                        cfg.module_name = ast.name
+                        cfgs_by_module[module.name].append(cfg)
+                        cfg.all_nodes = []
+                        cfg.partition_points.clear()
+                        cfg.partition_points.add(0)
+
+                        #print(cfg.paths)
+
                     state.store[module.name] = {}
                     manager.dependencies[module.name] = {}
                     manager.intermodule_dependencies[module.name] = {}
@@ -567,7 +614,7 @@ class ExecutionEngine:
             total_paths = 1
             for x in manager.child_num_paths.values():
                 total_paths *= x
-            #print(total_paths)
+
             # have do do things piece wise
             manager.debug = self.debug
             if total_paths > 100:
@@ -584,8 +631,14 @@ class ExecutionEngine:
             else:
                 manager.opt_1 = False
             manager.modules = modules_dict
-            paths = list(product(*manager.child_path_codes.values(), repeat=int(num_cycles)))
 
+            mapped_paths = {}
+            for module_name in cfgs_by_module:
+                for cfg in cfgs_by_module[module.name]:
+                    mapped_paths[module_name] = cfg.paths
+ 
+            total_paths = list(product(*mapped_paths.values(), repeat=int(num_cycles)))
+            #print(total_paths)
 
         if self.debug:
             manager.debug = True
@@ -596,37 +649,65 @@ class ExecutionEngine:
             manager.seen[name] = []
         manager.curr_module = manager.names_list[0]
 
+        # index into cfgs list
+        curr_cfg = 0
         stride_length = len(manager.names_list)
         # for each combinatoin of multicycle paths
-        for i in range(len(paths)):
+        for i in range(len(total_paths)):
             manager.cycle = 0
             # extract the single cycle path code for this iteration and execute, then merge the states
-            for j in range(0, len(paths[i])):
+            for j in range(0, len(total_paths[i])):
 
                 for name in manager.names_list:
-                    manager.config[name] = paths[i][j]
+                    manager.config[name] = total_paths[i][j]
             # makes assumption top level module is first in line
-            manager.path_code = paths[i][0]
+            # ! no longer path code as in bit string, but indices
+            manager.path_code = [i][0]
             manager.prev_store = state.store
             manager.init_state(state, manager.prev_store, ast)
+            
+
+            # actually want to terminate this part after the decl and comb part
             self.search_strategy.visit_module(manager, state, ast, modules_dict)
+            self.check_state(manager, state)
+
+            curr_path = total_paths[i]
+
+            #print(cfgs_by_module[manager.curr_module][curr_cfg].decls)
+
+            for node in cfgs_by_module[manager.curr_module][curr_cfg].decls:
+                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
+
+            for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
+                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)   
+            # each single cycle path is a list in the big tuple
+            for single_cycle_path in curr_path:
+                directions = cfgs_by_module[manager.curr_module][curr_cfg].compute_direction(single_cycle_path)
+                k: int = 0
+                for basic_block_idx in single_cycle_path:
+                    if basic_block_idx < 0: 
+                        # dummy node
+                        continue
+                    else:
+                        direction = directions[k]
+                        k += 1
+                        basic_block = cfgs_by_module[manager.curr_module][curr_cfg].basic_block_list[basic_block_idx]
+                        for stmt in basic_block:
+                            self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
+            for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
+                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
+
+            self.done = True
+            self.check_state(manager, state)
+            self.done = False
             manager.cycle += 1
+
             manager.curr_level = 0
             for module_name in manager.instances_seen:
                 manager.instances_seen[module_name] = 0
                 manager.instances_loc[module_name] = ""
-            if self.check_dup(manager):
-            #if False:
-                if self.debug:
-                    print("------------------------")
-                ...
-                #continue
-            else:
-                if self.debug:
-                    print("------------------------")
-                ...
-                
-            manager.seen[ast.name].append(manager.path_code)
+            if self.debug:
+                print("------------------------")
             if (manager.assertion_violation):
                 print("Assertion violation")
                 #manager.assertion_violation = False
@@ -721,3 +802,26 @@ class ExecutionEngine:
             manager.ignore = True
         self.module_depth -= 1
         #manager.is_child = False
+
+
+    def check_state(self, manager, state):
+        """Checks the status of the execution and displays the state."""
+        if self.done and manager.debug and not manager.is_child and not manager.init_run_flag and not manager.ignore and not manager.abandon:
+            print(f"Cycle {manager.cycle} final state:")
+            print(state.store)
+    
+            print(f"Cycle {manager.cycle} final path condition:")
+            print(state.pc)
+        elif self.done and not manager.is_child and manager.assertion_violation and not manager.ignore and not manager.abandon:
+            print(f"Cycle {manager.cycle} initial state:")
+            print(manager.initial_store)
+
+            print(f"Cycle {manager.cycle} final state:")
+            print(state.store)
+    
+            print(f"Cycle {manager.cycle} final path condition:")
+            print(state.pc)
+        elif manager.debug and not manager.is_child and not manager.init_run_flag and not manager.ignore:
+            print("Initial state:")
+            print(state.store)
+                

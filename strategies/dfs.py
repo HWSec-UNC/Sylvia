@@ -47,11 +47,6 @@ class DepthFirst(Search):
                 if port.name not in s.store[m.curr_module]:
                     s.store[m.curr_module][port.name] = init_symbol()
 
-
-        if m.debug and not m.is_child and not m.init_run_flag and not m.ignore:
-            print("Initial state:")
-            print(s.store)
-            ...
         
         if not m.is_child and not m.init_run_flag and not m.ignore:
             m.initial_store = copy.deepcopy(s.store) 
@@ -60,7 +55,10 @@ class DepthFirst(Search):
             if isinstance(item, Value):
                 self.visit_expr(m, s, item)
             else:
-                self.visit_stmt(m, s, item, modules)
+                continue
+                # This should be handled by exploration in always blocks
+                # self.visit_stmt(m, s, item, modules)
+        
 
         # simpl / collapsing step
         
@@ -89,24 +87,9 @@ class DepthFirst(Search):
         if m.ignore:
             ...
         
-        if m.debug and not m.is_child and not m.init_run_flag and not m.ignore and not m.abandon:
-            print(f"Cycle {m.cycle} final state:")
-            print(s.store)
-       
-            print(f"Cycle {m.cycle} final path condition:")
-            print(s.pc)
-        elif not m.is_child and m.assertion_violation and not m.ignore and not m.abandon:
-            print(f"Cycle {m.cycle} initial state:")
-            print(m.initial_store)
-
-            print(f"Cycle {m.cycle} final state:")
-            print(s.store)
-       
-            print(f"Cycle {m.cycle} final path condition:")
-            print(s.pc)
     
 
-    def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional):
+    def visit_stmt(self, m: ExecutionManager, s: SymbolicState, stmt: Node, modules: Optional[dict], direction: Optional[int]):
         "Traverse the statements in a hardware design"
         if m.ignore:
             return
@@ -115,7 +98,7 @@ class DepthFirst(Search):
                 if isinstance(item, Value):
                     self.visit_expr(m, s, item)
                 else:
-                    self.visit_stmt(m, s, item, modules)
+                    self.visit_stmt(m, s, item, modules, direction)
                 # ref_name = item.name
                 # ref_width = int(item.width.msb.value) + 1
                 #  dont want to actually call z3 here, just when looking at PC
@@ -136,7 +119,7 @@ class DepthFirst(Search):
                 if stmt in m.blocks_of_interest:
                     sub_stmt = stmt.statement
                     m.in_always = True
-                    self.visit_stmt(m, s, sub_stmt, modules)
+                    self.visit_stmt(m, s, sub_stmt, modules, direction)
                     for module in m.dependencies:
                         for signal in m.dependencies[module]:
                             if m.dependencies[module][signal] in m.updates:
@@ -196,7 +179,7 @@ class DepthFirst(Search):
             else: 
                 sub_stmt = stmt.statement
                 m.in_always = True
-                self.visit_stmt(m, s, sub_stmt, modules)
+                self.visit_stmt(m, s, sub_stmt, modules, direction)
                 for module in m.dependencies:
                     for signal in m.dependencies[module]:
                         if m.dependencies[module][signal] in m.updates:
@@ -521,20 +504,20 @@ class DepthFirst(Search):
         elif isinstance(stmt, Block):
             if m.opt_2:
                 for item in stmt.statements: 
-                    self.visit_stmt(m, s, item, modules)
+                    self.visit_stmt(m, s, item, modules, direction)
             else:
                 all_orderings = list(permutations(stmt.statements))
                 for ordering in all_orderings:
                     for item in ordering: 
-                        self.visit_stmt(m, s, item, modules)
+                        self.visit_stmt(m, s, item, modules, direction)
             
         elif isinstance(stmt, Initial):
             self.visit_stmt(m, s, stmt.statement,  modules)
         elif isinstance(stmt, IfStatement):
             m.curr_level += 1
             self.cond = True
-            bit_index = len(m.path_code) - m.curr_level
-            if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
+            bit_index = m.curr_level
+            if (direction):
                 self.branch = True
 
                 for lhs in m.cond_assigns[m.curr_module]:
@@ -554,7 +537,7 @@ class DepthFirst(Search):
                 #if nested_ifs == 0 and m.curr_level < 2 and self.seen_all_cases(m, bit_index, nested_ifs):
                 if m.seen_all_cases(m, bit_index, nested_ifs):
                     m.completed.append(bit_index)
-                self.visit_stmt(m, s, stmt.true_statement,  modules)
+                #self.visit_stmt(m, s, stmt.true_statement,  modules, direction)
             else:
                 m.count_conditionals_2(m, stmt.true_statement)
                 self.branch = False
@@ -570,13 +553,13 @@ class DepthFirst(Search):
                     print("Abandoning this path!")
 
                     return
-                self.visit_stmt(m, s, stmt.false_statement,  modules)
+                #self.visit_stmt(m, s, stmt.false_statement,  modules, direction)
         elif isinstance(stmt, ForStatement):
             print("FOR")
             m.curr_level += 1
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
-            if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
+            if (direction):
                 self.branch = True
 
                 for lhs in m.cond_assigns[m.curr_module]:
@@ -622,11 +605,11 @@ class DepthFirst(Search):
                     print("Abandoning this path!")
 
                     return
-                self.visit_stmt(m, s, stmt.statement,  modules)
+                self.visit_stmt(m, s, stmt.statement,  modules, direction)
         elif isinstance(stmt, SystemCall):
             m.assertion_violation = True
         elif isinstance(stmt, SingleStatement):
-            self.visit_stmt(m, s, stmt.statement,  modules)
+            self.visit_stmt(m, s, stmt.statement,  modules, direction)
         elif isinstance(stmt, InstanceList):
             if not stmt.module in m.instances_seen:
                 m.instances_seen[stmt.module] = 1
@@ -674,7 +657,7 @@ class DepthFirst(Search):
             self.cond = True
             bit_index = len(m.path_code) - m.curr_level
 
-            if (m.path_code[len(m.path_code) - m.curr_level] == '1'):
+            if (direction):
                 self.branch = True
                 for lhs in m.cond_assigns[m.curr_module]:
                     if str(stmt.cond) in m.cond_assigns[m.curr_module][lhs]:
@@ -716,13 +699,14 @@ class DepthFirst(Search):
         elif isinstance(stmt, CaseStatement):
             m.curr_case = stmt.comp
             for case in stmt.caselist:
-                self.visit_stmt(m, s, case, modules)
+                self.visit_stmt(m, s, case, modules, direction)
 
     def visit_expr(self, m: ExecutionManager, s: SymbolicState, expr: Value) -> None:
         """Traverse the expressions in a hardware design."""
         if isinstance(expr, Reg):
             if not expr.name in m.reg_writes:
-                if m.cycle == 0: 
+                if m.cycle == 0:
+                    #print(expr.name)
                     s.store[m.curr_module][expr.name] = init_symbol()
                 m.reg_writes.add(expr.name)
                 m.reg_decls.add(expr.name)
@@ -886,7 +870,7 @@ class DepthFirst(Search):
                     return
         elif isinstance(expr, Operator):
             #TODO Fix?
-            new_val = evaluate(parse_tokens(tokenize(expr, s, m)), s, m)
+            new_val = simpl_str_exp(evaluate(parse_tokens(tokenize(expr, s, m)),s,m), s, m)
             x = BitVec(new_val, 1)
             one = IntVal(1)
             one_bv = Int2BV(one, 1)
