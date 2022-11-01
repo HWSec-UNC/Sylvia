@@ -214,32 +214,27 @@ class CFG:
         """Slices up the list of all nodes into the actual basic blocks"""
         self.partition_points.add(len(self.all_nodes)-1)
         partition_list = list(self.partition_points)
-        print(self.all_nodes)
-        print(partition_list)
         for i in range(len(partition_list)):
             if i == len(partition_list) - 1: 
-                print(len(self.all_nodes))
-                print(self.all_nodes)
-                print(partition_list)
-                print(i)
-                if not self.all_nodes[partition_list[i]] is None:
+                if partition_list[i] < len(self.all_nodes):
                     basic_block = [self.all_nodes[partition_list[i]]]
                 else:
                     #idk if this is right
                     basic_block = [self.all_nodes[len(self.all_nodes)-1]]
                 self.basic_block_list.append(basic_block)
             elif i > 0: 
-                print("B")
                 basic_block = self.all_nodes[partition_list[i]+1:partition_list[i+1]+1]
                 self.basic_block_list.append(basic_block)
             else:
-                print("C")
                 basic_block = self.all_nodes[partition_list[i]:partition_list[i+1]+1]
                 self.basic_block_list.append(basic_block)
 
     def find_basic_block(self, node_idx) -> int:
         """Given a node index, find the index of the basic block that we're in."""
-        node = self.all_nodes[node_idx]
+        if node_idx < len(self.all_nodes):
+            node = self.all_nodes[node_idx]
+        else:
+            node = self.all_nodes[len(self.all_nodes)-1]
         found_block = None
         for block in self.basic_block_list:
             if node in block:
