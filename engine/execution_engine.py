@@ -733,11 +733,13 @@ class ExecutionEngine:
                     else:
                         print("UNSAT")
                     return
+                
+                state.pc.reset()
 
             curr_cfg += 1
             for module in manager.dependencies:
                 module = {}
-            state.pc.reset()
+                
             
             manager.ignore = False
             manager.abandon = False
