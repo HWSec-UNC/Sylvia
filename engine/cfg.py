@@ -16,7 +16,7 @@ from typing import Optional
 import random, string
 import time
 import gc
-from itertools import product, permutations
+from itertools import product, permutations, combinations
 import logging
 from helpers.utils import to_binary
 from strategies.dfs import DepthFirst
@@ -64,6 +64,32 @@ class CFG:
     # the nodes in the AST that correspond to always blocks
     always_blocks = []
 
+    # branch-point set
+    # for each basic statement, there may be some indpendent branching points
+    ind_branch_points = {1: set()}
+
+    # stack of flags for if we are looking at a block statement
+    block_smt = [False]
+
+    # how many nested block statements we've seen so far
+    block_stmt_depth = 0
+
+    def reset(self):
+        """Return to defaults."""
+        self.basic_block_list = []
+        self.curr_idx = 0
+        self.all_nodes = []
+        self.partition_points = set()
+        self.partition_points.add(0)
+        self.edgelist = []
+        self.cfg_edges = []
+        self.leaves = set()
+        self.paths = []
+        self.always_blocks = []
+        self.ind_branch_points = {1: set()}
+        self.block_smt = [False]
+        self.block_stmt_depth = 0
+
     def compute_direction(self, path):
         """Given a path, figure out the direction"""
         directions = []
@@ -74,6 +100,15 @@ class CFG:
                 directions.append(0)
         return directions
     
+    def resolve_independent_branch_pts(self, idx):
+        """After visiting a basic block, form edges between the branching points at that same level."""
+        if len(self.ind_branch_points[idx]) <= 1:
+            return 
+
+        res = list(combinations(self.ind_branch_points[idx], r=len(self.ind_branch_points[idx])))
+
+        self.edgelist += res 
+
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
         """Populate the always block list."""
         if isinstance(ast, Block):
@@ -128,20 +163,26 @@ class CFG:
     def basic_blocks(self, m:ExecutionManager, s: SymbolicState, ast):
         """We want to get a list of AST nodes partitioned into basic blocks.
         Need to keep track of children/parent indices of each block in the list."""
-
         if hasattr(ast, '__iter__'):
             for item in ast:
+                if self.block_smt[self.block_stmt_depth] and (isinstance(item, IfStatement) or isinstance(item, CaseStatement)
+                or isinstance(item, ForStatement)):
+                    if not self.block_stmt_depth in self.ind_branch_points:
+                        self.ind_branch_points[self.block_stmt_depth] = set()
+
+                    self.ind_branch_points[self.block_stmt_depth].add(self.curr_idx)
+
                 if isinstance(item, IfStatement):
                     self.all_nodes.append(item)
                     self.partition_points.add(self.curr_idx)
                     parent_idx = self.curr_idx
-                    self.curr_idx += 1
+                    self.basic_blocks(m, s, item.true_statement) 
                     edge_1 = (parent_idx, self.curr_idx)
                     self.partition_points.add(self.curr_idx)
-                    self.basic_blocks(m, s, item.true_statement) 
+                    self.basic_blocks(m, s, item.false_statement)
                     edge_2 = (parent_idx, self.curr_idx)
                     self.partition_points.add(self.curr_idx)
-                    self.basic_blocks(m, s, item.false_statement)
+                    self.curr_idx += 1
                     self.edgelist.append(edge_1)
                     self.edgelist.append(edge_2)
                 elif isinstance(item, CaseStatement):
@@ -155,6 +196,7 @@ class CFG:
                     self.curr_idx += 1
                     self.basic_blocks(m, s, item.statement) 
                 elif isinstance(item, Block):
+                    print("found block stmt")
                     self.basic_blocks(m, s, item.items)
                 elif isinstance(item, Always):
                     self.all_nodes.append(item)
@@ -193,7 +235,15 @@ class CFG:
                 self.curr_idx += 1
                 self.basic_blocks(m, s, ast.statement) 
             elif isinstance(ast, Block):
+                self.block_stmt_depth += 1
+                self.block_smt.append(True)
+                print("found other block statement")
+                print(ast.statements)
                 self.basic_blocks(m, s, ast.statements)
+                if self.block_stmt_depth in self.ind_branch_points:
+                    self.resolve_independent_branch_pts(self.block_stmt_depth)
+                self.block_smt.pop()
+                self.block_stmt_depth -= 1
             elif isinstance(ast, Always):
                 self.all_nodes.append(ast)
                 self.curr_idx += 1
@@ -214,15 +264,8 @@ class CFG:
         """Slices up the list of all nodes into the actual basic blocks"""
         self.partition_points.add(len(self.all_nodes)-1)
         partition_list = list(self.partition_points)
-        for i in range(len(partition_list)):
-            if i == len(partition_list) - 1: 
-                if partition_list[i] < len(self.all_nodes):
-                    basic_block = [self.all_nodes[partition_list[i]]]
-                else:
-                    #idk if this is right
-                    basic_block = [self.all_nodes[len(self.all_nodes)-1]]
-                self.basic_block_list.append(basic_block)
-            elif i > 0: 
+        for i in range(len(partition_list)-1):
+            if i > 0: 
                 basic_block = self.all_nodes[partition_list[i]+1:partition_list[i+1]+1]
                 self.basic_block_list.append(basic_block)
             else:
@@ -279,6 +322,10 @@ class CFG:
             start = edge[0]
             end = edge[1]
             G.add_edge(start, end)
+        
+        # edgecase lol
+        if self.edgelist == []:
+            G.add_edge(0, -2)
 
         # link up dummy start
         G.add_edge(-1, 0)
@@ -290,7 +337,7 @@ class CFG:
 
         #print(G.edges())
 
-        #self.display_cfg(G)
+        self.display_cfg(G)
 
         #traversed = nx.edge_dfs(G, source=-1)
         self.paths = list(nx.all_simple_paths(G, source=-1, target=-2))

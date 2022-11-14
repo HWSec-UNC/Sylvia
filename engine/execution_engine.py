@@ -19,6 +19,7 @@ import logging
 from helpers.utils import to_binary
 from strategies.dfs import DepthFirst
 import sys
+from copy import deepcopy
 
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
 
@@ -540,6 +541,7 @@ class ExecutionEngine:
             cfgs_by_module = {}
             for module in modules:
                 modules_dict[module.name] = module
+                always_blocks_by_module = {module.name: []}
                 manager.seen_mod[module.name] = {}
                 cfgs_by_module[module.name] = []
                 sub_manager = ExecutionManager()
@@ -589,22 +591,18 @@ class ExecutionEngine:
                     cfg.get_always(manager, state, ast.items)
                     cfg_count = len(cfg.always_blocks)
                     print(f"cfg count! {cfg_count}")
-                    always_blocks_by_module = []
+                    always_blocks_by_module[module.name] = deepcopy(cfg.always_blocks)
                     for k in range(cfg_count):
-
-                        cfg.basic_blocks(manager, state, cfg.always_blocks[k])
+                        cfg.basic_blocks(manager, state, always_blocks_by_module[module.name][k])
                         cfg.partition()
-                        # print(cfg.all_nodes)
                         # print(cfg.partition_points)
                         # print(len(cfg.basic_block_list))
                         # print(cfg.edgelist)
                         cfg.build_cfg(manager, state)
+                        print(cfg.cfg_edges)
                         cfg.module_name = ast.name
-                        cfgs_by_module[module.name].append(cfg)
-                        cfg.all_nodes = []
-                        cfg.partition_points.clear()
-                        cfg.partition_points.add(0)
-
+                        cfgs_by_module[module.name].append(deepcopy(cfg))
+                        cfg.reset()
                         #print(cfg.paths)
 
                     state.store[module.name] = {}
@@ -681,6 +679,9 @@ class ExecutionEngine:
                 for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
                     self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)   
                 # each single cycle path is a list in the big tuple
+                # print(cfgs_by_module[manager.curr_module][0].basic_block_list)
+                # print(cfgs_by_module[manager.curr_module][0].edgelist)
+                # print(cfgs_by_module[manager.curr_module][0].cfg_edges)
                 for single_cycle_path in curr_path:
                     directions = cfgs_by_module[manager.curr_module][curr_cfg].compute_direction(single_cycle_path)
                     k: int = 0

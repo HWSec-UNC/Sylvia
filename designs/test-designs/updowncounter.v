@@ -28,6 +28,13 @@ module updowncounter(
             internalvalue <= internalvalue + 1;
         end
     end 
+
+        
+    always @(posedge clock) begin
+       internalvalue <= internalvalue + 1;
+    end 
+
+    
     
     assign value = internalvalue;
 
