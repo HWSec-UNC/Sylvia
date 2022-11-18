@@ -14,7 +14,7 @@ from typing import Optional
 import random, string
 import time
 import gc
-from itertools import product, permutations
+from itertools import product
 import logging
 from helpers.utils import to_binary
 from strategies.dfs import DepthFirst
@@ -431,7 +431,7 @@ class ExecutionEngine:
                 manager.cond_assigns[module.name] = {}
 
         total_paths = sum(manager.child_num_paths.values())
-        print(total_paths)
+        #print(total_paths)
         manager.piece_wise = True
         #TODO: things piecewise, say 10,000 at a time.
         for i in range(0, total_paths, 10):
@@ -590,7 +590,6 @@ class ExecutionEngine:
                     #cfg.partition_points = []
                     cfg.get_always(manager, state, ast.items)
                     cfg_count = len(cfg.always_blocks)
-                    print(f"cfg count! {cfg_count}")
                     always_blocks_by_module[module.name] = deepcopy(cfg.always_blocks)
                     for k in range(cfg_count):
                         cfg.basic_blocks(manager, state, always_blocks_by_module[module.name][k])
@@ -599,7 +598,7 @@ class ExecutionEngine:
                         # print(len(cfg.basic_block_list))
                         # print(cfg.edgelist)
                         cfg.build_cfg(manager, state)
-                        print(cfg.cfg_edges)
+                        #print(cfg.cfg_edges)
                         cfg.module_name = ast.name
                         cfgs_by_module[module.name].append(deepcopy(cfg))
                         cfg.reset()
@@ -640,104 +639,112 @@ class ExecutionEngine:
         manager.seen = {}
         for name in manager.names_list:
             manager.seen[name] = []
+
+            # each module has a mapping table of cfg idx to path list
+            mapped_paths[name] = {}
         manager.curr_module = manager.names_list[0]
 
         # index into cfgs list
         curr_cfg = 0
         for cfg in cfgs_by_module[manager.curr_module]:
-            mapped_paths[manager.curr_module] = cfg.paths
-            print(f"Currently executing CFG {curr_cfg}")
-            total_paths = list(product(*mapped_paths.values(), repeat=int(num_cycles)))
+            mapped_paths[manager.curr_module][curr_cfg] = cfg.paths
+            curr_cfg += 1
 
-            stride_length = len(manager.names_list)
+
+        stride_length = cfg_count
+        single_paths = list(product(*mapped_paths[manager.curr_module].values()))
+        total_paths = list(tuple(product(single_paths, repeat=int(num_cycles))))
+
         # for each combinatoin of multicycle paths
-            for i in range(len(total_paths)):
-                manager.cycle = 0
-                # extract the single cycle path code for this iteration and execute, then merge the states
-                for j in range(0, len(total_paths[i])):
-
-                    for name in manager.names_list:
-                        manager.config[name] = total_paths[i][j]
-                # makes assumption top level module is first in line
-                # ! no longer path code as in bit string, but indices
-                manager.path_code = [i][0]
-                manager.prev_store = state.store
-                manager.init_state(state, manager.prev_store, ast)
-                
-
-                # actually want to terminate this part after the decl and comb part
-                self.search_strategy.visit_module(manager, state, ast, modules_dict)
-                self.check_state(manager, state)
-
-                curr_path = total_paths[i]
-
-                #print(cfgs_by_module[manager.curr_module][curr_cfg].decls)
-
-                for node in cfgs_by_module[manager.curr_module][curr_cfg].decls:
+        for i in range(len(total_paths)):
+            for cfg_idx in range(cfg_count):
+                for node in cfgs_by_module[manager.curr_module][cfg_idx].decls:
                     self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
+                for node in cfgs_by_module[manager.curr_module][cfg_idx].comb:
+                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None) 
+   
+            # extract the single cycle path code for this iteration and execute, then merge the states
+            for j in range(0, len(total_paths[i])):
 
-                for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
-                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)   
-                # each single cycle path is a list in the big tuple
-                # print(cfgs_by_module[manager.curr_module][0].basic_block_list)
-                # print(cfgs_by_module[manager.curr_module][0].edgelist)
-                # print(cfgs_by_module[manager.curr_module][0].cfg_edges)
-                for single_cycle_path in curr_path:
-                    directions = cfgs_by_module[manager.curr_module][curr_cfg].compute_direction(single_cycle_path)
+                for name in manager.names_list:
+                    manager.config[name] = total_paths[i][j]
+            # makes assumption top level module is first in line
+            # ! no longer path code as in bit string, but indices
+            manager.path_code = [i][0]
+            manager.prev_store = state.store
+            manager.init_state(state, manager.prev_store, ast)
+            
+
+            # actually want to terminate this part after the decl and comb part
+            self.search_strategy.visit_module(manager, state, ast, modules_dict)
+            self.check_state(manager, state)
+
+            curr_path = total_paths[i]
+
+            #print(cfgs_by_module[manager.curr_module][curr_cfg].decls)
+  
+            # each single cycle path is a list in the big tuple
+            # print(cfgs_by_module[manager.curr_module][0].basic_block_list)
+            # print(cfgs_by_module[manager.curr_module][0].edgelist)
+            # print(cfgs_by_module[manager.curr_module][0].cfg_edges)
+            manager.cycle = 0
+            for complete_single_cycle_path in curr_path:
+                for cfg_path in complete_single_cycle_path:
+                    directions = cfgs_by_module[manager.curr_module][complete_single_cycle_path.index(cfg_path)].compute_direction(cfg_path)
                     k: int = 0
-                    for basic_block_idx in single_cycle_path:
+                    for basic_block_idx in cfg_path:
                         if basic_block_idx < 0: 
                             # dummy node
                             continue
                         else:
                             direction = directions[k]
                             k += 1
-                            basic_block = cfgs_by_module[manager.curr_module][curr_cfg].basic_block_list[basic_block_idx]
+                            basic_block = cfgs_by_module[manager.curr_module][complete_single_cycle_path.index(cfg_path)].basic_block_list[basic_block_idx]
                             for stmt in basic_block:
                                 self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
-                for node in cfgs_by_module[manager.curr_module][curr_cfg].comb:
-                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
-
-                self.done = True
-                self.check_state(manager, state)
-                self.done = False
                 manager.cycle += 1
+            # only do once, and the last CFG 
+            for node in cfgs_by_module[manager.curr_module][cfg_count-1].comb:
+                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
+            manager.cycle = 0
+            self.done = True
+            self.check_state(manager, state)
+            self.done = False
 
-                manager.curr_level = 0
-                for module_name in manager.instances_seen:
-                    manager.instances_seen[module_name] = 0
-                    manager.instances_loc[module_name] = ""
-                if self.debug:
-                    print("------------------------")
-                if (manager.assertion_violation):
-                    print("Assertion violation")
-                    #manager.assertion_violation = False
-                    counterexample = {}
-                    symbols_to_values = {}
-                    solver_start = time.process_time()
-                    if self.solve_pc(state.pc):
-                        solver_end = time.process_time()
-                        manager.solver_time += solver_end - solver_start
-                        solved_model = state.pc.model()
-                        decls =  solved_model.decls()
-                        for item in decls:
-                            symbols_to_values[item.name()] = solved_model[item]
+            manager.curr_level = 0
+            for module_name in manager.instances_seen:
+                manager.instances_seen[module_name] = 0
+                manager.instances_loc[module_name] = ""
+            if self.debug:
+                print("------------------------")
+            if (manager.assertion_violation):
+                print("Assertion violation")
+                #manager.assertion_violation = False
+                counterexample = {}
+                symbols_to_values = {}
+                solver_start = time.process_time()
+                if self.solve_pc(state.pc):
+                    solver_end = time.process_time()
+                    manager.solver_time += solver_end - solver_start
+                    solved_model = state.pc.model()
+                    decls =  solved_model.decls()
+                    for item in decls:
+                        symbols_to_values[item.name()] = solved_model[item]
 
-                        # plug in phase
-                        for module in state.store:
-                            for signal in state.store[module]:
-                                for symbol in symbols_to_values:
-                                    if state.store[module][signal] == symbol:
-                                        counterexample[signal] = symbols_to_values[symbol]
+                    # plug in phase
+                    for module in state.store:
+                        for signal in state.store[module]:
+                            for symbol in symbols_to_values:
+                                if state.store[module][signal] == symbol:
+                                    counterexample[signal] = symbols_to_values[symbol]
 
-                        print(counterexample)
-                    else:
-                        print("UNSAT")
-                    return
-                
-                state.pc.reset()
+                    print(counterexample)
+                else:
+                    print("UNSAT")
+                return
+            
+            state.pc.reset()
 
-            curr_cfg += 1
             for module in manager.dependencies:
                 module = {}
                 

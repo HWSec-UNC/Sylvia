@@ -179,7 +179,7 @@ class DepthFirst(Search):
             else: 
                 sub_stmt = stmt.statement
                 m.in_always = True
-                self.visit_stmt(m, s, sub_stmt, modules, direction)
+                #self.visit_stmt(m, s, sub_stmt, modules, direction)
                 for module in m.dependencies:
                     for signal in m.dependencies[module]:
                         if m.dependencies[module][signal] in m.updates:

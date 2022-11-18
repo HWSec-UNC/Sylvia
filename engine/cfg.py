@@ -238,7 +238,6 @@ class CFG:
                 self.block_stmt_depth += 1
                 self.block_smt.append(True)
                 print("found other block statement")
-                print(ast.statements)
                 self.basic_blocks(m, s, ast.statements)
                 if self.block_stmt_depth in self.ind_branch_points:
                     self.resolve_independent_branch_pts(self.block_stmt_depth)
@@ -337,7 +336,7 @@ class CFG:
 
         #print(G.edges())
 
-        self.display_cfg(G)
+        #self.display_cfg(G)
 
         #traversed = nx.edge_dfs(G, source=-1)
         self.paths = list(nx.all_simple_paths(G, source=-1, target=-2))
