@@ -140,7 +140,7 @@ class CFG:
         elif ast != None:
             if isinstance(ast, IfStatement):
                 self.get_always(m, s, ast.true_statement) 
-                self.basic_blocks(m, s, ast.false_statement)
+                self.get_always(m, s, ast.false_statement)
             elif isinstance(ast, CaseStatement):
                 self.get_always(m, s, ast.caselist)
             elif isinstance(ast, ForStatement):

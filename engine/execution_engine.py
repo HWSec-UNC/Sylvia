@@ -539,6 +539,7 @@ class ExecutionEngine:
             modules_dict = {}
             # a dictionary keyed by module name, that gives the list of cfgs
             cfgs_by_module = {}
+            cfg_count_by_module = {}
             for module in modules:
                 modules_dict[module.name] = module
                 always_blocks_by_module = {module.name: []}
@@ -560,12 +561,12 @@ class ExecutionEngine:
                         # build X CFGx for the particular module 
                         cfg = CFG()
                         cfg.all_nodes = []
+                        cfg.always_blocks = []
                         cfg.partition_points = set()
                         cfg.partition_points.add(0)
                         cfg.get_always(manager, state, ast.items)
                         cfg_count = len(cfg.always_blocks)
                         for k in range(cfg_count):
-
                             cfg.basic_blocks(manager, state, cfg.always_blocks[k])
                             cfg.partition()
                             # print(cfg.all_nodes)
