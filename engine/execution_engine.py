@@ -524,8 +524,6 @@ class ExecutionEngine:
             for i in range(len(paths)):
                 for j in range(len(paths[i])):
                     manager.config[manager.names_list[j]] = paths[i][j]
-
-
     #@profile     
     def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager], directives, num_cycles: int) -> None:
         """Drives symbolic execution."""
@@ -560,11 +558,8 @@ class ExecutionEngine:
                         cfgs_by_module[instance_name] = []
                         # build X CFGx for the particular module 
                         cfg = CFG()
-                        cfg.all_nodes = []
-                        cfg.always_blocks = []
-                        cfg.partition_points = set()
-                        cfg.partition_points.add(0)
-                        cfg.get_always(manager, state, ast.items)
+                        cfg.reset()
+                        cfg.get_always(manager, state, module.items)
                         cfg_count = len(cfg.always_blocks)
                         for k in range(cfg_count):
                             cfg.basic_blocks(manager, state, cfg.always_blocks[k])
@@ -576,7 +571,7 @@ class ExecutionEngine:
                             cfg.build_cfg(manager, state)
                             cfg.module_name = ast.name
 
-                            cfgs_by_module[instance_name].append(cfg)
+                            cfgs_by_module[instance_name].append(deepcopy(cfg))
                             cfg.reset()
                             #print(cfg.paths)
 
@@ -649,18 +644,27 @@ class ExecutionEngine:
 
         # index into cfgs list
         curr_cfg = 0
-        for cfg in cfgs_by_module[manager.curr_module]:
-            mapped_paths[manager.curr_module][curr_cfg] = cfg.paths
-            curr_cfg += 1
+        for module_name in cfgs_by_module:
+            for cfg in cfgs_by_module[module_name]:
+                mapped_paths[module_name][curr_cfg] = cfg.paths
+                curr_cfg += 1
+            curr_cfg = 0
 
+        print(mapped_paths)
 
         stride_length = cfg_count
-        single_paths = list(product(*mapped_paths[manager.curr_module].values()))
-        total_paths = list(tuple(product(single_paths, repeat=int(num_cycles))))
+        paths_by_module = {}
+        for module_name in cfgs_by_module:
+            paths_by_module[module_name] = list(product(*mapped_paths[module_name].values()))
+        print(paths_by_module)
+        #single_paths = list(product(*mapped_paths[manager.curr_module].values()))
+        #total_paths = list(tuple(product(single_paths, repeat=int(num_cycles))))
 
         # for each combinatoin of multicycle paths
-        print(cfg_count)
+
         print(cfgs_by_module)
+        print(total_paths)
+        exit()
         for i in range(len(total_paths)):
             for cfg_idx in range(cfg_count):
                 for node in cfgs_by_module[manager.curr_module][cfg_idx].decls:

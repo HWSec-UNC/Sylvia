@@ -336,7 +336,7 @@ class CFG:
 
         #print(G.edges())
 
-        #self.display_cfg(G)
+        self.display_cfg(G)
 
         #traversed = nx.edge_dfs(G, source=-1)
         self.paths = list(nx.all_simple_paths(G, source=-1, target=-2))
