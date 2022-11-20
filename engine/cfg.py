@@ -192,7 +192,7 @@ class CFG:
                     self.basic_blocks(m, s, item.caselist) 
                 elif isinstance(item, ForStatement):
                     self.all_nodes.append(ast)
-                    self.partition_points.append(self.curr_idx)
+                    self.partition_points.add(self.curr_idx)
                     self.curr_idx += 1
                     self.basic_blocks(m, s, item.statement) 
                 elif isinstance(item, Block):

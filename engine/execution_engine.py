@@ -552,14 +552,16 @@ class ExecutionEngine:
                     manager.instances_seen[module.name] = 0
                     manager.instances_loc[module.name] = ""
                     num_instances = manager.instance_count[module.name]
+                    cfgs_by_module.pop(module.name, None)
                     for i in range(num_instances):
                         instance_name = f"{module.name}_{i}"
                         manager.names_list.append(instance_name)
-
+                        cfgs_by_module[instance_name] = []
                         # build X CFGx for the particular module 
                         cfg = CFG()
                         cfg.all_nodes = []
-                        cfg.partition_points = []
+                        cfg.partition_points = set()
+                        cfg.partition_points.add(0)
                         cfg.get_always(manager, state, ast.items)
                         cfg_count = len(cfg.always_blocks)
                         for k in range(cfg_count):
@@ -574,7 +576,7 @@ class ExecutionEngine:
                             cfg.module_name = ast.name
 
                             cfgs_by_module[instance_name].append(cfg)
-
+                            cfg.reset()
                             #print(cfg.paths)
 
 
@@ -656,6 +658,8 @@ class ExecutionEngine:
         total_paths = list(tuple(product(single_paths, repeat=int(num_cycles))))
 
         # for each combinatoin of multicycle paths
+        print(cfg_count)
+        print(cfgs_by_module)
         for i in range(len(total_paths)):
             for cfg_idx in range(cfg_count):
                 for node in cfgs_by_module[manager.curr_module][cfg_idx].decls:
