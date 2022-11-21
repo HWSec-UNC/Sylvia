@@ -8,6 +8,7 @@ from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, Strin
 from .execution_manager import ExecutionManager
 from .symbolic_state import SymbolicState
 from .cfg import CFG
+import re
 import os
 from optparse import OptionParser
 from typing import Optional
@@ -524,6 +525,7 @@ class ExecutionEngine:
             for i in range(len(paths)):
                 for j in range(len(paths[i])):
                     manager.config[manager.names_list[j]] = paths[i][j]
+
     #@profile     
     def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager], directives, num_cycles: int) -> None:
         """Drives symbolic execution."""
@@ -544,7 +546,6 @@ class ExecutionEngine:
                 manager.seen_mod[module.name] = {}
                 cfgs_by_module[module.name] = []
                 sub_manager = ExecutionManager()
-                manager.names_list.append(module.name)
                 self.init_run(sub_manager, module)
                 self.module_count(manager, module.items) 
                 if module.name in manager.instance_count:
@@ -580,8 +581,8 @@ class ExecutionEngine:
                         manager.dependencies[instance_name] = {}
                         manager.intermodule_dependencies[instance_name] = {}
                         manager.cond_assigns[instance_name] = {}
-                    manager.names_list.remove(module.name)
-                else:        
+                else: 
+                    manager.names_list.append(module.name)
                     # build X CFGx for the particular module 
                     cfg = CFG()
                     cfg.all_nodes = []
@@ -653,18 +654,21 @@ class ExecutionEngine:
         print(mapped_paths)
 
         stride_length = cfg_count
-        paths_by_module = {}
+        single_paths_by_module = {}
+        total_paths_by_module = {}
         for module_name in cfgs_by_module:
-            paths_by_module[module_name] = list(product(*mapped_paths[module_name].values()))
-        print(paths_by_module)
+            single_paths_by_module[module_name] = list(product(*mapped_paths[module_name].values()))
+            total_paths_by_module[module_name] = list(tuple(product(single_paths_by_module[module_name], repeat=int(num_cycles))))
+        print(f"tp {total_paths_by_module}")
+        keys, values = zip(*total_paths_by_module.items())
+        total_paths = [dict(zip(keys, path)) for path in product(*values)]
+        #print(total_paths)
+        
         #single_paths = list(product(*mapped_paths[manager.curr_module].values()))
         #total_paths = list(tuple(product(single_paths, repeat=int(num_cycles))))
 
         # for each combinatoin of multicycle paths
 
-        print(cfgs_by_module)
-        print(total_paths)
-        exit()
         for i in range(len(total_paths)):
             for cfg_idx in range(cfg_count):
                 for node in cfgs_by_module[manager.curr_module][cfg_idx].decls:
@@ -672,46 +676,44 @@ class ExecutionEngine:
                 for node in cfgs_by_module[manager.curr_module][cfg_idx].comb:
                     self.search_strategy.visit_stmt(manager, state, node, modules_dict, None) 
    
-            # extract the single cycle path code for this iteration and execute, then merge the states
-            for j in range(0, len(total_paths[i])):
-
-                for name in manager.names_list:
-                    manager.config[name] = total_paths[i][j]
+            manager.curr_module = manager.names_list[0]
             # makes assumption top level module is first in line
             # ! no longer path code as in bit string, but indices
-            manager.path_code = [i][0]
             manager.prev_store = state.store
             manager.init_state(state, manager.prev_store, ast)
-            
 
-            # actually want to terminate this part after the decl and comb part
-            self.search_strategy.visit_module(manager, state, ast, modules_dict)
+            # initalize inputs with symbols for all submodules too
+            for module_name in manager.names_list:
+                manager.curr_module = module_name
+                # actually want to terminate this part after the decl and comb part
+                self.search_strategy.visit_module(manager, state, ast, modules_dict)
+            
             self.check_state(manager, state)
 
             curr_path = total_paths[i]
 
-            #print(cfgs_by_module[manager.curr_module][curr_cfg].decls)
-  
-            # each single cycle path is a list in the big tuple
-            # print(cfgs_by_module[manager.curr_module][0].basic_block_list)
-            # print(cfgs_by_module[manager.curr_module][0].edgelist)
-            # print(cfgs_by_module[manager.curr_module][0].cfg_edges)
-            manager.cycle = 0
-            for complete_single_cycle_path in curr_path:
-                for cfg_path in complete_single_cycle_path:
-                    directions = cfgs_by_module[manager.curr_module][complete_single_cycle_path.index(cfg_path)].compute_direction(cfg_path)
-                    k: int = 0
-                    for basic_block_idx in cfg_path:
-                        if basic_block_idx < 0: 
-                            # dummy node
-                            continue
-                        else:
-                            direction = directions[k]
-                            k += 1
-                            basic_block = cfgs_by_module[manager.curr_module][complete_single_cycle_path.index(cfg_path)].basic_block_list[basic_block_idx]
-                            for stmt in basic_block:
-                                self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
-                manager.cycle += 1
+            modules_seen = 0
+            for module_name in curr_path:
+                manager.curr_module = manager.names_list[modules_seen]
+                manager.cycle = 0
+                for complete_single_cycle_path in curr_path[module_name]:
+                    for cfg_path in complete_single_cycle_path:
+                        directions = cfgs_by_module[module_name][complete_single_cycle_path.index(cfg_path)].compute_direction(cfg_path)
+                        k: int = 0
+                        for basic_block_idx in cfg_path:
+                            if basic_block_idx < 0: 
+                                # dummy node
+                                continue
+                            else:
+                                direction = directions[k]
+                                k += 1
+                                basic_block = cfgs_by_module[module_name][complete_single_cycle_path.index(cfg_path)].basic_block_list[basic_block_idx]
+                                for stmt in basic_block:
+                                    print(manager.curr_module)
+                                    self.check_state(manager, state)
+                                    self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
+                    manager.cycle += 1
+                modules_seen += 1
             # only do once, and the last CFG 
             for node in cfgs_by_module[manager.curr_module][cfg_count-1].comb:
                 self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  

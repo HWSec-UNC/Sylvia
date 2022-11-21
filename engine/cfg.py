@@ -74,6 +74,9 @@ class CFG:
     # how many nested block statements we've seen so far
     block_stmt_depth = 0
 
+    #submodules defined
+    submodules = []
+
     def reset(self):
         """Return to defaults."""
         self.basic_block_list = []
@@ -136,6 +139,10 @@ class CFG:
                         self.decls.append(item)
                     elif isinstance(item, Assign):
                         self.comb.append(item)
+                    elif isinstance(item, InstanceList):
+                        print("FOUND SUBModule!")
+                        print(item.module)
+                        self.submodules.append(item)
                     ...
         elif ast != None:
             if isinstance(ast, IfStatement):
@@ -158,6 +165,8 @@ class CFG:
                     self.decls.append(ast)
                 elif isinstance(ast, Assign):
                     self.comb.append(ast)
+                elif isinstance(item, InstanceList):
+                    print("FOUND SUBModule!")
                 ...
 
     def basic_blocks(self, m:ExecutionManager, s: SymbolicState, ast):
@@ -336,7 +345,7 @@ class CFG:
 
         #print(G.edges())
 
-        self.display_cfg(G)
+        #self.display_cfg(G)
 
         #traversed = nx.edge_dfs(G, source=-1)
         self.paths = list(nx.all_simple_paths(G, source=-1, target=-2))
