@@ -670,6 +670,15 @@ class ExecutionEngine:
         # for each combinatoin of multicycle paths
 
         for i in range(len(total_paths)):
+            manager.prev_store = state.store
+            manager.init_state(state, manager.prev_store, ast)
+
+            # initalize inputs with symbols for all submodules too
+            for module_name in manager.names_list:
+                manager.curr_module = module_name
+                # actually want to terminate this part after the decl and comb part
+                self.search_strategy.visit_module(manager, state, ast, modules_dict)
+                
             for cfg_idx in range(cfg_count):
                 for node in cfgs_by_module[manager.curr_module][cfg_idx].decls:
                     self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
@@ -679,14 +688,7 @@ class ExecutionEngine:
             manager.curr_module = manager.names_list[0]
             # makes assumption top level module is first in line
             # ! no longer path code as in bit string, but indices
-            manager.prev_store = state.store
-            manager.init_state(state, manager.prev_store, ast)
 
-            # initalize inputs with symbols for all submodules too
-            for module_name in manager.names_list:
-                manager.curr_module = module_name
-                # actually want to terminate this part after the decl and comb part
-                self.search_strategy.visit_module(manager, state, ast, modules_dict)
             
             self.check_state(manager, state)
 
