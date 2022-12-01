@@ -672,7 +672,6 @@ class ExecutionEngine:
         for i in range(len(total_paths)):
             manager.prev_store = state.store
             manager.init_state(state, manager.prev_store, ast)
-
             # initalize inputs with symbols for all submodules too
             for module_name in manager.names_list:
                 manager.curr_module = module_name
@@ -711,14 +710,14 @@ class ExecutionEngine:
                                 k += 1
                                 basic_block = cfgs_by_module[module_name][complete_single_cycle_path.index(cfg_path)].basic_block_list[basic_block_idx]
                                 for stmt in basic_block:
-                                    print(manager.curr_module)
-                                    self.check_state(manager, state)
+                                    # print(f"updating curr mod {manager.curr_module}")
+                                    #self.check_state(manager, state)
                                     self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
+                                            # only do once, and the last CFG 
+                    for node in cfgs_by_module[module_name][cfg_count-1].comb:
+                        self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
                     manager.cycle += 1
                 modules_seen += 1
-            # only do once, and the last CFG 
-            for node in cfgs_by_module[manager.curr_module][cfg_count-1].comb:
-                self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
             manager.cycle = 0
             self.done = True
             self.check_state(manager, state)
