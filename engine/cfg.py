@@ -165,7 +165,7 @@ class CFG:
                     self.decls.append(ast)
                 elif isinstance(ast, Assign):
                     self.comb.append(ast)
-                elif isinstance(item, InstanceList):
+                elif isinstance(ast, InstanceList):
                     print("FOUND SUBModule!")
                 ...
 
