@@ -126,21 +126,18 @@ def main():
         # print(mod.members[1])
 
     text = preprocess(filelist, include=options.include, define=options.define)
-    print(options.include)
-    print(filelist)
-    filelist = []
-    for filename in os.listdir(options.include[0]):
-        f = os.path.join(options.include[0], filename)
-        # checking if it is a file
-        if os.path.isfile(f):
-            print(f)
-            filelist.append(str(f))
-    ast, directives = parse(filelist,
+    if options.include:
+        for filename in os.listdir(options.include[0]):
+            f = os.path.join(options.include[0], filename)
+            # checking if it is a file
+            if os.path.isfile(f):
+                print(f)
+                filelist.append(str(f))
+        ast, directives = parse(filelist,
                             preprocess_include=options.include,
                             preprocess_define=options.define)
-    print(options.include)
-    print(ast.show())
-    exit()
+    else:
+        ast, directives = parse(filelist, preprocess_define=options.define)
     # analyzer = VerilogDataflowAnalyzer(filelist, options.topmodule,
     #                                    noreorder=options.noreorder,
     #                                    nobind=options.nobind,
