@@ -112,6 +112,71 @@ class CFG:
 
         self.edgelist += res 
 
+
+    def get_always_sv(self, m: ExecutionManager, s: SymbolicState, ast):
+        """Populate the always block list for a SV design."""
+        if ast.__class__.__name__ == "ProceduralBlockSyntax":
+            print("hey")
+            ast = ast.members
+
+        if hasattr(ast, '__iter__'):
+            for item in ast:
+                #print(f"item ! {item.kind} {dir(item)}")
+                print(item.__class__.__name__)
+                if item.__class__.__name__ == "ConditionalStatementSyntax":
+                    print("found if statement")
+                    print(dir(item))
+                    self.get_always_sv(m, s, item.statement) 
+                    self.get_always_sv(m, s, item.elseClause)
+                elif ast.__class__.__name__ == "CaseStatementSyntax":
+                    return self.get_always_sv(m, s, item.items) 
+                elif item.__class__.__name__ == "ForLoopStatementSyntax":
+                    return self.get_always_sv(m, s, item.statement) 
+                elif item.__class__.__name__ == "ProceduralBlockSyntax":
+                    self.get_always_sv(m, s, item.statement.statement.items)    
+                elif item.__class__.__name__ == "BlockStatementSyntax":
+                    print("regular block stmt")
+                    print(item.items)
+                    self.get_always_sv(m, s, item.items)    
+                # elif isinstance(item, Initial):
+                #     self.get_always(m, s, item.statement)
+                # elif isinstance(item, SingleStatement):
+                #     self.get_always(m, s, item.statement)
+                else:
+                    if isinstance(item, Decl):
+                        self.decls.append(item)
+                    elif isinstance(item, Assign):
+                        self.comb.append(item)
+                    elif isinstance(item, InstanceList):
+                        print("FOUND SUBModule!")
+                        print(item.module)
+                        self.submodules.append(item)
+                    ...
+        elif ast != None:
+            if isinstance(ast, IfStatement):
+                self.get_always(m, s, ast.true_statement) 
+                self.get_always(m, s, ast.false_statement)
+            elif isinstance(ast, CaseStatement):
+                self.get_always(m, s, ast.caselist)
+            elif isinstance(ast, ForStatement):
+                self.get_always(m, s, ast.statement)
+            elif isinstance(ast, Block):
+                self.get_always(m, s, ast.items)
+            elif isinstance(ast, Always):
+                self.always_blocks.append(ast)          
+            elif isinstance(ast, Initial):
+                self.get_always(m, s, ast.statement)
+            elif isinstance(ast, SingleStatement):
+                self.get_always(m, s, ast.statement)
+            else:
+                if isinstance(ast, Decl):
+                    self.decls.append(ast)
+                elif isinstance(ast, Assign):
+                    self.comb.append(ast)
+                elif isinstance(ast, InstanceList):
+                    print("FOUND SUBModule!")
+                ...
+
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
         """Populate the always block list."""
         if isinstance(ast, Block):

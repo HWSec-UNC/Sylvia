@@ -161,6 +161,9 @@ def solve_pc(s: Solver) -> bool:
         model = s.model()
         return True
     else:
+        print("unsat")
+        print(s)
+        print(s.unsat_core())
         return False
 
 def evaluate_expr(parsedList, s: SymbolicState, m: ExecutionManager):

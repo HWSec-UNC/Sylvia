@@ -28,6 +28,7 @@ from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 from pyverilog.dataflow.optimizer import VerilogDataflowOptimizer
 from pyverilog.dataflow.graphgen import VerilogGraphGenerator
 import pygraphviz as pgv
+import pyslang
 
 gc.collect()
 
@@ -56,7 +57,7 @@ def main():
     optparser.add_option("-v", "--version", action="store_true", dest="showversion",
                          default=False, help="Show the version")
     optparser.add_option("-I", "--include", dest="include", action="append",
-                         default=["designs/or1200/", "darkriscv/", "designs"], help="Include path")
+                         help="Include path")
     optparser.add_option("-D", dest="define", action="append",
                          default=[], help="Macro Definition")
     optparser.add_option("-B", "--debug", action="store_true", dest="showdebug", help="Debug Mode")
@@ -70,6 +71,8 @@ def main():
                          default="out.png", help="Graph file name, Default=out.png")
     optparser.add_option("-s", "--search", dest="searchtarget", action="append",
                          default=[], help="Search Target Signal")
+    optparser.add_option("--sv", action="store_true", dest="sv",
+                         default=False, help="enable SystemVerilog parser")
     optparser.add_option("--walk", action="store_true", dest="walk",
                          default=False, help="Walk contineous signals, Default=False")
     optparser.add_option("--identical", action="store_true", dest="identical",
@@ -91,21 +94,53 @@ def main():
 
     if options.showdebug:
         engine.debug = True
-
+    
     for f in filelist:
         if not os.path.exists(f):
             raise IOError("file not found: " + f)
 
     if len(filelist) == 0:
         showVersion()
+    
+    if options.sv:
+        tree = pyslang.SyntaxTree.fromFile('designs/test-designs/updowncounter.v')
+        print(f"total number of modules defined in this file {len(tree.root.members)}")
+        top_level_module = tree.root.members[0]
+        print(top_level_module.header)
+        header = top_level_module.header
+        modules = tree.root.members
+        start = time.process_time()
+        engine.execute_sv(top_level_module, modules, None, num_cycles)
+        end = time.process_time()
+        print(f"Elapsed time {end - start}")
+        exit()
+
+        # for item in tree.root.members:
+        #     print(item)
+        #     print(type(item))
+            # for item2 in item.members:
+            #     print(item2)
+            #     print(type(item2))
+        # print(mod.header.name.value)
+        # print(mod.members[0])
+        # print(mod.members[1])
 
     text = preprocess(filelist, include=options.include, define=options.define)
-    #print(text)
+    print(options.include)
+    print(filelist)
+    filelist = []
+    for filename in os.listdir(options.include[0]):
+        f = os.path.join(options.include[0], filename)
+        # checking if it is a file
+        if os.path.isfile(f):
+            print(f)
+            filelist.append(str(f))
     ast, directives = parse(filelist,
                             preprocess_include=options.include,
                             preprocess_define=options.define)
-
-
+    print(options.include)
+    print(ast.show())
+    exit()
     # analyzer = VerilogDataflowAnalyzer(filelist, options.topmodule,
     #                                    noreorder=options.noreorder,
     #                                    nobind=options.nobind,

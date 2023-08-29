@@ -312,6 +312,37 @@ class ExecutionEngine:
             return True
         return False
 
+    def module_count_sv(self, m: ExecutionManager, items) -> None:
+        """Traverse a top level module and count up the instances of each type of module
+        for SystemVerilog."""
+        print(len(items))
+        # TODO need to figure out what the node type is for instances
+        # TODO do this check for the other block types
+        if items.__class__.__name__ == "ProceduralBlockSyntax":
+            items = items.statement.statements
+        if hasattr(items, '__iter__'):
+            for item in items:
+                if isinstance(item, InstanceList):
+                    self.module_count(m, item.instances)
+                elif isinstance(item, Instance):
+                    if item.module in m.instance_count:
+                        m.instance_count[item.module] += 1
+                        ...
+                    else:
+                        m.instance_count[item.module] = 1
+                if item.__class__.__name__ == "ProceduralBlockSyntax":
+                    # Always Block
+                    self.module_count(m, item.statement.statement.items)           
+                elif isinstance(item, Initial):
+                    self.module_count(m, item.statement)
+        elif items != None:
+                if isinstance(items, InstanceList):
+                    if items.module in m.instance_count:
+                        m.instance_count[items.module] += 1
+                    else:
+                        m.instance_count[items.module] = 1
+                    self.module_count(m, items.instances)
+
     def module_count(self, m: ExecutionManager, items) -> None:
         """Traverse a top level module and count up the instances of each type of module."""
         if isinstance(items, Block):
@@ -345,9 +376,11 @@ class ExecutionEngine:
     def init_run(self, m: ExecutionManager, module: ModuleDef) -> None:
         """Initalize run."""
         m.init_run_flag = True
-        self.count_conditionals(m, module.items)
-        self.lhs_signals(m, module.items)
-        self.get_assertions(m, module.items)
+        # come back to this stuff 
+        # TODO change to members and redo 
+        # self.count_conditionals(m, module.items)
+        # self.lhs_signals(m, module.items)
+        # self.get_assertions(m, module.items)
         m.init_run_flag = False
         #self.module_count(m, module.items)
 
@@ -525,6 +558,248 @@ class ExecutionEngine:
             for i in range(len(paths)):
                 for j in range(len(paths[i])):
                     manager.config[manager.names_list[j]] = paths[i][j]
+
+    def execute_sv(self, ast, modules, manager: Optional[ExecutionManager], num_cycles: int) -> None:
+        """Drives symbolic execution for SystemVerilog designs."""
+        print("yeehaw")
+        gc.collect()
+        print(f"Executing for {num_cycles} clock cycles")
+        self.module_depth += 1
+        state: SymbolicState = SymbolicState()
+        if manager is None:
+            manager: ExecutionManager = ExecutionManager()
+            manager.debugging = False
+            modules_dict = {}
+            # a dictionary keyed by module name, that gives the list of cfgs
+            cfgs_by_module = {}
+            cfg_count_by_module = {}
+            for module in modules:
+                sv_module_name = module.header.name.value
+                modules_dict[sv_module_name] = sv_module_name
+                always_blocks_by_module = {sv_module_name: []}
+                manager.seen_mod[sv_module_name] = {}
+                cfgs_by_module[sv_module_name] = []
+                sub_manager = ExecutionManager()
+                self.init_run(sub_manager, module)
+                self.module_count_sv(manager, module.members) 
+                if sv_module_name in manager.instance_count:
+                    manager.instances_seen[sv_module_name] = 0
+                    manager.instances_loc[sv_module_name] = ""
+                    num_instances = manager.instance_count[sv_module_name]
+                    cfgs_by_module.pop(sv_module_name, None)
+                    for i in range(num_instances):
+                        instance_name = f"{sv_module_name}_{i}"
+                        manager.names_list.append(instance_name)
+                        cfgs_by_module[instance_name] = []
+                        # build X CFGx for the particular module 
+                        cfg = CFG()
+                        cfg.reset()
+                        cfg.get_always(manager, state, module.items)
+                        cfg_count = len(cfg.always_blocks)
+                        for k in range(cfg_count):
+                            cfg.basic_blocks(manager, state, cfg.always_blocks[k])
+                            cfg.partition()
+                            # print(cfg.all_nodes)
+                            # print(cfg.partition_points)
+                            # print(len(cfg.basic_block_list))
+                            # print(cfg.edgelist)
+                            cfg.build_cfg(manager, state)
+                            cfg.module_name = ast.name
+
+                            cfgs_by_module[instance_name].append(deepcopy(cfg))
+                            cfg.reset()
+                            #print(cfg.paths)
+                        state.store[instance_name] = {}
+                        manager.dependencies[instance_name] = {}
+                        manager.intermodule_dependencies[instance_name] = {}
+                        manager.cond_assigns[instance_name] = {}
+                else: 
+                    manager.names_list.append(sv_module_name)
+                    # build X CFGx for the particular module 
+                    cfg = CFG()
+                    cfg.all_nodes = []
+                    #cfg.partition_points = []
+                    cfg.get_always_sv(manager, state, ast.members)
+                    cfg_count = len(cfg.always_blocks)
+                    always_blocks_by_module[module.name] = deepcopy(cfg.always_blocks)
+                    for k in range(cfg_count):
+                        cfg.basic_blocks(manager, state, always_blocks_by_module[module.name][k])
+                        cfg.partition()
+                        # print(cfg.partition_points)
+                        # print(len(cfg.basic_block_list))
+                        # print(cfg.edgelist)
+                        cfg.build_cfg(manager, state)
+                        #print(cfg.cfg_edges)
+                        cfg.module_name = ast.name
+                        cfgs_by_module[module.name].append(deepcopy(cfg))
+                        cfg.reset()
+                        #print(cfg.paths)
+
+                    state.store[module.name] = {}
+                    manager.dependencies[module.name] = {}
+                    manager.intermodule_dependencies[module.name] = {}
+                    manager.cond_assigns[module.name] = {}
+            total_paths = 1
+            for x in manager.child_num_paths.values():
+                total_paths *= x
+
+            # have do do things piece wise
+            manager.debug = self.debug
+            if total_paths > 100:
+                start = time.process_time()
+                self.piece_wise_execute(ast, manager, modules)
+                end = time.process_time()
+                print(f"Elapsed time {end - start}")
+                print(f"Solver time {manager.solver_time}")
+                sys.exit()
+            self.populate_child_paths(manager)
+            if len(modules) > 1:
+                self.populate_seen_mod(manager)
+                #manager.opt_1 = True
+            else:
+                manager.opt_1 = False
+            manager.modules = modules_dict
+
+            mapped_paths = {}
+            #print(total_paths)
+
+        if self.debug:
+            manager.debug = True
+        self.assertions_always_intersect(manager)
+
+        manager.seen = {}
+        for name in manager.names_list:
+            manager.seen[name] = []
+
+            # each module has a mapping table of cfg idx to path list
+            mapped_paths[name] = {}
+        manager.curr_module = manager.names_list[0]
+
+        # index into cfgs list
+        curr_cfg = 0
+        for module_name in cfgs_by_module:
+            for cfg in cfgs_by_module[module_name]:
+                mapped_paths[module_name][curr_cfg] = cfg.paths
+                curr_cfg += 1
+            curr_cfg = 0
+
+        print(mapped_paths)
+
+        stride_length = cfg_count
+        single_paths_by_module = {}
+        total_paths_by_module = {}
+        for module_name in cfgs_by_module:
+            single_paths_by_module[module_name] = list(product(*mapped_paths[module_name].values()))
+            total_paths_by_module[module_name] = list(tuple(product(single_paths_by_module[module_name], repeat=int(num_cycles))))
+        print(f"tp {total_paths_by_module}")
+        keys, values = zip(*total_paths_by_module.items())
+        total_paths = [dict(zip(keys, path)) for path in product(*values)]
+        #print(total_paths)
+        
+        #single_paths = list(product(*mapped_paths[manager.curr_module].values()))
+        #total_paths = list(tuple(product(single_paths, repeat=int(num_cycles))))
+
+        # for each combinatoin of multicycle paths
+
+        for i in range(len(total_paths)):
+            manager.prev_store = state.store
+            manager.init_state(state, manager.prev_store, ast)
+            # initalize inputs with symbols for all submodules too
+            for module_name in manager.names_list:
+                manager.curr_module = module_name
+                # actually want to terminate this part after the decl and comb part
+                self.search_strategy.visit_module(manager, state, ast, modules_dict)
+                
+            for cfg_idx in range(cfg_count):
+                for node in cfgs_by_module[manager.curr_module][cfg_idx].decls:
+                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
+                for node in cfgs_by_module[manager.curr_module][cfg_idx].comb:
+                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None) 
+   
+            manager.curr_module = manager.names_list[0]
+            # makes assumption top level module is first in line
+            # ! no longer path code as in bit string, but indices
+
+            
+            self.check_state(manager, state)
+
+            curr_path = total_paths[i]
+
+            modules_seen = 0
+            for module_name in curr_path:
+                manager.curr_module = manager.names_list[modules_seen]
+                manager.cycle = 0
+                for complete_single_cycle_path in curr_path[module_name]:
+                    for cfg_path in complete_single_cycle_path:
+                        directions = cfgs_by_module[module_name][complete_single_cycle_path.index(cfg_path)].compute_direction(cfg_path)
+                        k: int = 0
+                        for basic_block_idx in cfg_path:
+                            if basic_block_idx < 0: 
+                                # dummy node
+                                continue
+                            else:
+                                direction = directions[k]
+                                k += 1
+                                basic_block = cfgs_by_module[module_name][complete_single_cycle_path.index(cfg_path)].basic_block_list[basic_block_idx]
+                                for stmt in basic_block:
+                                    # print(f"updating curr mod {manager.curr_module}")
+                                    #self.check_state(manager, state)
+                                    self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
+                                            # only do once, and the last CFG 
+                    for node in cfgs_by_module[module_name][cfg_count-1].comb:
+                        self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
+                    manager.cycle += 1
+                modules_seen += 1
+            manager.cycle = 0
+            self.done = True
+            self.check_state(manager, state)
+            self.done = False
+
+            manager.curr_level = 0
+            for module_name in manager.instances_seen:
+                manager.instances_seen[module_name] = 0
+                manager.instances_loc[module_name] = ""
+            if self.debug:
+                print("------------------------")
+            if (manager.assertion_violation):
+                print("Assertion violation")
+                #manager.assertion_violation = False
+                counterexample = {}
+                symbols_to_values = {}
+                solver_start = time.process_time()
+                if self.solve_pc(state.pc):
+                    solver_end = time.process_time()
+                    manager.solver_time += solver_end - solver_start
+                    solved_model = state.pc.model()
+                    decls =  solved_model.decls()
+                    for item in decls:
+                        symbols_to_values[item.name()] = solved_model[item]
+
+                    # plug in phase
+                    for module in state.store:
+                        for signal in state.store[module]:
+                            for symbol in symbols_to_values:
+                                if state.store[module][signal] == symbol:
+                                    counterexample[signal] = symbols_to_values[symbol]
+
+                    print(counterexample)
+                else:
+                    print("UNSAT")
+                return
+            
+            state.pc.reset()
+
+            for module in manager.dependencies:
+                module = {}
+                
+            
+            manager.ignore = False
+            manager.abandon = False
+            manager.reg_writes.clear()
+            for name in manager.names_list:
+                state.store[name] = {}
+
+        self.module_depth -= 1
 
     #@profile     
     def execute(self, ast: ModuleDef, modules, manager: Optional[ExecutionManager], directives, num_cycles: int) -> None:

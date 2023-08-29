@@ -7,6 +7,7 @@ from pyverilog.vparser.ast import Pointer
 
 class SymbolicState:
     pc = Solver()
+    assertion_counter = 0
     sort = BitVecSort(32)
     clock_cycle: int = 0
     #TODO need to change to be a nested mapping of module names to dictionaries

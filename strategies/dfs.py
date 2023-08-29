@@ -752,7 +752,8 @@ class DepthFirst(Search):
                 y = BitVec(expr.right.name, 32)
             if self.branch:
                 s.pc.push()
-                s.pc.add(x==y)
+                s.assertion_counter += 1
+                s.pc.assert_and_track(x==y, f"p{s.assertion_counter}")
                 if not solve_pc(s.pc):
                     s.pc.pop()
                     m.abandon = True
@@ -760,7 +761,8 @@ class DepthFirst(Search):
                     return
             else: 
                 s.pc.push()
-                s.pc.add(x != y)
+                s.assertion_counter += 1
+                s.pc.assert_and_track(x!=y, f"p{s.assertion_counter}")
                 if not solve_pc(s.pc):
                     s.pc.pop()
                     m.abandon = True
@@ -791,7 +793,9 @@ class DepthFirst(Search):
             zero_bv = Int2BV(zero, 1)
             if self.branch:
                 s.pc.push()
-                s.pc.add(x==one_bv)
+                print("howdy !")
+                s.assertion_counter += 1
+                s.pc.assert_and_track(x==one_bv, f"p{s.assertion_counter}")
                 if not solve_pc(s.pc):
                     s.pc.pop()
                     #print("Abandoning infeasible path")
@@ -800,7 +804,8 @@ class DepthFirst(Search):
                     return
             else: 
                 s.pc.push()
-                s.pc.add(x != one_bv)
+                s.assertion_counter += 1
+                s.pc.assert_and_track(x!=one_bv, f"p{s.assertion_counter}")
                 if not solve_pc(s.pc):
                     s.pc.pop()
                     #print("Abandoning infeasible path")

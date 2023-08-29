@@ -1,3 +1,24 @@
+  //----------------------------------------------------------------
+  // l2b
+  //
+  // Swap bytes from little to big endian byte order.
+  //----------------------------------------------------------------
+
+  module l2b (
+    input [31 :0] op, 
+    output [31:0] out
+  );
+
+  reg [31:0] l2b;
+
+    always @(posedge clk) begin
+      l2b = {op[7 : 0], op[15 : 8], op[23 : 16], op[31 : 24]};
+    end
+
+  assign out = l2b;
+  
+  endmodule
+
 //======================================================================
 //
 // chacha_core.v
@@ -84,17 +105,6 @@ module chacha_core(
   localparam CTRL_FINALIZE = 3'h3;
   localparam CTRL_DONE     = 3'h4;
 
-
-  //----------------------------------------------------------------
-  // l2b()
-  //
-  // Swap bytes from little to big endian byte order.
-  //----------------------------------------------------------------
-  function [31 : 0] l2b(input [31 : 0] op);
-    begin
-      l2b = {op[7 : 0], op[15 : 8], op[23 : 16], op[31 : 24]};
-    end
-  endfunction // b2l
 
 
   //----------------------------------------------------------------
