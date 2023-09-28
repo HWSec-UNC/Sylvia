@@ -958,6 +958,7 @@ class ExecutionEngine:
                     self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
                 for node in cfgs_by_module[manager.curr_module][cfg_idx].comb:
                     self.search_strategy.visit_stmt(manager, state, node, modules_dict, None) 
+
    
             manager.curr_module = manager.names_list[0]
             # makes assumption top level module is first in line
@@ -991,6 +992,7 @@ class ExecutionEngine:
                                             # only do once, and the last CFG 
                     for node in cfgs_by_module[module_name][cfg_count-1].comb:
                         self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
+                        print(state.store)
                     manager.cycle += 1
                 modules_seen += 1
             manager.cycle = 0
