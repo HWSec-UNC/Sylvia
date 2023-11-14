@@ -58,11 +58,14 @@ class CFG:
     # Decl nodes outside the always block to be executed once up front for all paths
     decls = []
 
-    # Combinational logic nodes outside the always block to be twice for all paths
+    # Combinational logic nodes outside the always block to be visited twice for all paths
     comb = []
 
     # the nodes in the AST that correspond to always blocks
     always_blocks = []
+
+    # the nodes in the AST that correspond to initial blocks
+    initial_blocks = []
 
     # branch-point set
     # for each basic statement, there may be some indpendent branching points
@@ -111,6 +114,64 @@ class CFG:
         res = list(combinations(self.ind_branch_points[idx], r=len(self.ind_branch_points[idx])))
 
         self.edgelist += res 
+
+    def get_initial(self, m: ExecutionManager, s: SymbolicState, ast):
+        """Populate the initial block list."""
+        if isinstance(ast, Block):
+            ast = ast.statements
+
+        if hasattr(ast, '__iter__'):
+            for item in ast:
+                if isinstance(item, IfStatement):
+                    self.get_initial(m, s, item.true_statement) 
+                    self.get_initial(m, s, item.false_statement)
+                elif isinstance(ast, CaseStatement):
+                    return self.get_initial(m, s, ast.caselist) 
+                elif isinstance(ast, ForStatement):
+                    return self.get_initial(m, s, ast.statement) 
+                elif isinstance(item, Block):
+                    self.get_initial(m, s, item.items)
+                elif isinstance(item, Always):
+                    ...           
+                elif isinstance(item, Initial):
+                    self.initial_blocks.append(item)
+                elif isinstance(item, SingleStatement):
+                    self.get_initial(m, s, item.statement)
+                else:
+                    if isinstance(item, Decl):
+                        self.decls.append(item)
+                    elif isinstance(item, Assign):
+                        self.comb.append(item)
+                    elif isinstance(item, InstanceList):
+                        print("FOUND SUBModule!")
+                        print(item.module)
+                        self.submodules.append(item)
+                    ...
+        elif ast != None:
+            if isinstance(ast, IfStatement):
+                self.get_initial(m, s, ast.true_statement) 
+                self.get_initial(m, s, ast.false_statement)
+            elif isinstance(ast, CaseStatement):
+                self.get_initial(m, s, ast.caselist)
+            elif isinstance(ast, ForStatement):
+                self.get_initial(m, s, ast.statement)
+            elif isinstance(ast, Block):
+                self.get_initial(m, s, ast.items)
+            elif isinstance(ast, Always):
+                ...        
+            elif isinstance(ast, Initial):
+                self.initial_blocks.append(ast)
+            elif isinstance(ast, SingleStatement):
+                self.get_initial(m, s, ast.statement)
+            else:
+                if isinstance(ast, Decl):
+                    self.decls.append(ast)
+                elif isinstance(ast, Assign):
+                    self.comb.append(ast)
+                elif isinstance(ast, InstanceList):
+                    print("FOUND SUBModule!")
+                ...
+
 
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
         """Populate the always block list."""
@@ -315,7 +376,7 @@ class CFG:
     def build_cfg(self, m: ExecutionManager, s: SymbolicState):
         """Build networkx digraph."""
         self.make_paths()
-        # print(self.basic_block_list)
+        print(self.basic_block_list)
         # print(self.cfg_edges)
 
         G = nx.DiGraph()
@@ -345,7 +406,7 @@ class CFG:
 
         #print(G.edges())
 
-        #self.display_cfg(G)
+        self.display_cfg(G)
 
         #traversed = nx.edge_dfs(G, source=-1)
         self.paths = list(nx.all_simple_paths(G, source=-1, target=-2))

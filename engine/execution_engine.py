@@ -559,9 +559,14 @@ class ExecutionEngine:
                         cfgs_by_module[instance_name] = []
                         # build X CFGx for the particular module 
                         cfg = CFG()
+                        cfg2 = CFG()
                         cfg.reset()
                         cfg.get_always(manager, state, module.items)
+                        cfg2.get_initial(manager, state, module.items)
                         cfg_count = len(cfg.always_blocks)
+                        initial_count = len(cfg2.initial_blocks)
+                        print("hi")
+                        print(initial_count)
                         for k in range(cfg_count):
                             cfg.basic_blocks(manager, state, cfg.always_blocks[k])
                             cfg.partition()
@@ -585,23 +590,38 @@ class ExecutionEngine:
                     manager.names_list.append(module.name)
                     # build X CFGx for the particular module 
                     cfg = CFG()
+                    # also need some CFGs for the initial blocks
+                    initials = CFG()
                     cfg.all_nodes = []
                     #cfg.partition_points = []
                     cfg.get_always(manager, state, ast.items)
-                    cfg_count = len(cfg.always_blocks)
-                    always_blocks_by_module[module.name] = deepcopy(cfg.always_blocks)
+                    initials.get_initial(manager, state, ast.items)
+                    print(initials.initial_blocks)
+                    cfg_count = len(cfg.always_blocks) + len(initials.initial_blocks)
+                    always_blocks_by_module[module.name] = deepcopy(cfg.always_blocks) + deepcopy(initials.initial_blocks)
+                    num_standard_always = len(cfg.always_blocks)
                     for k in range(cfg_count):
-                        cfg.basic_blocks(manager, state, always_blocks_by_module[module.name][k])
-                        cfg.partition()
-                        # print(cfg.partition_points)
-                        # print(len(cfg.basic_block_list))
-                        # print(cfg.edgelist)
-                        cfg.build_cfg(manager, state)
-                        #print(cfg.cfg_edges)
-                        cfg.module_name = ast.name
-                        cfgs_by_module[module.name].append(deepcopy(cfg))
-                        cfg.reset()
-                        #print(cfg.paths)
+                        if k >= num_standard_always:
+                            print("here")
+                            initials.basic_blocks(manager, state, initials.initial_blocks[0])
+                            initials.partition()
+                            initials.build_cfg(manager,state)
+
+                            initials.module_name = ast.name
+                            cfgs_by_module[module.name].append(deepcopy(initials))
+                            initials.reset()
+                        else: 
+                            cfg.basic_blocks(manager, state, always_blocks_by_module[module.name][k])
+                            cfg.partition()
+                            # print(cfg.partition_points)
+                            # print(len(cfg.basic_block_list))
+                            # print(cfg.edgelist)
+                            cfg.build_cfg(manager, state)
+                            #print(cfg.cfg_edges)
+                            cfg.module_name = ast.name
+                            cfgs_by_module[module.name].append(deepcopy(cfg))
+                            cfg.reset()
+                            #print(cfg.paths)
 
                     state.store[module.name] = {}
                     manager.dependencies[module.name] = {}
@@ -647,6 +667,7 @@ class ExecutionEngine:
         curr_cfg = 0
         for module_name in cfgs_by_module:
             for cfg in cfgs_by_module[module_name]:
+                print(cfg.initial_blocks)
                 mapped_paths[module_name][curr_cfg] = cfg.paths
                 curr_cfg += 1
             curr_cfg = 0
