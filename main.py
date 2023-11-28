@@ -133,7 +133,7 @@ def main():
 
     # graphgen.draw()
 
-    ast.show()
+    #ast.show()
     #print(ast.children()[0].definitions)
 
     description: Description = ast.children()[0]

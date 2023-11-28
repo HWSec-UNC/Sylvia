@@ -32,7 +32,7 @@ module updowncounter(
 
         
     always @(posedge clock) begin
-       internalvalue2 <= internalvalue2 + 1;
+       internalvalue2 <= internalvalue2 + 1; 
     end 
 
     

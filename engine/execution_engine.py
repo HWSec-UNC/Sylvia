@@ -596,13 +596,15 @@ class ExecutionEngine:
                     #cfg.partition_points = []
                     cfg.get_always(manager, state, ast.items)
                     initials.get_initial(manager, state, ast.items)
-                    print(initials.initial_blocks)
+
                     cfg_count = len(cfg.always_blocks) + len(initials.initial_blocks)
                     always_blocks_by_module[module.name] = deepcopy(cfg.always_blocks) + deepcopy(initials.initial_blocks)
                     num_standard_always = len(cfg.always_blocks)
                     for k in range(cfg_count):
                         if k >= num_standard_always:
-                            print("here")
+                            initials.basic_block_list = []
+                            initials.partition_points.clear()
+                            initials.partition_points.add(0)
                             initials.basic_blocks(manager, state, initials.initial_blocks[0])
                             initials.partition()
                             initials.build_cfg(manager,state)

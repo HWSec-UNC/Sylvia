@@ -10,6 +10,7 @@ from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial, 
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Instance
 from .execution_manager import ExecutionManager
 from .symbolic_state import SymbolicState
+from copy import deepcopy
 import os
 from optparse import OptionParser
 from typing import Optional
@@ -80,6 +81,9 @@ class CFG:
     #submodules defined
     submodules = []
 
+    # basic blocks that don't have out edges
+    dangling = set()
+
     def reset(self):
         """Return to defaults."""
         self.basic_block_list = []
@@ -95,6 +99,7 @@ class CFG:
         self.ind_branch_points = {1: set()}
         self.block_smt = [False]
         self.block_stmt_depth = 0
+        self.dangling = []
 
     def compute_direction(self, path):
         """Given a path, figure out the direction"""
@@ -112,7 +117,6 @@ class CFG:
             return 
 
         res = list(combinations(self.ind_branch_points[idx], r=len(self.ind_branch_points[idx])))
-
         self.edgelist += res 
 
     def get_initial(self, m: ExecutionManager, s: SymbolicState, ast):
@@ -246,15 +250,21 @@ class CFG:
                     self.all_nodes.append(item)
                     self.partition_points.add(self.curr_idx)
                     parent_idx = self.curr_idx
-                    self.basic_blocks(m, s, item.true_statement) 
+                    self.basic_blocks(m, s, item.true_statement)
+                    snapshot_before_else = deepcopy(self.all_nodes)
                     edge_1 = (parent_idx, self.curr_idx)
                     self.partition_points.add(self.curr_idx)
                     self.basic_blocks(m, s, item.false_statement)
-                    edge_2 = (parent_idx, self.curr_idx)
-                    self.partition_points.add(self.curr_idx)
-                    self.curr_idx += 1
+                    
+                    # if there are no other nodes added after this 
+                    # AST traversal, then we know that we don't have the 
+                    # else to worry about, shouldn't add the edge
+                    if len(self.all_nodes) > len(snapshot_before_else):
+                        edge_2 = (parent_idx, self.curr_idx)
+                        self.edgelist.append(edge_2)
+                        self.partition_points.add(self.curr_idx)
+                        self.curr_idx += 1
                     self.edgelist.append(edge_1)
-                    self.edgelist.append(edge_2)
                 elif isinstance(item, CaseStatement):
                     self.all_nodes.append(ast)
                     self.partition_points.add(self.curr_idx)
@@ -361,6 +371,15 @@ class CFG:
             path = (block1, block2)
             self.cfg_edges.append(path)
 
+    def find_dangling(self):
+        """Find dangling nodes in CFG, to know which should connect to exit."""
+        ends = set(edges[1] for edges in self.cfg_edges)
+        for edge in self.cfg_edges:
+            for end in ends:
+                if edge[0] == end and edge[1] == end:
+                    self.dangling.add(end)
+        
+
     def find_leaves(self):
         """Find leaves in cfg, to know which nodes need to connect to dummy exit."""
         starts = set(edge[0] for edge in self.cfg_edges)
@@ -375,9 +394,8 @@ class CFG:
 
     def build_cfg(self, m: ExecutionManager, s: SymbolicState):
         """Build networkx digraph."""
+        self.cfg_edges = []
         self.make_paths()
-        print(self.basic_block_list)
-        # print(self.cfg_edges)
 
         G = nx.DiGraph()
         for block in self.basic_block_list:
@@ -404,9 +422,13 @@ class CFG:
         for leaf in self.leaves:
             G.add_edge(leaf, -2)
 
-        #print(G.edges())
+        self.find_dangling()
+        # also need to link up the dangling nodes that had self loops
+        for dangling in self.dangling:
+            G.add_edge(dangling, -2)
 
-        self.display_cfg(G)
+
+        #self.display_cfg(G)
 
         #traversed = nx.edge_dfs(G, source=-1)
         self.paths = list(nx.all_simple_paths(G, source=-1, target=-2))
