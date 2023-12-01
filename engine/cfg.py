@@ -99,7 +99,7 @@ class CFG:
         self.ind_branch_points = {1: set()}
         self.block_smt = [False]
         self.block_stmt_depth = 0
-        self.dangling = []
+        self.dangling = set()
 
     def compute_direction(self, path):
         """Given a path, figure out the direction"""
