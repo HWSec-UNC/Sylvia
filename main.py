@@ -100,7 +100,6 @@ def main():
         showVersion()
 
     text = preprocess(filelist, include=options.include, define=options.define)
-    #print(text)
     ast, directives = parse(filelist,
                             preprocess_include=options.include,
                             preprocess_define=options.define)

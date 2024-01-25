@@ -58,11 +58,14 @@ class CFG:
     # Decl nodes outside the always block to be executed once up front for all paths
     decls = []
 
-    # Combinational logic nodes outside the always block to be twice for all paths
+    # Combinational logic nodes outside the always block to be visited twice for all paths
     comb = []
 
     # the nodes in the AST that correspond to always blocks
     always_blocks = []
+
+    # the nodes in the AST that correspond to inital blocks
+    initial_blocks = []
 
     # branch-point set
     # for each basic statement, there may be some indpendent branching points
@@ -88,7 +91,7 @@ class CFG:
         self.cfg_edges = []
         self.leaves = set()
         self.paths = []
-        self.always_blocks = []
+        #self.always_blocks = []
         self.ind_branch_points = {1: set()}
         self.block_smt = [False]
         self.block_stmt_depth = 0
@@ -140,8 +143,6 @@ class CFG:
                     elif isinstance(item, Assign):
                         self.comb.append(item)
                     elif isinstance(item, InstanceList):
-                        print("FOUND SUBModule!")
-                        print(item.module)
                         self.submodules.append(item)
                     ...
         elif ast != None:
@@ -246,7 +247,6 @@ class CFG:
             elif isinstance(ast, Block):
                 self.block_stmt_depth += 1
                 self.block_smt.append(True)
-                print("found other block statement")
                 self.basic_blocks(m, s, ast.statements)
                 if self.block_stmt_depth in self.ind_branch_points:
                     self.resolve_independent_branch_pts(self.block_stmt_depth)

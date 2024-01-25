@@ -21,6 +21,8 @@ from helpers.utils import to_binary
 from strategies.dfs import DepthFirst
 import sys
 from copy import deepcopy
+from pympler import asizeof
+
 
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
 
@@ -562,7 +564,11 @@ class ExecutionEngine:
                         cfg.reset()
                         cfg.get_always(manager, state, module.items)
                         cfg_count = len(cfg.always_blocks)
-                        for k in range(cfg_count):
+                        for k in range(5):
+                            print("hi")
+                            print(cfg_count)
+                            print(k)
+                            print(len(cfg.always_blocks))
                             cfg.basic_blocks(manager, state, cfg.always_blocks[k])
                             cfg.partition()
                             # print(cfg.all_nodes)
@@ -573,8 +579,10 @@ class ExecutionEngine:
                             cfg.module_name = ast.name
 
                             cfgs_by_module[instance_name].append(deepcopy(cfg))
+                            print(asizeof.asizeof(cfg))
+                            print(cfg.paths)
                             cfg.reset()
-                            #print(cfg.paths)
+
 
 
                         state.store[instance_name] = {}
@@ -651,7 +659,6 @@ class ExecutionEngine:
                 curr_cfg += 1
             curr_cfg = 0
 
-        print(mapped_paths)
 
         stride_length = cfg_count
         single_paths_by_module = {}
@@ -659,7 +666,6 @@ class ExecutionEngine:
         for module_name in cfgs_by_module:
             single_paths_by_module[module_name] = list(product(*mapped_paths[module_name].values()))
             total_paths_by_module[module_name] = list(tuple(product(single_paths_by_module[module_name], repeat=int(num_cycles))))
-        print(f"tp {total_paths_by_module}")
         keys, values = zip(*total_paths_by_module.items())
         total_paths = [dict(zip(keys, path)) for path in product(*values)]
         #print(total_paths)
@@ -732,6 +738,7 @@ class ExecutionEngine:
             if (manager.assertion_violation):
                 print("Assertion violation")
                 #manager.assertion_violation = False
+                print(state.pc)
                 counterexample = {}
                 symbols_to_values = {}
                 solver_start = time.process_time()
