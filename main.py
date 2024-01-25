@@ -11,6 +11,7 @@ from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial, 
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg
 import sys
 import os
+import traceback
 from optparse import OptionParser
 from typing import Optional
 import random, string
@@ -34,7 +35,7 @@ gc.collect()
 with open('errors.log', 'w'):
     pass
 logging.basicConfig(filename='errors.log', level=logging.DEBUG)
-logging.debug("Starting over")
+logging.debug("Starting over!")
 
 
 INFO = "Verilog Symbolic Execution Engine"
@@ -140,7 +141,11 @@ def main():
     top_level_module: ModuleDef = description.children()[0]
     modules = description.definitions
     start = time.process_time()
-    engine.execute(top_level_module, modules, None, directives, num_cycles)
+    try:
+        engine.execute(top_level_module, modules, None, directives, num_cycles)
+    except Exception as e:
+        logging.error(f'caught error: {e}', exc_info=True)
+
     end = time.process_time()
     print(f"Elapsed time {end - start}")
 
