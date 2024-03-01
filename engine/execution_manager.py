@@ -8,7 +8,9 @@ from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, B
 from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg
 from helpers.utils import init_symbol
+from helpers.slang_helpers import SlangSymbolVisitor, SlangNodeVisitor
 from typing import Optional
+import pyslang as ps
 
 
 CONDITIONALS = (IfStatement, ForStatement, WhileStatement, CaseStatement)
@@ -67,6 +69,7 @@ class ExecutionManager:
     instances_seen = {}
     instances_loc = {}
     solver_time = 0
+    sv = False
 
     def merge_states(self, state: SymbolicState, store, flag, module_name=""):
         """Merges two states. The flag is for when we are just merging a particular module"""
@@ -133,8 +136,34 @@ class ExecutionManager:
 
     def init_state(self, s: SymbolicState, prev_store, ast):
         """give fresh symbols and merge register values in."""
-        params = ast.paramlist.params
-        ports = ast.portlist.ports
+        if self.sv:
+            driver = ps.Driver()
+            driver.addStandardArgs()
+            driver.processCommandFile("designs/test-designs/updowncounter.v", makeRelative=True)
+            driver.processOptions()
+            driver.parseAllSources()
+            
+            compilation = driver.createCompilation()
+            successful_compilation = driver.reportCompilation(compilation, False)
+            if successful_compilation:
+                # logging.debug(f"Number of syntax trees: {len(self.driver.syntaxTrees)}")
+                tree = driver.syntaxTrees[0]
+                print("here!")
+            vis1 = SlangSymbolVisitor()
+            compilation.getRoot().visit(SlangSymbolVisitor.visit)
+            exit()
+            visitor = SlangNodeVisitor()
+            visitor.traverse_tree(ast.root)
+            params = ast.header.parameters
+            port_list = ast.header.ports
+            for i, token in enumerate(port_list):
+                port = extract_kinds_from_descendants(token, desired_kinds=[ps.SyntaxKind.ImplicitAnsiPort])
+                port_list.append(port)
+            
+            print(port_list)
+        else:
+            params = ast.paramlist.params
+            ports = ast.portlist.ports
 
         for param in params:
             if isinstance(param.list[0], Parameter):

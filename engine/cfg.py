@@ -23,7 +23,7 @@ from strategies.dfs import DepthFirst
 import sys
 import networkx as nx
 import matplotlib.pyplot as plt
-
+from pyslang import ConditionalStatementSyntax, DataDeclarationSyntax
 
 class CFG:
     """CFG of Verilog RTL."""
@@ -122,8 +122,9 @@ class CFG:
         if hasattr(ast, '__iter__'):
             for item in ast:
                 #print(f"item ! {item.kind} {dir(item)}")
-                print(item.__class__.__name__)
-                if item.__class__.__name__ == "ConditionalStatementSyntax":
+                print(f"kind of item !! {item.kind}")
+                print((item.__class__.__name__))
+                if ast.__class__.__name__ == "ConditionalStatementSyntax":
                     print("found if statement")
                     print(dir(item))
                     self.get_always_sv(m, s, item.statement) 

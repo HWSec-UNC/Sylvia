@@ -18,6 +18,7 @@ import gc
 from itertools import product
 import logging
 from helpers.utils import to_binary
+from helpers.slang_helpers import get_module_name
 from strategies.dfs import DepthFirst
 import sys
 from copy import deepcopy
@@ -568,13 +569,14 @@ class ExecutionEngine:
         state: SymbolicState = SymbolicState()
         if manager is None:
             manager: ExecutionManager = ExecutionManager()
+            manager.sv = True
             manager.debugging = False
             modules_dict = {}
             # a dictionary keyed by module name, that gives the list of cfgs
             cfgs_by_module = {}
             cfg_count_by_module = {}
             for module in modules:
-                sv_module_name = module.header.name.value
+                sv_module_name = get_module_name(module)
                 modules_dict[sv_module_name] = sv_module_name
                 always_blocks_by_module = {sv_module_name: []}
                 manager.seen_mod[sv_module_name] = {}
@@ -621,9 +623,9 @@ class ExecutionEngine:
                     #cfg.partition_points = []
                     cfg.get_always_sv(manager, state, ast.members)
                     cfg_count = len(cfg.always_blocks)
-                    always_blocks_by_module[module.name] = deepcopy(cfg.always_blocks)
+                    always_blocks_by_module[sv_module_name] = deepcopy(cfg.always_blocks)
                     for k in range(cfg_count):
-                        cfg.basic_blocks(manager, state, always_blocks_by_module[module.name][k])
+                        cfg.basic_blocks(manager, state, always_blocks_by_module[sv_module_name][k])
                         cfg.partition()
                         # print(cfg.partition_points)
                         # print(len(cfg.basic_block_list))
@@ -631,14 +633,14 @@ class ExecutionEngine:
                         cfg.build_cfg(manager, state)
                         #print(cfg.cfg_edges)
                         cfg.module_name = ast.name
-                        cfgs_by_module[module.name].append(deepcopy(cfg))
+                        cfgs_by_module[sv_module_name].append(deepcopy(cfg))
                         cfg.reset()
                         #print(cfg.paths)
 
-                    state.store[module.name] = {}
-                    manager.dependencies[module.name] = {}
-                    manager.intermodule_dependencies[module.name] = {}
-                    manager.cond_assigns[module.name] = {}
+                    state.store[sv_module_name] = {}
+                    manager.dependencies[sv_module_name] = {}
+                    manager.intermodule_dependencies[sv_module_name] = {}
+                    manager.cond_assigns[sv_module_name] = {}
             total_paths = 1
             for x in manager.child_num_paths.values():
                 total_paths *= x
