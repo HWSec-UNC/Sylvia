@@ -514,7 +514,7 @@ class DepthFirst(Search):
                         self.visit_stmt(m, s, item, modules, direction)
             
         elif isinstance(stmt, Initial):
-            self.visit_stmt(m, s, stmt.statement,  modules)
+            self.visit_stmt(m, s, stmt.statement, modules, direction)
         elif isinstance(stmt, IfStatement):
             m.curr_level += 1
             self.cond = True

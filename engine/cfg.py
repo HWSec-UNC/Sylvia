@@ -10,6 +10,7 @@ from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial, 
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Instance
 from .execution_manager import ExecutionManager
 from .symbolic_state import SymbolicState
+from copy import deepcopy
 import os
 from optparse import OptionParser
 from typing import Optional
@@ -64,7 +65,7 @@ class CFG:
     # the nodes in the AST that correspond to always blocks
     always_blocks = []
 
-    # the nodes in the AST that correspond to inital blocks
+    # the nodes in the AST that correspond to initial blocks
     initial_blocks = []
 
     # branch-point set
@@ -79,6 +80,9 @@ class CFG:
 
     #submodules defined
     submodules = []
+
+    # basic blocks that don't have out edges
+    dangling = set()
 
     def reset(self):
         """Return to defaults."""
@@ -95,6 +99,7 @@ class CFG:
         self.ind_branch_points = {1: set()}
         self.block_smt = [False]
         self.block_stmt_depth = 0
+        self.dangling = set()
 
     def compute_direction(self, path):
         """Given a path, figure out the direction"""
@@ -112,8 +117,65 @@ class CFG:
             return 
 
         res = list(combinations(self.ind_branch_points[idx], r=len(self.ind_branch_points[idx])))
-
         self.edgelist += res 
+
+    def get_initial(self, m: ExecutionManager, s: SymbolicState, ast):
+        """Populate the initial block list."""
+        if isinstance(ast, Block):
+            ast = ast.statements
+
+        if hasattr(ast, '__iter__'):
+            for item in ast:
+                if isinstance(item, IfStatement):
+                    self.get_initial(m, s, item.true_statement) 
+                    self.get_initial(m, s, item.false_statement)
+                elif isinstance(ast, CaseStatement):
+                    return self.get_initial(m, s, ast.caselist) 
+                elif isinstance(ast, ForStatement):
+                    return self.get_initial(m, s, ast.statement) 
+                elif isinstance(item, Block):
+                    self.get_initial(m, s, item.items)
+                elif isinstance(item, Always):
+                    ...           
+                elif isinstance(item, Initial):
+                    self.initial_blocks.append(item)
+                elif isinstance(item, SingleStatement):
+                    self.get_initial(m, s, item.statement)
+                else:
+                    if isinstance(item, Decl):
+                        self.decls.append(item)
+                    elif isinstance(item, Assign):
+                        self.comb.append(item)
+                    elif isinstance(item, InstanceList):
+                        print("FOUND SUBModule!")
+                        print(item.module)
+                        self.submodules.append(item)
+                    ...
+        elif ast != None:
+            if isinstance(ast, IfStatement):
+                self.get_initial(m, s, ast.true_statement) 
+                self.get_initial(m, s, ast.false_statement)
+            elif isinstance(ast, CaseStatement):
+                self.get_initial(m, s, ast.caselist)
+            elif isinstance(ast, ForStatement):
+                self.get_initial(m, s, ast.statement)
+            elif isinstance(ast, Block):
+                self.get_initial(m, s, ast.items)
+            elif isinstance(ast, Always):
+                ...        
+            elif isinstance(ast, Initial):
+                self.initial_blocks.append(ast)
+            elif isinstance(ast, SingleStatement):
+                self.get_initial(m, s, ast.statement)
+            else:
+                if isinstance(ast, Decl):
+                    self.decls.append(ast)
+                elif isinstance(ast, Assign):
+                    self.comb.append(ast)
+                elif isinstance(ast, InstanceList):
+                    print("FOUND SUBModule!")
+                ...
+
 
     def get_always(self, m: ExecutionManager, s: SymbolicState, ast):
         """Populate the always block list."""
@@ -186,15 +248,21 @@ class CFG:
                     self.all_nodes.append(item)
                     self.partition_points.add(self.curr_idx)
                     parent_idx = self.curr_idx
-                    self.basic_blocks(m, s, item.true_statement) 
+                    self.basic_blocks(m, s, item.true_statement)
+                    snapshot_before_else = deepcopy(self.all_nodes)
                     edge_1 = (parent_idx, self.curr_idx)
                     self.partition_points.add(self.curr_idx)
                     self.basic_blocks(m, s, item.false_statement)
-                    edge_2 = (parent_idx, self.curr_idx)
-                    self.partition_points.add(self.curr_idx)
-                    self.curr_idx += 1
+                    
+                    # if there are no other nodes added after this 
+                    # AST traversal, then we know that we don't have the 
+                    # else to worry about, shouldn't add the edge
+                    if len(self.all_nodes) > len(snapshot_before_else):
+                        edge_2 = (parent_idx, self.curr_idx)
+                        self.edgelist.append(edge_2)
+                        self.partition_points.add(self.curr_idx)
+                        self.curr_idx += 1
                     self.edgelist.append(edge_1)
-                    self.edgelist.append(edge_2)
                 elif isinstance(item, CaseStatement):
                     self.all_nodes.append(ast)
                     self.partition_points.add(self.curr_idx)
@@ -300,6 +368,15 @@ class CFG:
             path = (block1, block2)
             self.cfg_edges.append(path)
 
+    def find_dangling(self):
+        """Find dangling nodes in CFG, to know which should connect to exit."""
+        ends = set(edges[1] for edges in self.cfg_edges)
+        for edge in self.cfg_edges:
+            for end in ends:
+                if edge[0] == end and edge[1] == end:
+                    self.dangling.add(end)
+        
+
     def find_leaves(self):
         """Find leaves in cfg, to know which nodes need to connect to dummy exit."""
         starts = set(edge[0] for edge in self.cfg_edges)
@@ -314,9 +391,8 @@ class CFG:
 
     def build_cfg(self, m: ExecutionManager, s: SymbolicState):
         """Build networkx digraph."""
+        self.cfg_edges = []
         self.make_paths()
-        # print(self.basic_block_list)
-        # print(self.cfg_edges)
 
         G = nx.DiGraph()
         for block in self.basic_block_list:
@@ -343,7 +419,11 @@ class CFG:
         for leaf in self.leaves:
             G.add_edge(leaf, -2)
 
-        #print(G.edges())
+        self.find_dangling()
+        # also need to link up the dangling nodes that had self loops
+        for dangling in self.dangling:
+            G.add_edge(dangling, -2)
+
 
         #self.display_cfg(G)
 
