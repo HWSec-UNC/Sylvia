@@ -39,8 +39,9 @@ You can run:
 
 `python3 -m main --help` for information about the different flags you can run Sylvia with. -B will display the initial & final symbolic store and path condition for each clock cycle during the run. 
 
+How to Cite
 ---------------------
-How To Cite
+
 
 Please cite our FMCAD paper when using Sylvia!
 
