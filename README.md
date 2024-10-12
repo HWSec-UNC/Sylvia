@@ -2,25 +2,12 @@
 
 ## Setup
 
-Requirements
---------------------
-- Python3: 3.8 or later
-- z3: run `python3 -m pip install z3-solver`
-- Icarus Verilog: 10.1 or later: run `sudo apt install iverilog`
-- Jinja 2.10 or later: run `python3 -m pip install jinja2`
-- PLY 3.4 or later: run `python3 -m pip install ply`
-- Graphviz 2.38.0 or later: run `sudo apt install graphviz`
-- Pygraphviz 1.3.1 or later: run `python3 -m pip install pygraphviz`. If you have trouble with this step with errors related to building wheel for pygraphviz, try running `sudo apt install graphviz-dev` and then rerunning the `python3 - m pip install pygraphviz` command.
-- PyVerilog: run `python3 -m pip install pyverilog`
-- networkx: run `python3 -m pip install networkx`
-- matplotlib: run `python3 -m pip install matplotlib`
-
-
 Download
 --------------------
-git clone https://github.com/kakiryan/Sylvia
+1. Clone this repo. `git clone https://github.com/kakiryan/Sylvia`
+2. `cd Sylvia`
+3. Run the dependency install script, this will install all system-wide and python module dependencies. `./sylviaInstall.sh`
 
-cd Sylvia
 
 Running Sylvia
 ---------------------
