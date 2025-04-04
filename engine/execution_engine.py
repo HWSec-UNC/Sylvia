@@ -673,7 +673,7 @@ class ExecutionEngine:
         curr_cfg = 0
         for module_name in cfgs_by_module:
             for cfg in cfgs_by_module[module_name]:
-                print(cfg.initial_blocks)
+                #print(f"{cfg.initial_blocks}!!")
                 mapped_paths[module_name][curr_cfg] = cfg.paths
                 curr_cfg += 1
             curr_cfg = 0
