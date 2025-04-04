@@ -717,12 +717,12 @@ class ExecutionEngine:
             self.check_state(manager, state)
 
             curr_path = total_paths[i]
-
             modules_seen = 0
             for module_name in curr_path:
                 manager.curr_module = manager.names_list[modules_seen]
                 manager.cycle = 0
                 for complete_single_cycle_path in curr_path[module_name]:
+                    print(f"path {i} clock cycle {manager.cycle}")
                     for cfg_path in complete_single_cycle_path:
                         directions = cfgs_by_module[module_name][complete_single_cycle_path.index(cfg_path)].compute_direction(cfg_path)
                         k: int = 0
@@ -742,6 +742,8 @@ class ExecutionEngine:
                     for node in cfgs_by_module[module_name][cfg_count-1].comb:
                         self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
                     manager.cycle += 1
+                    if self.debug:
+                        self.check_state(manager, state)
                 modules_seen += 1
             manager.cycle = 0
             self.done = True
@@ -752,13 +754,11 @@ class ExecutionEngine:
             for module_name in manager.instances_seen:
                 manager.instances_seen[module_name] = 0
                 manager.instances_loc[module_name] = ""
-            if self.debug:
-                print("------------------------")
-            if (manager.assertion_violation):
+            counterexample = {}
+            if (manager.assertion_violation) and not self.debug:
                 print("Assertion violation")
                 #manager.assertion_violation = False
                 print(state.pc)
-                counterexample = {}
                 symbols_to_values = {}
                 solver_start = time.process_time()
                 if self.solve_pc(state.pc):
@@ -776,9 +776,13 @@ class ExecutionEngine:
                                 if state.store[module][signal] == symbol:
                                     counterexample[signal] = symbols_to_values[symbol]
 
-                    print(counterexample)
                 else:
                     print("UNSAT")
+                
+            if self.debug:
+                print("------------------------")
+            else:
+                print(counterexample)
                 return
             
             state.pc.reset()
