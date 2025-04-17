@@ -714,15 +714,18 @@ class ExecutionEngine:
             # ! no longer path code as in bit string, but indices
 
             
-            self.check_state(manager, state)
+
 
             curr_path = total_paths[i]
             modules_seen = 0
+            manager.executing = True
             for module_name in curr_path:
                 manager.curr_module = manager.names_list[modules_seen]
                 manager.cycle = 0
                 for complete_single_cycle_path in curr_path[module_name]:
-                    print(f"path {i} clock cycle {manager.cycle}")
+                    print(f"** path {i} clock cycle {manager.cycle} **")
+                    if manager.executing:
+                        self.check_state(manager, state)
                     for cfg_path in complete_single_cycle_path:
                         directions = cfgs_by_module[module_name][complete_single_cycle_path.index(cfg_path)].compute_direction(cfg_path)
                         k: int = 0
@@ -741,13 +744,17 @@ class ExecutionEngine:
                                             # only do once, and the last CFG 
                     for node in cfgs_by_module[module_name][cfg_count-1].comb:
                         self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
-                    manager.cycle += 1
-                    if self.debug:
+                    if self.debug and complete_single_cycle_path.index(cfg_path) == len(complete_single_cycle_path) - 1:
+                        manager.executing = False
                         self.check_state(manager, state)
+                        print(f"<end of cycle {manager.cycle}>")
+                    manager.cycle += 1
                 modules_seen += 1
             manager.cycle = 0
             self.done = True
-            self.check_state(manager, state)
+            if not self.debug:
+                print("==END OF RUN==")
+                self.check_state(manager, state)
             self.done = False
 
             manager.curr_level = 0
@@ -860,22 +867,30 @@ class ExecutionEngine:
 
     def check_state(self, manager, state):
         """Checks the status of the execution and displays the state."""
-        if self.done and manager.debug and not manager.is_child and not manager.init_run_flag and not manager.ignore and not manager.abandon:
-            print(f"Cycle {manager.cycle} final state:")
+        if not self.done and manager.debug and manager.executing:
+            print(f"path {manager.curr_path} cycle {manager.cycle} state:")
             print(state.store)
     
-            print(f"Cycle {manager.cycle} final path condition:")
+            print(f"path {manager.curr_path} cycle {manager.cycle} path condition:")
+            print(state.pc)
+        elif self.done and manager.debug and not manager.is_child and not manager.init_run_flag and not manager.ignore and not manager.abandon:
+            print(f"path {manager.curr_path} cycle {manager.cycle} final state:")
+            print(state.store)
+    
+            print(f"path {manager.curr_path} cycle {manager.cycle} final path condition:")
             print(state.pc)
         elif self.done and not manager.is_child and manager.assertion_violation and not manager.ignore and not manager.abandon:
-            print(f"Cycle {manager.cycle} initial state:")
+            print(f"path {manager.curr_path} cycle {manager.cycle} initial state:")
             print(manager.initial_store)
 
-            print(f"Cycle {manager.cycle} final state:")
+            print(f"path {manager.curr_path} cycle {manager.cycle} final state:")
             print(state.store)
     
-            print(f"Cycle {manager.cycle} final path condition:")
+            print(f"path {manager.curr_path} cycle {manager.cycle} final path condition:")
             print(state.pc)
         elif manager.debug and not manager.is_child and not manager.init_run_flag and not manager.ignore:
-            print("Initial state:")
+            print(f"path {manager.curr_path} cycle {manager.cycle} state:")
             print(state.store)
-                
+
+            print(f"path {manager.curr_path} cycle {manager.cycle} Path condition:")
+            print(state.pc)                

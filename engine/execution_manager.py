@@ -67,6 +67,8 @@ class ExecutionManager:
     instances_seen = {}
     instances_loc = {}
     solver_time = 0
+    executing = False
+    curr_path = 0
 
     def merge_states(self, state: SymbolicState, store, flag, module_name=""):
         """Merges two states. The flag is for when we are just merging a particular module"""
