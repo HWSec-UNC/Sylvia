@@ -5,23 +5,60 @@ import z3
 from z3 import Solver, Int, BitVec, Context, BitVecSort, ExprRef, BitVecRef, If, BitVecVal, And, IntVal, Int2BV
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
-from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
+from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case, Ulnot
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg
 from helpers.rvalue_parser import parse_tokens, tokenize
 from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
+import re
 
 BINARY_OPS = ("Plus", "Minus", "Power", "Times", "Divide", "Mod", "Sll", "Srl", "Sla", "Sra", "LessThan",
 "GreaterThan", "LessEq", "GreaterEq", "Eq", "NotEq", "Eql", "NotEql", "And", "Xor",
 "Xnor", "Or", "Land", "Lor")
+UNARY_OPS = ("Ulnot")
 op_map = {"Plus": "+", "Minus": "-", "Power": "**", "Times": "*", "Divide": "/", "Mod": "%", "Sll": "<<", "Srl": ">>>",
 "Sra": ">>", "LessThan": "<", "GreaterThan": ">", "LessEq": "<=", "GreaterEq": ">=", "Eq": "=", "NotEq": "!=", "Eql": "===", "NotEql": "!==",
-"And": "&", "Xor": "^", "Xnor": "<->", "Land": "&&", "Lor": "||"}
+"And": "&", "Xor": "^", "Xnor": "<->", "Land": "&&", "Lor": "||", "Ulnot": "!"}
+
+def eval_expr(expr, s: SymbolicState, m: ExecutionManager) -> str:
+    """Takes in an AST and should return the new symbolic expression for the symbolic state."""
+    if not expr:
+        return ""
+    if expr[0] in BINARY_OPS:
+        return evaluate_expr_to_smt(expr[1], expr[2], op_map[expr[0]], s, m)
+    elif expr[0] in UNARY_OPS:
+        return f"({op_map[expr[0]]} {eval_expr(expr[1], s, m)})"
+    else:
+        return str(expr)
+
+def evaluate_expr_to_smt(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> str: 
+    """Helper function to resolve binary symbolic expressions."""   
+    if isinstance(lhs, tuple) and isinstance(rhs, tuple):
+        return f"({op} ({eval_expr(lhs, s, m)}) ({eval_expr(rhs, s, m)}))"
+    elif isinstance(lhs, tuple):
+        if isinstance(rhs, str) and not rhs.isdigit():
+            return f"({op} ({eval_expr(lhs, s, m)}) {s.get_symbolic_expr(m.curr_module, rhs)})"
+        else:
+            return f"({op} ({eval_expr(lhs, s, m)}) {str(rhs)})"
+    elif isinstance(rhs, tuple):
+        if isinstance(lhs, str) and not lhs.isdigit():
+            return f"({op} ({s.get_symbolic_expr(m.curr_module, lhs)}) ({eval_expr(rhs, s, m)}))"
+        else:
+            return f"({op} {str(lhs)} ({eval_expr(rhs, s, m)}))"
+    else:
+        if isinstance(lhs, str) and isinstance(rhs, str) and not lhs.isdigit() and not rhs.isdigit():
+            return f"({op} {s.get_symbolic_expr(m.curr_module, lhs)} {s.get_symbolic_expr(m.curr_module, rhs)})"
+        elif isinstance(lhs, str) and not lhs.isdigit():
+            return f"({op} {s.get_symbolic_expr(m.curr_module, lhs)} {str(rhs)})"
+        elif isinstance(rhs, str) and not rhs.isdigit():
+            return f"({op} {str(lhs)} {s.get_symbolic_expr(m.curr_module, rhs)})"
+        else: 
+            return f"({op} {str(lhs)} {str(rhs)})"
 
 def get_constants_list(new_constraint, s: SymbolicState, m: ExecutionManager):
     """Get list of constants that need to be added to z3 context from pyverilog tokens."""
     res = []
-    words = new_constraint.split(" ")
+    words = re.findall(r'[^\s()]+', new_constraint)
     for word in words:
         if word in s.store[m.curr_module].values():
             res.append(word)
@@ -152,6 +189,9 @@ def parse_expr_to_Z3(e: Value, s: SymbolicState, m: ExecutionManager):
             return s
             #TODO:FIX!
             #return s.pc.add(lhs.pc.assertions() and rhs.pc.assertions())
+    elif isinstance(e, Ulnot):
+        rhs = parse_expr_to_Z3(e.right, s, m)
+
     return s
 
 def solve_pc(s: Solver) -> bool:
@@ -165,34 +205,5 @@ def solve_pc(s: Solver) -> bool:
 
 def evaluate_expr(parsedList, s: SymbolicState, m: ExecutionManager):
     for i in parsedList:
-	    res = eval_expr(i, s, m)
+        res = eval_expr(i, s, m)
     return res
-
-def evaluate_expr_to_smt(lhs, rhs, op, s: SymbolicState, m: ExecutionManager) -> str: 
-    """Helper function to resolve binary symbolic expressions."""
-    if (isinstance(lhs,tuple) and isinstance(rhs,tuple)):
-        return f"({op} ({eval_expr(lhs, s, m)})  ({eval_expr(rhs, s, m)}))"
-    elif (isinstance(lhs,tuple)):
-        if (isinstance(rhs,str)) and not rhs.isdigit():
-            return f"({op} ({eval_expr(lhs, s, m)}) {s.get_symbolic_expr(m.curr_module, rhs)})"
-        else:
-            return f"({op} ({eval_expr(lhs, s, m)}) {str(rhs)})"
-    elif (isinstance(rhs,tuple)):
-        if (isinstance(lhs,str)) and not lhs.isdigit():
-            return f"({op} ({s.get_symbolic_expr(m.curr_module, lhs)}) ({eval_expr(rhs, s, m)}))"
-        else:
-            return f"({op} {str(lhs)}  ({eval_expr(rhs, s, m)}))"
-    else:
-        if (isinstance(lhs ,str) and isinstance(rhs , str)) and not lhs.isdigit() and not rhs.isdigit():
-            return f"({op} {s.get_symbolic_expr(m.curr_module, lhs)} {s.get_symbolic_expr(m.curr_module, rhs)})"
-        elif (isinstance(lhs ,str)) and not lhs.isdigit():
-            return f"({op} {s.get_symbolic_expr(m.curr_module, lhs)} {str(rhs)})"
-        elif (isinstance(rhs ,str)) and not rhs.isdigit():
-            return f"({op} {str(lhs)}  {s.get_symbolic_expr(m.curr_module, rhs)})"
-        else: 
-            return f"({op} {str(lhs)} {str(rhs)})"
- 
-def eval_expr(expr, s: SymbolicState, m: ExecutionManager) -> str:
-    """Takes in an AST and should return the new symbolic expression for the symbolic state."""
-    if not expr is None and expr[0] in BINARY_OPS:
-        return evaluate_expr_to_smt(expr[1], expr[2], op_map[expr[0]], s, m)

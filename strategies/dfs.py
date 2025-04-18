@@ -5,7 +5,7 @@ from engine.execution_manager import ExecutionManager
 from engine.symbolic_state import SymbolicState
 from pyverilog.vparser.ast import Description, ModuleDef, Node, IfStatement, SingleStatement, And, Constant, Rvalue, Plus, Input, Output
 from pyverilog.vparser.ast import WhileStatement, ForStatement, CaseStatement, Block, SystemCall, Land, InstanceList, IntConst, Partselect, Ioport
-from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case
+from pyverilog.vparser.ast import Value, Reg, Initial, Eq, Identifier, Initial,  NonblockingSubstitution, Decl, Always, Assign, NotEql, Case, Ulnot
 from pyverilog.vparser.ast import Concat, BlockingSubstitution, Parameter, StringConst, Wire, PortArg, Cond, Pointer, IdentifierScope, Operator, ForStatement
 from pyverilog.vparser.ast import Repeat 
 from helpers.utils import init_symbol
@@ -870,8 +870,10 @@ class DepthFirst(Search):
                     m.abandon = True
                     m.ignore = True
                     return
+        elif isinstance(expr, Ulnot):
+            res = parse_expr_to_Z3(expr, s, m)
         elif isinstance(expr, Operator):
-            #TODO Fix?
+            #TODO Fix? maybe this is too general
             new_val = simpl_str_exp(evaluate(parse_tokens(tokenize(expr, s, m)),s,m), s, m)
             x = BitVec(new_val, 1)
             one = IntVal(1)

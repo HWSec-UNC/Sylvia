@@ -757,6 +757,33 @@ class ExecutionEngine:
                 self.check_state(manager, state)
             self.done = False
 
+            if self.debug and manager.assertion_violation:
+                print("Assertion violation")
+                manager.assertion_violation = False
+                print(state.pc)
+                symbols_to_values = {}
+                solver_start = time.process_time()
+                if self.solve_pc(state.pc):
+                    solver_end = time.process_time()
+                    manager.solver_time += solver_end - solver_start
+                    solved_model = state.pc.model()
+                    decls =  solved_model.decls()
+                    for item in decls:
+                        symbols_to_values[item.name()] = solved_model[item]
+
+                    counterexample = {}
+                    # plug in phase
+                    for module in state.store:
+                        for signal in state.store[module]:
+                            for symbol in symbols_to_values:
+                                if state.store[module][signal] == symbol:
+                                    counterexample[signal] = symbols_to_values[symbol]
+
+                    print(counterexample)
+                else: 
+                    print("UNSAT!")
+
+
             manager.curr_level = 0
             for module_name in manager.instances_seen:
                 manager.instances_seen[module_name] = 0
