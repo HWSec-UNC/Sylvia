@@ -29,6 +29,7 @@ from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 from pyverilog.dataflow.optimizer import VerilogDataflowOptimizer
 from pyverilog.dataflow.graphgen import VerilogGraphGenerator
 import pygraphviz as pgv
+import pickle
 
 gc.collect()
 
@@ -61,6 +62,7 @@ def main():
     optparser.add_option("-D", dest="define", action="append",
                          default=[], help="Macro Definition")
     optparser.add_option("-B", "--debug", action="store_true", dest="showdebug", help="Debug Mode")
+    optparser.add_option("-r", "--reset-state", action="store", dest="resetstate", help="Reset State")
     optparser.add_option("-t", "--top", dest="topmodule",
                          default="top", help="Top module, Default=top")
     optparser.add_option("--nobind", action="store_true", dest="nobind",
@@ -92,6 +94,10 @@ def main():
 
     if options.showdebug:
         engine.debug = True
+
+    if options.resetstate:
+        with open(options.resetstate, 'rb') as f:
+            engine.reset_state = pickle.load(f)
 
     for f in filelist:
         if not os.path.exists(f):

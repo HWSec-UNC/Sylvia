@@ -30,6 +30,7 @@ class ExecutionEngine:
     module_depth: int = 0
     search_strategy = DepthFirst()
     debug: bool = False
+    reset_state: bool = False
     done: bool = False
 
     def check_pc_SAT(self, s: Solver, constraint: ExprRef) -> bool:
@@ -713,15 +714,17 @@ class ExecutionEngine:
             # makes assumption top level module is first in line
             # ! no longer path code as in bit string, but indices
 
-            
-
 
             curr_path = total_paths[i]
             modules_seen = 0
             manager.executing = True
+            
+            #TODO set the reset state
+
             for module_name in curr_path:
                 manager.curr_module = manager.names_list[modules_seen]
                 manager.cycle = 0
+    
                 for complete_single_cycle_path in curr_path[module_name]:
                     print(f"** path {i} clock cycle {manager.cycle} **")
                     if manager.executing:
