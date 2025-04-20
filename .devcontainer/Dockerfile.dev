@@ -1,0 +1,31 @@
+FROM python:3.10
+
+# Install system dependencies needed for pygraphviz and dev
+RUN apt-get update && apt-get install -y \
+    wget curl sudo unzip \
+    build-essential \
+    graphviz \
+    libgraphviz-dev \
+    pkg-config \
+    python3-dev \
+    zlib1g-dev libffi-dev libgmp-dev
+
+# Install oc CLI
+RUN arch="$(arch)" && \
+    case "$arch" in \
+        x86_64) TARGET='' ;; \
+        aarch64) TARGET='arm64-' ;; \
+    esac && \
+    wget -O /tmp/oc.tgz "https://github.com/okd-project/okd/releases/download/4.15.0-0.okd-2024-03-10-010116/openshift-client-linux-${TARGET}4.15.0-0.okd-2024-03-10-010116.tar.gz" && \
+    tar -xvzf /tmp/oc.tgz -C /tmp && \
+    sudo mv /tmp/oc /usr/local/bin/oc && \
+    rm -rf /tmp/oc.tgz /tmp/kubectl /tmp/README.md
+
+# Create working dir
+WORKDIR /workspace
+
+# Install Python packages
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+

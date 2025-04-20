@@ -1,0 +1,14 @@
+name: CI/CD Frontend
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  cd:
+    name: "Continuous Deployment"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify OKD to Build and Deploy
+        run: |
+          curl -X POST ${{ secrets.SYLVIA_BUILD_WEBHOOK }}

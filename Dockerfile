@@ -1,0 +1,24 @@
+# /hwsec-unc-sylvia/Dockerfile
+FROM python:3.10-slim
+
+# System deps for z3 / graphviz / etc
+RUN apt-get update && apt-get install -y \
+    build-essential zlib1g-dev libffi-dev libgmp-dev graphviz && \
+    apt-get clean
+
+WORKDIR /app
+
+# Install Python deps
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Install any system scripts (sylviaInstall.sh)
+COPY sylviaInstall.sh .
+RUN chmod +x sylviaInstall.sh && ./sylviaInstall.sh
+
+# Copy the rest of Sylvia
+COPY . .
+
+EXPOSE 8001
+
+CMD ["uvicorn", "API.sylvia_api:app", "--host", "0.0.0.0", "--port", "8001"]
