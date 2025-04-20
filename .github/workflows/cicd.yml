@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Notify OKD to Build and Deploy
         run: |
-          curl -X POST ${{ secrets.SYLVIA_BUILD_WEBHOOK }}
+          curl -X POST ${{ secrets.CD_BUILD_WEBHOOK_SYLVIA }}
