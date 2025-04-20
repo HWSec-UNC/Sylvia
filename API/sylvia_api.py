@@ -22,7 +22,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 🔥 Allows requests from any domain
+    allow_origins=ALLOWED_DOMAINS,
     allow_credentials=True,
     allow_methods=["*"],  # 🔥 Ensure POST is allowed
     allow_headers=["*"],
