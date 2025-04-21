@@ -3,7 +3,7 @@ FROM python:3.10-slim
 
 # System deps for z3 / graphviz / etc
 RUN apt-get update && apt-get install -y \
-    build-essential zlib1g-dev libffi-dev libgmp-dev graphviz && \
+    build-essential zlib1g-dev libffi-dev libgmp-dev graphviz iverilog && \
     apt-get clean
 
 WORKDIR /app
