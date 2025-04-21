@@ -1,12 +1,14 @@
-name: CI/CD Frontend
+name: Sylvia Deployment
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  cd:
-    name: "Continuous Deployment"
+  cd-sylvia:
+    name: "Continuous Deployment - Sylvia"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

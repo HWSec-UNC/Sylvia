@@ -12,8 +12,10 @@ run with this one -> 'uvicorn API.sylvia_api:app --host 127.0.0.1 --port 8001` a
 app = FastAPI()
 
 script_dir = os.path.dirname(__file__)
-UPLOAD_DIR = os.path.join(script_dir, "..", "uploads")  # Directory to store uploaded files
-OUTPUT_JSON = os.path.join(script_dir, "sylvia_tree.json")
+#UPLOAD_DIR = os.path.join(script_dir, "..", "uploads")  # Directory to store uploaded files
+#OUTPUT_JSON = os.path.join(script_dir, "sylvia_tree.json")
+UPLOAD_DIR = "/tmp/uploads"
+OUTPUT_JSON = "/tmp/sylvia_tree.json"
 ALLOWED_DOMAINS = ["https://veriviz-backend-dept-hwsecurity.cloudapps.unc.edu", 
                    "https://localhost:8000"
                    ]
