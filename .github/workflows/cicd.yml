@@ -9,6 +9,7 @@ jobs:
     name: "Continuous Deployment"
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Notify OKD to Build and Deploy
         run: |
           curl -X POST ${{ secrets.CD_BUILD_WEBHOOK_SYLVIA }}
