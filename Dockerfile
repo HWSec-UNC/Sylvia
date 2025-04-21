@@ -22,6 +22,8 @@ RUN chmod +x sylviaInstall.sh && ./sylviaInstall.sh
 
 # Copy the rest of Sylvia
 COPY . .
+#can write to out.txt
+RUN chmod -R 777 /app
 
 EXPOSE 8001
 
