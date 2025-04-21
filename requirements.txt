@@ -8,3 +8,4 @@ matplotlib
 pympler
 uvicorn[standard]>=0.29.0
 fastapi==0.110.0
+python-multipart
