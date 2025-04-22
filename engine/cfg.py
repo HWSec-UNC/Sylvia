@@ -147,8 +147,6 @@ class CFG:
                     elif isinstance(item, Assign):
                         self.comb.append(item)
                     elif isinstance(item, InstanceList):
-                        print("FOUND SUBModule!")
-                        print(item.module)
                         self.submodules.append(item)
                     ...
         elif ast != None:
@@ -173,7 +171,7 @@ class CFG:
                 elif isinstance(ast, Assign):
                     self.comb.append(ast)
                 elif isinstance(ast, InstanceList):
-                    print("FOUND SUBModule!")
+                    ...
                 ...
 
 
@@ -229,7 +227,7 @@ class CFG:
                 elif isinstance(ast, Assign):
                     self.comb.append(ast)
                 elif isinstance(ast, InstanceList):
-                    print("FOUND SUBModule!")
+                    ...
                 ...
 
     def basic_blocks(self, m:ExecutionManager, s: SymbolicState, ast):
