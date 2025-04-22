@@ -6,7 +6,7 @@ import json
 import shutil
 import uuid
 """
-run with this one -> 'uvicorn API.sylvia_api:app --host 127.0.0.1 --port 8001` and open on `http://localhost:8001/docs`
+run with this one -> 'uvicorn API.sylvia_api:app --host 127.0.0.1 --port 8001 --timeout-keep-alive 0` and open on `http://localhost:8001/docs`
 """
 
 app = FastAPI()
