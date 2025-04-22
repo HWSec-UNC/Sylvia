@@ -27,4 +27,4 @@ RUN chmod -R 777 /app
 
 EXPOSE 8001
 
-CMD ["uvicorn", "API.sylvia_api:app", "--host", "0.0.0.0", "--port", "8001", "--timeout-keep-alive", "0"]
+CMD ["uvicorn", "API.sylvia_api:app", "--host", "0.0.0.0", "--port", "8001", "--timeout-keep-alive", "600"]
