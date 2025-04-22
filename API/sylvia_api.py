@@ -2,11 +2,13 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 import subprocess
 import os
+os.environ["MPLCONFIGDIR"] = "/tmp"
+os.environ["XDG_CACHE_HOME"] = "/tmp"
 import json
 import shutil
 import uuid
 """
-run with this one -> 'uvicorn API.sylvia_api:app --host 127.0.0.1 --port 8001 --timeout-keep-alive 0` and open on `http://localhost:8001/docs`
+run with this one -> 'uvicorn API.sylvia_api:app --host 127.0.0.1 --port 8001 --timeout-keep-alive 600` and open on `http://localhost:8001/docs`
 """
 
 app = FastAPI()
