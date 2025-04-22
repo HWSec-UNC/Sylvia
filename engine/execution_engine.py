@@ -696,6 +696,7 @@ class ExecutionEngine:
         # for each combinatoin of multicycle paths
 
         for i in range(len(total_paths)):
+            manager.curr_path = i
             manager.prev_store = state.store
             manager.init_state(state, manager.prev_store, ast)
             # initalize inputs with symbols for all submodules too
@@ -720,6 +721,7 @@ class ExecutionEngine:
             manager.executing = True
             
             #TODO set the reset state
+            #print(self.reset_state)
 
             for module_name in curr_path:
                 manager.curr_module = manager.names_list[modules_seen]
