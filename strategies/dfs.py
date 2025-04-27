@@ -389,6 +389,8 @@ class DepthFirst(Search):
             if isinstance(stmt.right.var, IntConst):
                 if isinstance(stmt.left.var, Pointer):
                     s.store[m.curr_module][stmt.left.var.var.name] = stmt.right.var.value
+                elif isinstance(stmt.left.var, Partselect):
+                    s.store[m.curr_module][f"{stmt.left.var.var.name}[{stmt.left.var.msb}:{stmt.left.var.lsb}]"] = stmt.right.var.value
                 else:
                     s.store[m.curr_module][stmt.left.var.name] = stmt.right.var.value
             elif isinstance(stmt.right.var, Identifier):

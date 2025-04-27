@@ -17,7 +17,7 @@ import time
 import gc
 from itertools import product
 import logging
-from helpers.utils import to_binary
+from helpers.utils import to_binary, init_symbol
 from strategies.dfs import DepthFirst
 import sys
 from copy import deepcopy
@@ -216,7 +216,7 @@ class ExecutionEngine:
                             m.always_writes[m.curr_always].append(sub_item.name)
                 elif isinstance(items.left.var, Partselect):
                     if m.curr_always is not None and items.left.var.var.name not in m.always_writes[m.curr_always]:
-                        m.always_writes[m.curr_always].append(item.left.var.var.name)
+                        m.always_writes[m.curr_always].append(items.left.var.var.name)
                 elif isinstance(items.left.var, Pointer):
                     if m.curr_always is not None and items.left.var.var.name not in m.always_writes[m.curr_always]:
                         m.always_writes[m.curr_always].append(items.left.var.var.name)
@@ -721,6 +721,7 @@ class ExecutionEngine:
             manager.executing = True
             
             #TODO set the reset state
+
             #print(self.reset_state)
 
             for module_name in curr_path:
@@ -765,6 +766,9 @@ class ExecutionEngine:
             if self.debug and manager.assertion_violation:
                 print("Assertion violation")
                 manager.assertion_violation = False
+                new_assertions = list(set(state.pc.assertions()))
+                state.pc = Solver()
+                state.pc.add(new_assertions)
                 print(state.pc)
                 symbols_to_values = {}
                 solver_start = time.process_time()
