@@ -699,6 +699,11 @@ class ExecutionEngine:
             manager.curr_path = i
             manager.prev_store = state.store
             manager.init_state(state, manager.prev_store, ast)
+
+            #TODO set the reset state here
+            #print(self.reset_state)
+            # state.store = {}
+
             # initalize inputs with symbols for all submodules too
             for module_name in manager.names_list:
                 manager.curr_module = module_name
@@ -719,10 +724,6 @@ class ExecutionEngine:
             curr_path = total_paths[i]
             modules_seen = 0
             manager.executing = True
-            
-            #TODO set the reset state
-
-            #print(self.reset_state)
 
             for module_name in curr_path:
                 manager.curr_module = manager.names_list[modules_seen]
