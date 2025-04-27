@@ -19,6 +19,7 @@ from itertools import product
 import logging
 from helpers.utils import to_binary, init_symbol
 from strategies.dfs import DepthFirst
+from helpers.rvalue_parser import BINARY_OPS, UNARY_OPS
 import sys
 from copy import deepcopy
 from pympler import asizeof
@@ -703,7 +704,7 @@ class ExecutionEngine:
             #TODO set the reset state here
             #print(self.reset_state)
             # state.store = {}
-
+            
             # initalize inputs with symbols for all submodules too
             for module_name in manager.names_list:
                 manager.curr_module = module_name
@@ -783,11 +784,19 @@ class ExecutionEngine:
 
                     counterexample = {}
                     # plug in phase
+                    assertion_symbols = []
+                    for assertion in manager.assertions:
+                        assertion_symbols.extend(
+                            [symbol for symbol in re.findall(r'\b\w+\b', str(assertion)) if symbol not in BINARY_OPS and symbol not in UNARY_OPS and not symbol.isdigit()]
+                        )
                     for module in state.store:
                         for signal in state.store[module]:
                             for symbol in symbols_to_values:
                                 if state.store[module][signal] == symbol:
                                     counterexample[signal] = symbols_to_values[symbol]
+                    for symbol in assertion_symbols:
+                        if not symbol in counterexample:
+                            counterexample[symbol] = state.store[module][symbol]
 
                     print(counterexample)
                 else: 
@@ -909,6 +918,9 @@ class ExecutionEngine:
             print(state.store)
     
             print(f"path {manager.curr_path} cycle {manager.cycle} path condition:")
+            new_assertions = list(set(state.pc.assertions()))
+            state.pc = Solver()
+            state.pc.add(new_assertions)
             print(state.pc)
         elif self.done and manager.debug and not manager.is_child and not manager.init_run_flag and not manager.ignore and not manager.abandon:
             print(f"path {manager.curr_path} cycle {manager.cycle} final state:")
