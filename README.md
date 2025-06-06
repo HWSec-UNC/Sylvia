@@ -4,7 +4,7 @@
 
 Download
 --------------------
-1. Clone this repo. `git clone https://github.com/HWSec-UNC/Sylvia`
+1. Clone this repo. `git clone git@github.com:HWSec-UNC/Sylvia.git`
 2. `cd Sylvia`
 3. Run the dependency install script, this will install all system-wide and python module dependencies. `./sylviaInstall.sh`
 
