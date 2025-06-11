@@ -278,7 +278,6 @@ class DepthFirst(Search):
                     elif not new_lsb is None: 
                         s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{new_lsb}]"
                     else:
-                        # print(m.curr_module)
                         # print(stmt.left.var.name)
                         s.store[m.curr_module][stmt.left.var.name] = f"{s.store[m.curr_module][stmt.right.var.var.name]}[{stmt.right.var.msb}:{stmt.right.var.lsb}]"
                     m.dependencies[m.curr_module][stmt.left.var.name] = stmt.right.var.var.name

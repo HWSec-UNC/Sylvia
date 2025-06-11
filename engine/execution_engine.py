@@ -542,33 +542,49 @@ class ExecutionEngine:
             manager.debugging = False
             modules_dict = {}
             # a dictionary keyed by module name, that gives the list of cfgs
+            # Initialize dictionaries to hold CFGs and counts for each module
             cfgs_by_module = {}
             cfg_count_by_module = {}
             for module in modules:
+                # Map module name to module object
                 modules_dict[module.name] = module
+                # Prepare to collect always blocks for this module
                 always_blocks_by_module = {module.name: []}
+                # Initialize seen_mod for this module
                 manager.seen_mod[module.name] = {}
+                # Initialize list of CFGs for this module
                 cfgs_by_module[module.name] = []
+                # Create a sub-manager for this module
                 sub_manager = ExecutionManager()
+                # Run initial analysis (counts conditionals, lhs signals, assertions)
                 self.init_run(sub_manager, module)
+                # Count module instances
                 self.module_count(manager, module.items) 
+                # If this module is instantiated multiple times
                 if module.name in manager.instance_count:
                     manager.instances_seen[module.name] = 0
                     manager.instances_loc[module.name] = ""
                     num_instances = manager.instance_count[module.name]
+                    # Remove the original module entry from cfgs_by_module
                     cfgs_by_module.pop(module.name, None)
+                    # For each instance of the module
                     for i in range(num_instances):
                         instance_name = f"{module.name}_{i}"
+                        modules_dict[instance_name] = module
                         manager.names_list.append(instance_name)
                         cfgs_by_module[instance_name] = []
-                        # build X CFGx for the particular module 
+                        # Build CFG for always blocks
                         cfg = CFG()
+                        # Build CFG for initial blocks
                         cfg2 = CFG()
                         cfg.reset()
+
                         cfg.get_always(manager, state, module.items)
                         cfg2.get_initial(manager, state, module.items)
-                        cfg_count = len(cfg.always_blocks)
+                        # reset the length fo each new module
+                        cfg_count = len(cfg.always_blocks) + len(initials.initial_blocks)
                         initial_count = len(cfg2.initial_blocks)
+                        # For each always block, build its basic blocks and CFG
                         for k in range(cfg_count):
                             cfg.basic_blocks(manager, state, cfg.always_blocks[k])
                             cfg.partition()
@@ -579,10 +595,9 @@ class ExecutionEngine:
                             cfg.build_cfg(manager, state)
                             cfg.module_name = ast.name
 
+                            # Store a deepcopy of the CFG for this instance
                             cfgs_by_module[instance_name].append(deepcopy(cfg))
                             cfg.reset()
-
-
 
                         state.store[instance_name] = {}
                         manager.dependencies[instance_name] = {}
@@ -634,7 +649,6 @@ class ExecutionEngine:
             total_paths = 1
             for x in manager.child_num_paths.values():
                 total_paths *= x
-
             # have do do things piece wise
             manager.debug = self.debug
             if total_paths > 100:
@@ -702,18 +716,19 @@ class ExecutionEngine:
             # state.store = {}
             
             # initalize inputs with symbols for all submodules too
-            for module_name in manager.names_list:
+            for module_name in cfgs_by_module.keys():
                 manager.curr_module = module_name
                 # actually want to terminate this part after the decl and comb part
-                self.search_strategy.visit_module(manager, state, ast, modules_dict)
+                self.search_strategy.visit_module(manager, state, modules_dict[module_name], modules_dict)
                 
-            for cfg_idx in range(cfg_count):
-                for node in cfgs_by_module[manager.curr_module][cfg_idx].decls:
-                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
-                for node in cfgs_by_module[manager.curr_module][cfg_idx].comb:
-                    self.search_strategy.visit_stmt(manager, state, node, modules_dict, None) 
+            for module_name in cfgs_by_module.keys():
+                manager.curr_module = module_name
+                for i in range(len(cfgs_by_module[module_name])):
+                    for node in cfgs_by_module[module_name][i].decls:
+                        self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
+                    for node in cfgs_by_module[module_name][i].comb:
+                        self.search_strategy.visit_stmt(manager, state, node, modules_dict, None) 
    
-            manager.curr_module = manager.names_list[0]
             # makes assumption top level module is first in line
             # ! no longer path code as in bit string, but indices
 

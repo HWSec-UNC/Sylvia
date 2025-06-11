@@ -95,11 +95,12 @@ class CFG:
         self.cfg_edges = []
         self.leaves = set()
         self.paths = []
-        #self.always_blocks = []
+        self.always_blocks = []
         self.ind_branch_points = {1: set()}
         self.block_smt = [False]
         self.block_stmt_depth = 0
         self.dangling = set()
+        self.comb = []
 
     def compute_direction(self, path):
         """Given a path, figure out the direction"""
