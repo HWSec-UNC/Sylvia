@@ -54,6 +54,8 @@ class DepthFirst(Search):
         for item in module.items:
             if isinstance(item, Value):
                 self.visit_expr(m, s, item)
+            elif isinstance(item, Decl):
+                self.visit_expr(m, s, item)
             else:
                 continue
                 # This should be handled by exploration in always blocks
@@ -604,7 +606,6 @@ class DepthFirst(Search):
                 m.solver_time += solver_end - solver_start
                 while str_to_bool(evaluate(parse_tokens(tokenize(stmt.cond, s, m)), s, m), s, m):
                     self.visit_stmt(m, s, stmt.statement,  modules)
-                    print("hi")
                     s.store[m.curr_module][stmt.pre.left.var.name] = str_to_int(evaluate(parse_tokens(tokenize(stmt.post.right.var, s, m)), s, m), s, m)
 
                 if (m.abandon and m.debug):
@@ -902,7 +903,12 @@ class DepthFirst(Search):
                     time.process_time()
                     return
         elif isinstance(expr, Decl):
-            #print("here")
+            decl_expr = expr.list[0]
+            if isinstance(decl_expr, Reg):
+                if not decl_expr.name in m.reg_decls:
+                    m.reg_decls.add(decl_expr.name)
+                    s.store[m.curr_module][decl_expr.name] = init_symbol()
+            #m.reg_decls.add(expr.name)
             ...
         else:   
             return None

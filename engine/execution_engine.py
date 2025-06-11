@@ -569,8 +569,6 @@ class ExecutionEngine:
                         cfg2.get_initial(manager, state, module.items)
                         cfg_count = len(cfg.always_blocks)
                         initial_count = len(cfg2.initial_blocks)
-                        print("hi")
-                        print(initial_count)
                         for k in range(cfg_count):
                             cfg.basic_blocks(manager, state, cfg.always_blocks[k])
                             cfg.partition()
@@ -582,8 +580,6 @@ class ExecutionEngine:
                             cfg.module_name = ast.name
 
                             cfgs_by_module[instance_name].append(deepcopy(cfg))
-                            print(asizeof.asizeof(cfg))
-                            print(cfg.paths)
                             cfg.reset()
 
 
@@ -727,7 +723,7 @@ class ExecutionEngine:
             manager.executing = True
 
             for module_name in curr_path:
-                manager.curr_module = manager.names_list[modules_seen]
+                manager.curr_module = module_name
                 manager.cycle = 0
     
                 for complete_single_cycle_path in curr_path[module_name]:
@@ -749,15 +745,18 @@ class ExecutionEngine:
                                     # print(f"updating curr mod {manager.curr_module}")
                                     #self.check_state(manager, state)
                                     self.search_strategy.visit_stmt(manager, state, stmt, modules_dict, direction)
-                                            # only do once, and the last CFG 
-                    for node in cfgs_by_module[module_name][cfg_count-1].comb:
+                    
+                    # only do once, and the last CFG 
+                    for node in cfgs_by_module[module_name][complete_single_cycle_path.index(cfg_path)].comb:
                         self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)  
                     if self.debug and complete_single_cycle_path.index(cfg_path) == len(complete_single_cycle_path) - 1:
                         manager.executing = False
                         self.check_state(manager, state)
+                        #manager.curr_module = manager.names_list[0]
                         print(f"<end of cycle {manager.cycle}>")
                     manager.cycle += 1
                 modules_seen += 1
+            manager.curr_module = manager.names_list[0]
             manager.cycle = 0
             self.done = True
             if not self.debug:
