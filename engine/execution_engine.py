@@ -741,6 +741,7 @@ class ExecutionEngine:
                 manager.curr_module = module_name
                 manager.cycle = 0
     
+                i = 0
                 for complete_single_cycle_path in curr_path[module_name]:
                     print(f"** path {i} clock cycle {manager.cycle} **")
                     if manager.executing:
@@ -770,6 +771,7 @@ class ExecutionEngine:
                         #manager.curr_module = manager.names_list[0]
                         print(f"<end of cycle {manager.cycle}>")
                     manager.cycle += 1
+                    i += 1
                 modules_seen += 1
             manager.curr_module = manager.names_list[0]
             manager.cycle = 0
