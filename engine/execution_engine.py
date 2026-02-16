@@ -723,10 +723,10 @@ class ExecutionEngine:
                 
             for module_name in cfgs_by_module.keys():
                 manager.curr_module = module_name
-                for i in range(len(cfgs_by_module[module_name])):
-                    for node in cfgs_by_module[module_name][i].decls:
+                for j in range(len(cfgs_by_module[module_name])):
+                    for node in cfgs_by_module[module_name][j].decls:
                         self.search_strategy.visit_stmt(manager, state, node, modules_dict, None)
-                    for node in cfgs_by_module[module_name][i].comb:
+                    for node in cfgs_by_module[module_name][j].comb:
                         self.search_strategy.visit_stmt(manager, state, node, modules_dict, None) 
    
             # makes assumption top level module is first in line
@@ -736,12 +736,13 @@ class ExecutionEngine:
             curr_path = total_paths[i]
             modules_seen = 0
             manager.executing = True
+            print(f"curr path{curr_path}")
 
             for module_name in curr_path:
                 manager.curr_module = module_name
                 manager.cycle = 0
     
-                i = 0
+                
                 for complete_single_cycle_path in curr_path[module_name]:
                     print(f"** path {i} clock cycle {manager.cycle} **")
                     if manager.executing:
@@ -771,7 +772,7 @@ class ExecutionEngine:
                         #manager.curr_module = manager.names_list[0]
                         print(f"<end of cycle {manager.cycle}>")
                     manager.cycle += 1
-                    i += 1
+                    
                 modules_seen += 1
             manager.curr_module = manager.names_list[0]
             manager.cycle = 0
