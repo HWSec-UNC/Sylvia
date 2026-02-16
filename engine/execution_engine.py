@@ -736,7 +736,7 @@ class ExecutionEngine:
             curr_path = total_paths[i]
             modules_seen = 0
             manager.executing = True
-            print(f"curr path{curr_path}")
+
 
             for module_name in curr_path:
                 manager.curr_module = module_name
